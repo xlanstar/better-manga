@@ -1,0 +1,34 @@
+# better-manga
+
+A browser extension (Chrome MV3 + Firefox) that enhances manga reading sites.
+
+## Stack
+
+WXT + React 19 + TypeScript, bun. Entrypoints live in `entrypoints/`; WXT
+generates the manifest — never hand-write `manifest.json`.
+
+Popup UI uses Tailwind CSS v4 and [coss ui](https://coss.com/ui) (Base UI
+components in `components/ui/`, theme in `entrypoints/popup/style.css`).
+Add components with `npx shadcn@latest add @coss/<name>`.
+
+- `bun run dev` / `bun run dev:firefox` — dev with HMR
+- `bun run build` / `bun run zip` — production output in `.output/`
+- `bun run compile` — typecheck (`tsc --noEmit`)
+
+## Versioning
+
+Follow semver in `package.json` — that version becomes the extension version.
+Patch for fixes, minor for new site support or features, major for breaking changes.
+
+## Rules
+
+- Typecheck must pass before anything is called done.
+- Add permissions to `wxt.config.ts` only when a feature actually needs them.
+  Prefer `activeTab` and optional permissions over broad host permissions.
+- No new dependency for what a few lines of code or a browser API can do.
+- Content scripts run on third-party pages: never assume DOM structure exists,
+  guard every query, and fail silently rather than break the host page.
+- Site-specific selectors and quirks belong in one place, not scattered across
+  content scripts.
+- Store state with `browser.storage`, not `localStorage`.
+- No user data leaves the browser without an explicit user action.
