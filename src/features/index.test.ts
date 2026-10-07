@@ -18,27 +18,39 @@ describe('feature registry', () => {
   });
 
   describe.each(featureIds)('%s', (id) => {
-    const { defaults, sanitize } = features[id];
+    const { defaults, sanitizeOptions } = features[id];
 
     test('defaults are a plain object without undefined values', () => {
       expect(Object.getPrototypeOf(defaults)).toBe(Object.prototype);
       for (const v of Object.values(defaults)) expect(v).not.toBeUndefined();
     });
 
-    test('sanitize of an empty object is empty', () => {
-      expect(sanitize({})).toEqual({});
+    test('defaults include a boolean `enabled`', () => {
+      expect(defaults.enabled).toBeBoolean();
     });
 
-    test('sanitize keeps every user field the defaults set, unchanged', () => {
-      const clean = sanitize({ ...defaults }) as Record<string, unknown>;
+    if (!sanitizeOptions) return;
+
+    test('sanitizeOptions of an empty object is empty', () => {
+      expect(sanitizeOptions({})).toEqual({});
+    });
+
+    test('sanitizeOptions never returns `enabled` (the framework sanitizes it)', () => {
+      for (const enabled of [true, false, 'x']) {
+        expect('enabled' in sanitizeOptions({ ...defaults, enabled })).toBe(false);
+      }
+    });
+
+    test('sanitizeOptions keeps every option the defaults set, unchanged', () => {
+      const clean = sanitizeOptions({ ...defaults }) as Record<string, unknown>;
       for (const [k, v] of Object.entries(clean)) {
         expect(v).toEqual((defaults as Record<string, unknown>)[k]);
       }
     });
 
-    test('sanitize is idempotent on the defaults', () => {
-      const once = sanitize({ ...defaults });
-      expect(sanitize({ ...once })).toEqual(once);
+    test('sanitizeOptions is idempotent on the defaults', () => {
+      const once = sanitizeOptions({ ...defaults });
+      expect(sanitizeOptions({ ...once })).toEqual(once);
     });
   });
 });

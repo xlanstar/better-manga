@@ -23,8 +23,8 @@ export type PageKeyEvent = Pick<
  * default (roughly one full screen). Ratios below 1 leave overlap between
  * screens, which is what long vertical readers want.
  *
- * `getOptions` is read on every key press, so settings changes apply live;
- * return `null` to leave the key to the browser.
+ * `getOptions` is read on every key press; return `null` to leave the key to
+ * the browser.
  *
  * Scrolls whichever container actually holds the content — many readers put it
  * in their own overflow box rather than the document. Removed when `signal`

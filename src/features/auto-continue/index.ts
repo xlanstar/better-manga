@@ -1,4 +1,3 @@
-import { sanitizeToggle, type ToggleUserConfig } from '../toggle';
 import type { Feature } from '../types';
 
 /**
@@ -7,22 +6,16 @@ import type { Feature } from '../types';
  *
  * - `index.ts` (this file): definition, registered in `features/index.ts`.
  * - `start.ts`: content-script side, registered in `features/starters.ts`.
- * - `controls.tsx`: popup controls, registered in `features/controls.ts`.
+ * - Popup title and description: in `features/controls.ts`.
  */
 
 export type AutoContinueSiteConfig = {
   /** The button(s) to click. */
   selector?: string;
 };
-export type AutoContinueUserConfig = ToggleUserConfig;
 export type AutoContinueResolvedConfig = AutoContinueSiteConfig & { enabled: boolean };
 
-export const autoContinue: Feature<
-  AutoContinueSiteConfig,
-  AutoContinueUserConfig,
-  AutoContinueResolvedConfig
-> = {
+export const autoContinue: Feature<AutoContinueSiteConfig, AutoContinueResolvedConfig> = {
   defaults: { enabled: true },
-  sanitize: sanitizeToggle,
   siteSpecific: true,
 };

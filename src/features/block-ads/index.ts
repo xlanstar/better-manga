@@ -1,4 +1,3 @@
-import { sanitizeToggle, type ToggleUserConfig } from '../toggle';
 import type { Feature } from '../types';
 
 /**
@@ -7,7 +6,7 @@ import type { Feature } from '../types';
  *
  * - `index.ts` (this file): definition, registered in `features/index.ts`.
  * - `start.ts`: content-script side, registered in `features/starters.ts`.
- * - `controls.tsx`: popup controls, registered in `features/controls.ts`.
+ * - Popup title and description: in `features/controls.ts`.
  */
 
 export type BlockAdsSiteConfig = {
@@ -19,11 +18,9 @@ export type BlockAdsSiteConfig = {
    */
   remove?: string[];
 };
-export type BlockAdsUserConfig = ToggleUserConfig;
 export type BlockAdsResolvedConfig = BlockAdsSiteConfig & { enabled: boolean };
 
-export const blockAds: Feature<BlockAdsSiteConfig, BlockAdsUserConfig, BlockAdsResolvedConfig> = {
+export const blockAds: Feature<BlockAdsSiteConfig, BlockAdsResolvedConfig> = {
   defaults: { enabled: true },
-  sanitize: sanitizeToggle,
   siteSpecific: true,
 };

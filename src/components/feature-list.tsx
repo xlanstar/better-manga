@@ -1,6 +1,5 @@
-import type { ComponentType } from 'react';
-import { featureIds, type FeatureId } from '@/features';
-import { featureControls, type ControlsPropsOf } from '@/features/controls';
+import { featureIds, type FeatureId, type FeatureUserConfig } from '@/features';
+import { featureControls } from '@/features/controls';
 import {
   resolveFeatures,
   type ResolvedFeatures,
@@ -8,6 +7,7 @@ import {
   type UserSettings,
 } from '@/features/settings';
 import { i18n } from '@/utils/i18n';
+import { FeatureToggle } from './feature-toggle';
 
 /** No layers beneath: a stable default. */
 const NONE: readonly UserSettings[] = [];
@@ -15,9 +15,9 @@ const NONE: readonly UserSettings[] = [];
 export type OnLayerChange = (next: UserSettings, persist: boolean) => void;
 
 /**
- * The controls of every feature that applies, editing one user layer (`layer`)
- * on top of the layers `beneath` it (bottom first). Controls show the
- * effective value, and as their default what the layers beneath give.
+ * The switch and options of every feature that applies, editing one user
+ * layer (`layer`) on top of the layers `beneath` it (bottom first). Controls
+ * show the effective value, and as their default what the layers beneath give.
  */
 export function FeatureList({
   siteFeatures,
@@ -55,7 +55,7 @@ export function FeatureList({
   );
 }
 
-/** One feature's controls, wired to its slice of the layer. */
+/** One feature's switch and options, wired to its slice of the layer. */
 function FeatureSettings<K extends FeatureId>({
   id,
   resolved,
@@ -69,18 +69,21 @@ function FeatureSettings<K extends FeatureId>({
   layer: UserSettings;
   onChange: OnLayerChange;
 }) {
-  // TS can't correlate the map entry with `K` through JSX props on its own.
-  const Controls = featureControls[id] as ComponentType<ControlsPropsOf<K>>;
+  const { title, description, Options } = featureControls[id];
   const value = resolved[id];
   const defaultValue = defaults[id];
   if (!value || !defaultValue) return null;
+  const change = (patch: FeatureUserConfig<K>, persist: boolean) =>
+    onChange({ ...layer, [id]: { ...layer[id], ...patch } }, persist);
   return (
-    <Controls
-      defaults={defaultValue}
-      onChange={(patch, persist) =>
-        onChange({ ...layer, [id]: { ...layer[id], ...patch } }, persist)
-      }
-      value={value}
-    />
+    <div className="flex flex-col gap-3">
+      <FeatureToggle
+        checked={value.enabled}
+        description={description()}
+        onCheckedChange={(enabled) => change({ enabled }, true)}
+        title={title()}
+      />
+      {Options && <Options defaults={defaultValue} onChange={change} value={value} />}
+    </div>
   );
 }

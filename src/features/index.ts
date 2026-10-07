@@ -6,7 +6,7 @@ import { skipRedirects } from './skip-redirects';
 /**
  * Registry of feature definitions — add a folder next to this one, then one
  * line here, one in `starters.ts` (content script) and one in `controls.ts`
- * (popup). The key is the feature id, also its key in `Site.features` and in
+ * (popup text and options). The key is the feature id, also its key in `Site.features` and in
  * stored user settings, so never rename one. The order here is the order in
  * the popup / options page.
  */
@@ -17,5 +17,7 @@ export const featureIds = Object.keys(features) as FeatureId[];
 
 type ConfigTypes<K extends FeatureId> = NonNullable<(typeof features)[K]['types']>;
 export type FeatureSiteConfig<K extends FeatureId> = ConfigTypes<K>['site'];
-export type FeatureUserConfig<K extends FeatureId> = ConfigTypes<K>['user'];
+/** The user settings besides `enabled`. */
+export type FeatureOptions<K extends FeatureId> = ConfigTypes<K>['options'];
+export type FeatureUserConfig<K extends FeatureId> = FeatureOptions<K> & { enabled?: boolean };
 export type FeatureResolvedConfig<K extends FeatureId> = ConfigTypes<K>['resolved'];

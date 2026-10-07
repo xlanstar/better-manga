@@ -8,6 +8,7 @@ import { startAutoContinue } from './auto-continue/start';
 import { startBlockAds } from './block-ads/start';
 import { featureIds, type FeatureId, type FeatureResolvedConfig } from './index';
 import { startPageScroll } from './page-scroll/start';
+import { createFeatureRunner } from './runner';
 import { startSkipRedirects } from './skip-redirects/start';
 import { resolveFeatures, type ResolvedFeatures, type UserSettings } from './settings';
 import {
@@ -16,7 +17,7 @@ import {
   type StoredSettings,
   type StoredSettingsChange,
 } from './settings-storage';
-import type { FeatureStart, SubscribeConfig } from './types';
+import type { FeatureStart } from './types';
 
 /**
  * How to start each feature. Typed over every `FeatureId`, so a new feature
@@ -30,10 +31,10 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
 };
 
 /**
- * Wire up the features for `site`. They are installed synchronously (some
- * must beat the page's own scripts) and read the effective settings on use,
- * so user changes in the popup apply without a reload. Until storage has
- * loaded they run with the site's defaults. An orphaned instance (see
+ * Wire up the features for `site`. They start synchronously (some must beat
+ * the page's own scripts) with the site's defaults, then restart with the
+ * user settings once storage has loaded and whenever they change, so popup
+ * changes apply without a reload (see `runner.ts`). An orphaned instance (see
  * `utils/lifecycle`) stops acting and watching: everything is tied to its
  * lifetime signal.
  *
@@ -43,42 +44,35 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
  */
 export function startFeatures(site: Site) {
   const lifetime = lifetimeSignal();
-  let resolved: ResolvedFeatures = resolveFeatures(site.features);
-  const listeners = new Set<() => void>();
-  const subscribe: SubscribeConfig = (listener, signal) => {
-    if (signal.aborted) return;
-    listeners.add(listener);
-    signal.addEventListener('abort', () => listeners.delete(listener), { once: true });
+  const defaults = resolveFeatures(site.features);
+
+  // Generic so TS ties each starter to its own feature's config type.
+  const createRunner = <K extends FeatureId>(id: K) => {
+    const update = createFeatureRunner(featureStarters[id], lifetime);
+    return (resolved: ResolvedFeatures) => {
+      try {
+        update(resolved[id]);
+      } catch (err) {
+        // Never break the host page, or the other features, over one of them.
+        console.debug(`[better-manga] ${site.name} ${id} failed`, err);
+      }
+    };
   };
+  // `null` = the feature doesn't fit this site; don't install it at all.
+  const runners = featureIds.filter((id) => defaults[id]).map(createRunner);
+  const runAll = (resolved: ResolvedFeatures) => {
+    for (const run of runners) run(resolved);
+  };
+  runAll(defaults);
+
   let global: UserSettings = {};
   let override: UserSettings = {};
   const apply = (change: StoredSettingsChange) => {
     if (change.disabledSites?.has(site.name)) return retire();
     if (change.global) global = change.global;
     if (change.bySite && site.name in change.bySite) override = change.bySite[site.name] ?? {};
-    resolved = resolveFeatures(site.features, global, override);
-    for (const listener of listeners) {
-      try {
-        listener();
-      } catch (err) {
-        console.debug(`[better-manga] ${site.name} settings change failed`, err);
-      }
-    }
+    runAll(resolveFeatures(site.features, global, override));
   };
-
-  // Generic so TS ties each starter to its own feature's config type.
-  const startFeature = <K extends FeatureId>(id: K) => {
-    // `null` = the feature doesn't fit this site; don't install it at all.
-    if (!resolved[id]) return;
-    const getConfig = () => (isAlive() ? resolved[id] : null);
-    try {
-      featureStarters[id](getConfig, subscribe, lifetime);
-    } catch (err) {
-      // Never break the host page, or the other features, over one of them.
-      console.debug(`[better-manga] ${site.name} ${id} failed`, err);
-    }
-  };
-  for (const id of featureIds) startFeature(id);
 
   if (!isAlive()) return;
   // Watch before loading so a change made while the load is in flight isn't

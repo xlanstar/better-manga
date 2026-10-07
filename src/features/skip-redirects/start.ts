@@ -1,3 +1,4 @@
+import { isAlive } from '@/utils/lifecycle';
 import type { FeatureStart } from '../types';
 import type { SkipRedirectsResolvedConfig } from './index';
 
@@ -5,20 +6,20 @@ import type { SkipRedirectsResolvedConfig } from './index';
 const EVENTS = ['click', 'auxclick', 'contextmenu'] as const;
 
 // The page may set hrefs late (after its data loads), so rewrite on use
-// rather than up front. Stateless: the config is read on every event.
+// rather than up front.
 export const startSkipRedirects: FeatureStart<SkipRedirectsResolvedConfig> = (
-  getConfig,
-  _,
+  { rewriteLink },
   signal,
 ) => {
+  if (!rewriteLink) return;
   const rewrite = (event: Event) => {
-    const config = getConfig();
-    if (!config?.enabled || !config.rewriteLink) return;
+    // An orphaned instance (extension removed) gets no abort; stand down.
+    if (!isAlive()) return;
     const target = event.target;
     if (!(target instanceof Element)) return;
     const link = target.closest('a[href]');
     if (!(link instanceof HTMLAnchorElement)) return;
-    const direct = config.rewriteLink(link.href, location.origin);
+    const direct = rewriteLink(link.href, location.origin);
     if (direct) link.href = direct;
   };
   // Window capture runs before any page listener on document or below.

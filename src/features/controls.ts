@@ -3,26 +3,45 @@
  * doesn't bundle React.
  */
 import type { ComponentType } from 'react';
-import type { FeatureId, FeatureResolvedConfig, FeatureUserConfig } from './index';
-import { AutoContinueControls } from './auto-continue/controls';
-import { BlockAdsControls } from './block-ads/controls';
-import { PageScrollControls } from './page-scroll/controls';
-import { SkipRedirectsControls } from './skip-redirects/controls';
-import type { FeatureControlsProps } from './types';
+import { i18n } from '@/utils/i18n';
+import type { FeatureId, FeatureOptions, FeatureResolvedConfig } from './index';
+import { PageScrollOptions } from './page-scroll/controls';
+import type { FeatureOptionsProps } from './types';
 
-/** Props of feature `K`'s popup controls. */
-export type ControlsPropsOf<K extends FeatureId> = FeatureControlsProps<
-  FeatureUserConfig<K>,
+/** Props of feature `K`'s options controls. */
+type OptionsPropsOf<K extends FeatureId> = FeatureOptionsProps<
+  FeatureOptions<K>,
   FeatureResolvedConfig<K>
 >;
 
 /**
- * Popup controls per feature. Typed over every `FeatureId`, so a new feature
- * can't be forgotten here.
+ * What the popup shows for each feature: its on/off switch with `title` and
+ * `description` (functions, so the text follows the language picker), then
+ * its `Options` controls if it has any. Typed over every `FeatureId`, so a
+ * new feature can't be forgotten here.
  */
-export const featureControls: { [K in FeatureId]: ComponentType<ControlsPropsOf<K>> } = {
-  blockAds: BlockAdsControls,
-  skipRedirects: SkipRedirectsControls,
-  autoContinue: AutoContinueControls,
-  pageScroll: PageScrollControls,
+export const featureControls: {
+  [K in FeatureId]: {
+    title: () => string;
+    description: () => string;
+    Options?: ComponentType<OptionsPropsOf<K>>;
+  };
+} = {
+  blockAds: {
+    title: () => i18n.t('blockAds.title'),
+    description: () => i18n.t('blockAds.description'),
+  },
+  skipRedirects: {
+    title: () => i18n.t('skipRedirects.title'),
+    description: () => i18n.t('skipRedirects.description'),
+  },
+  autoContinue: {
+    title: () => i18n.t('autoContinue.title'),
+    description: () => i18n.t('autoContinue.description'),
+  },
+  pageScroll: {
+    title: () => i18n.t('pageScroll.title'),
+    description: () => i18n.t('pageScroll.description'),
+    Options: PageScrollOptions,
+  },
 };

@@ -1,4 +1,3 @@
-import { sanitizeToggle, type ToggleUserConfig } from '../toggle';
 import type { Feature } from '../types';
 
 /**
@@ -9,7 +8,7 @@ import type { Feature } from '../types';
  *
  * - `index.ts` (this file): definition, registered in `features/index.ts`.
  * - `start.ts`: content-script side, registered in `features/starters.ts`.
- * - `controls.tsx`: popup controls, registered in `features/controls.ts`.
+ * - Popup title and description: in `features/controls.ts`.
  */
 
 export type SkipRedirectsSiteConfig = {
@@ -19,15 +18,9 @@ export type SkipRedirectsSiteConfig = {
    */
   rewriteLink?: (href: string, origin: string) => string | null;
 };
-export type SkipRedirectsUserConfig = ToggleUserConfig;
 export type SkipRedirectsResolvedConfig = SkipRedirectsSiteConfig & { enabled: boolean };
 
-export const skipRedirects: Feature<
-  SkipRedirectsSiteConfig,
-  SkipRedirectsUserConfig,
-  SkipRedirectsResolvedConfig
-> = {
+export const skipRedirects: Feature<SkipRedirectsSiteConfig, SkipRedirectsResolvedConfig> = {
   defaults: { enabled: true },
-  sanitize: sanitizeToggle,
   siteSpecific: true,
 };

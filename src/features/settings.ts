@@ -14,13 +14,18 @@
  * anti-hijack rules, …) is a site-specific feature too, so the user can turn
  * it off.
  *
- * Each feature is one folder in `features/` (defaults, per-layer types, user
- * value sanitizing, content-script start, popup / options controls). This
- * file only loops over the registry, so adding a feature means:
+ * Every feature has an `enabled` user setting, which the framework sanitizes
+ * here, applies (`runner.ts` starts and stops the feature) and shows as a
+ * switch. Each feature is one folder in `features/` (defaults, per-layer
+ * types, sanitizing of its other user options, content-script start, options
+ * controls). This file only loops over the registry, so adding a feature
+ * means:
  *
  * 1. `features/<name>/`: `index.ts` exports a `Feature` definition, `start.ts`
- *    a `FeatureStart`, `controls.tsx` the popup controls (see `page-scroll/`).
- * 2. Register them in `features/index.ts`, `starters.ts` and `controls.ts`.
+ *    a `FeatureStart`, and `controls.tsx` its options controls if it has user
+ *    options besides `enabled` (see `page-scroll/`).
+ * 2. Register them in `features/index.ts`, `starters.ts` and `controls.ts`
+ *    (with the popup title and description).
  *
  * Step 2 is typed over `FeatureId`, so a missing entry is a compile error.
  *
@@ -91,7 +96,7 @@ export function sanitizeUserSettings(raw: unknown): UserSettings {
   for (const id of featureIds) {
     const value = raw[id];
     if (!isPlainObject(value)) continue;
-    const config = features[id].sanitize(value);
+    const config = sanitizeFeature(id, value);
     if (Object.keys(config).length) clean[id] = config;
   }
   return clean as UserSettings;
@@ -131,6 +136,13 @@ export function isCustomised(userSettings: UserSettings): boolean {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+/** One feature's user layer: `enabled` is common, the rest is up to the feature. */
+function sanitizeFeature(id: FeatureId, raw: Record<string, unknown>): object {
+  const config: Record<string, unknown> = { ...features[id].sanitizeOptions?.(raw) };
+  if (typeof raw.enabled === 'boolean') config.enabled = raw.enabled;
+  return config;
+}
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

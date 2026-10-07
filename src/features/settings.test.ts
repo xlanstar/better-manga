@@ -56,6 +56,34 @@ describe('sanitizeUserSettings', () => {
     });
   });
 
+  // `enabled` is sanitized by the framework, the same for every feature.
+  describe.each(featureIds)('%s.enabled', (id) => {
+    test.each([true, false])('keeps boolean %p', (enabled) => {
+      expect(sanitizeUserSettings({ [id]: { enabled } })).toEqual({ [id]: { enabled } });
+    });
+
+    test.each([
+      ['string "true"', 'true'],
+      ['string "false"', 'false'],
+      ['number 1', 1],
+      ['number 0', 0],
+      ['null', null],
+      ['undefined', undefined],
+      ['object', {}],
+      ['array', [true]],
+      ['Boolean object', new Boolean(true)],
+    ])('drops non-boolean (%s)', (_, enabled) => {
+      expect(sanitizeUserSettings({ [id]: { enabled } })).toEqual({});
+    });
+
+    test('is idempotent', () => {
+      for (const enabled of [true, false, 'x', undefined]) {
+        const once = sanitizeUserSettings({ [id]: { enabled, bogus: 1 } });
+        expect(sanitizeUserSettings(once)).toEqual(once);
+      }
+    });
+  });
+
   test('drops unknown feature ids', () => {
     expect(sanitizeUserSettings({ zoom: { level: 2 }, pageScroll: { ratio: 0.4 } })).toEqual({
       pageScroll: { ratio: 0.4 },
