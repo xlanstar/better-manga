@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { PAGE_SCROLL_RATIO } from '@/features/page-scroll';
+import { PAGE_DISTANCE_RATIO } from '@/features/page-distance';
 import { formatPercent, sliderValue } from './format';
 
 describe('formatPercent', () => {
@@ -28,7 +28,7 @@ describe('formatPercent', () => {
   });
 
   test('every slider step shows a distinct multiple of 5%', () => {
-    const { min, max, step } = PAGE_SCROLL_RATIO;
+    const { min, max, step } = PAGE_DISTANCE_RATIO;
     const seen = new Set<string>();
     for (let i = 0; min + i * step <= max + 1e-9; i++) {
       const label = formatPercent(min + i * step);
@@ -55,7 +55,7 @@ describe('sliderValue', () => {
   });
 
   test('every slider step lands exactly on its decimal value', () => {
-    const { min, max, step } = PAGE_SCROLL_RATIO;
+    const { min, max, step } = PAGE_DISTANCE_RATIO;
     for (let i = 0; min + i * step <= max + 1e-9; i++) {
       const expected = Number((0.3 + i * 0.05).toFixed(2));
       expect(sliderValue(min + i * step, 0)).toBe(expected);
@@ -63,8 +63,8 @@ describe('sliderValue', () => {
   });
 
   test('accumulated steps compare equal to the default ratio', () => {
-    let v = PAGE_SCROLL_RATIO.min;
-    for (let i = 0; i < 8; i++) v += PAGE_SCROLL_RATIO.step;
+    let v = PAGE_DISTANCE_RATIO.min;
+    for (let i = 0; i < 8; i++) v += PAGE_DISTANCE_RATIO.step;
     expect(v).not.toBe(0.7); // the raw float is off
     expect(sliderValue(v, 0)).toBe(0.7);
   });

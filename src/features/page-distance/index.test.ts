@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'bun:test';
-import { PAGE_SCROLL_RATIO, pageScroll } from './index';
+import { PAGE_DISTANCE_RATIO, pageDistance } from './index';
 
-const { defaults } = pageScroll;
-const sanitizeOptions = pageScroll.sanitizeOptions!;
-const { min, max, step } = PAGE_SCROLL_RATIO;
+const { defaults } = pageDistance;
+const sanitizeOptions = pageDistance.sanitizeOptions!;
+const { min, max, step } = PAGE_DISTANCE_RATIO;
 
-describe('PAGE_SCROLL_RATIO', () => {
+describe('PAGE_DISTANCE_RATIO', () => {
   test('is a non-empty range inside (0, 1]', () => {
     expect(min).toBeGreaterThan(0);
     expect(max).toBeLessThanOrEqual(1);
@@ -19,7 +19,7 @@ describe('PAGE_SCROLL_RATIO', () => {
   });
 });
 
-describe('pageScroll.defaults', () => {
+describe('pageDistance.defaults', () => {
   test('is enabled with a ratio that leaves overlap', () => {
     expect(defaults).toEqual({ enabled: true, ratio: 0.7 });
   });
@@ -40,7 +40,7 @@ describe('pageScroll.defaults', () => {
   });
 });
 
-describe('pageScroll.sanitizeOptions', () => {
+describe('pageDistance.sanitizeOptions', () => {
   test('empty input gives an empty layer', () => {
     expect(sanitizeOptions({})).toEqual({});
   });

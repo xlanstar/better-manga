@@ -53,8 +53,8 @@ autoContinue:
   title: '自動繼續閱讀'
   description: '「點擊繼續閱讀」之類的按鈕一出現就自動點擊。'
 
-pageScroll:
-  title: Page Up / Down 捲動
+pageDistance:
+  title: Page Up / Down 捲動距離
   description: '每次捲動畫面高度的固定比例，保留重疊方便接續閱讀。'
   ratio: '捲動比例'
 

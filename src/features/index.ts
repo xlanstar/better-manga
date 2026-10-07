@@ -1,6 +1,6 @@
 import { autoContinue } from './auto-continue';
 import { blockAds } from './block-ads';
-import { pageScroll } from './page-scroll';
+import { pageDistance } from './page-distance';
 import { skipRedirects } from './skip-redirects';
 import { smoothScroll } from './smooth-scroll';
 
@@ -8,12 +8,21 @@ import { smoothScroll } from './smooth-scroll';
  * Registry of feature definitions — add a folder next to this one, then one
  * line here, one in `starters.ts` (content script) and one in `controls.ts`
  * (popup text and options). The key is the feature id, also its key in `Site.features` and in
- * stored user settings, so never rename one. The order here is the order in
- * the popup / options page.
+ * stored user settings: renaming one means listing the old id in
+ * `renamedFeatureIds`, or users lose their settings. The order here is the
+ * order in the popup / options page.
  */
-export const features = { blockAds, skipRedirects, autoContinue, pageScroll, smoothScroll };
+export const features = { blockAds, skipRedirects, autoContinue, pageDistance, smoothScroll };
 
 export type FeatureId = keyof typeof features;
+
+/**
+ * Former feature ids, old → new. Stored settings may still use an old one;
+ * `sanitizeUserSettings` reads it as the new one, and the next save drops it.
+ */
+export const renamedFeatureIds: Readonly<Record<string, FeatureId>> = {
+  pageScroll: 'pageDistance',
+};
 export const featureIds = Object.keys(features) as FeatureId[];
 
 type ConfigTypes<K extends FeatureId> = NonNullable<(typeof features)[K]['types']>;

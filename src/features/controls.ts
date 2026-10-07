@@ -5,7 +5,7 @@
 import type { ComponentType } from 'react';
 import { i18n } from '@/utils/i18n';
 import type { FeatureId, FeatureOptions, FeatureResolvedConfig } from './index';
-import { PageScrollOptions } from './page-scroll/controls';
+import { PageDistanceOptions } from './page-distance/controls';
 import { SmoothScrollOptions } from './smooth-scroll/controls';
 import type { FeatureOptionsProps } from './types';
 
@@ -40,10 +40,10 @@ export const featureControls: {
     title: () => i18n.t('autoContinue.title'),
     description: () => i18n.t('autoContinue.description'),
   },
-  pageScroll: {
-    title: () => i18n.t('pageScroll.title'),
-    description: () => i18n.t('pageScroll.description'),
-    Options: PageScrollOptions,
+  pageDistance: {
+    title: () => i18n.t('pageDistance.title'),
+    description: () => i18n.t('pageDistance.description'),
+    Options: PageDistanceOptions,
   },
   smoothScroll: {
     title: () => i18n.t('smoothScroll.title'),

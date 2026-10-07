@@ -2,7 +2,7 @@ import type { Feature } from '../types';
 
 /**
  * Animate Page Up/Down: presses add up, a held key glides, letting go eases to
- * a stop (see `utils/smooth-scroll.ts`). Independent of `pageScroll`, which
+ * a stop (see `utils/smooth-scroll.ts`). Independent of `pageDistance`, which
  * sets the distance; without it each press goes the browser's own step.
  *
  * - `index.ts` (this file): definition, registered in `features/index.ts`.
@@ -12,7 +12,7 @@ import type { Feature } from '../types';
  */
 
 /**
- * What a site may declare. `container` is an adapter, as in `pageScroll`; a
+ * What a site may declare. `container` is an adapter, as in `pageDistance`; a
  * site whose reader scrolls in its own box sets it on both, so each feature
  * finds the box with the other turned off.
  */

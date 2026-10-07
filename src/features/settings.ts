@@ -25,7 +25,7 @@
  *
  * 1. `features/<name>/`: `index.ts` exports a `Feature` definition, `start.ts`
  *    a `FeatureStart`, and `controls.tsx` its options controls if it has user
- *    options besides `enabled` (see `page-scroll/`).
+ *    options besides `enabled` (see `page-distance/`).
  * 2. Register them in `features/index.ts`, `starters.ts` and `controls.ts`
  *    (with the popup title and description).
  *
@@ -37,6 +37,7 @@
 import {
   featureIds,
   features,
+  renamedFeatureIds,
   type FeatureId,
   type FeatureResolvedConfig,
   type FeatureSiteConfig,
@@ -96,14 +97,16 @@ export function resolveFeatures(scope: SiteScope, ...userLayers: UserLayers): Re
 /**
  * Coerce an untrusted user layer into `UserSettings`. Stored values may be
  * corrupt or written by an older version, so keep only fields of the right type
- * and range; everything else falls through to the defaults. Idempotent.
+ * and range; everything else falls through to the defaults. A renamed
+ * feature's settings are read from its old id when the new one is missing.
+ * Idempotent.
  */
 export function sanitizeUserSettings(raw: unknown): UserSettings {
   if (!isPlainObject(raw)) return {};
   const clean: Record<string, object> = {};
   for (const id of featureIds) {
-    const value = raw[id];
-    if (!isPlainObject(value)) continue;
+    const value = [id, ...(OLD_IDS.get(id) ?? [])].map((key) => raw[key]).find(isPlainObject);
+    if (!value) continue;
     const config = sanitizeFeature(id, value);
     if (Object.keys(config).length) clean[id] = config;
   }
@@ -144,6 +147,12 @@ export function isCustomised(userSettings: UserSettings): boolean {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Each renamed feature's old ids (see `renamedFeatureIds`). */
+const OLD_IDS = new Map<FeatureId, string[]>();
+for (const [oldId, id] of Object.entries(renamedFeatureIds)) {
+  OLD_IDS.set(id, [...(OLD_IDS.get(id) ?? []), oldId]);
+}
 
 /** One feature's user layer: `enabled` is common, the rest is up to the feature. */
 function sanitizeFeature(id: FeatureId, raw: Record<string, unknown>): object {

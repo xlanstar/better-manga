@@ -52,8 +52,8 @@ autoContinue:
   title: '自动继续阅读'
   description: '“点击继续阅读”之类的按钮一出现就自动点击。'
 
-pageScroll:
-  title: Page Up / Down 滚动
+pageDistance:
+  title: Page Up / Down 滚动距离
   description: '每次滚动屏幕高度的固定比例，保留重叠方便接续阅读。'
   ratio: '滚动比例'
 

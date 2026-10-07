@@ -1,6 +1,6 @@
 /**
  * Page Up/Down handling, shared by the features that change it: one sets the
- * distance (`pageScroll`), another animates it (`smoothScroll`). Each
+ * distance (`pageDistance`), another animates it (`smoothScroll`). Each
  * registers its part with `contributePageKeyScroll`; one key listener reads
  * them all, so the features stay independent switches without fighting over
  * the same key press.

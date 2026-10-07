@@ -7,7 +7,7 @@ import { isAlive, lifetimeSignal, retire } from '@/utils/lifecycle';
 import { startAutoContinue } from './auto-continue/start';
 import { startBlockAds } from './block-ads/start';
 import { featureIds, type FeatureId, type FeatureResolvedConfig } from './index';
-import { startPageScroll } from './page-scroll/start';
+import { startPageDistance } from './page-distance/start';
 import { createFeatureRunner } from './runner';
 import { startSkipRedirects } from './skip-redirects/start';
 import { startSmoothScroll } from './smooth-scroll/start';
@@ -23,7 +23,7 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
   blockAds: startBlockAds,
   skipRedirects: startSkipRedirects,
   autoContinue: startAutoContinue,
-  pageScroll: startPageScroll,
+  pageDistance: startPageDistance,
   smoothScroll: startSmoothScroll,
 };
 

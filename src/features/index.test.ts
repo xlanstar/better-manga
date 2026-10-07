@@ -1,15 +1,22 @@
 import { describe, expect, test } from 'bun:test';
-import { featureIds, features } from './index';
+import { featureIds, features, renamedFeatureIds } from './index';
 import { featureStarters } from './starters';
 
 describe('feature registry', () => {
   test('featureIds lists every feature, in registry order', () => {
     expect(featureIds).toEqual(Object.keys(features) as typeof featureIds);
-    expect(featureIds).toContain('pageScroll');
+    expect(featureIds).toContain('pageDistance');
   });
 
   test('ids are unique', () => {
     expect(new Set(featureIds).size).toBe(featureIds.length);
+  });
+
+  test('renamed ids point at current features and are not reused', () => {
+    for (const [oldId, id] of Object.entries(renamedFeatureIds)) {
+      expect(featureIds).toContain(id);
+      expect(featureIds as string[]).not.toContain(oldId);
+    }
   });
 
   test('every feature has a content-script starter', () => {

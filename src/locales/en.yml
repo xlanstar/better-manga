@@ -53,8 +53,8 @@ autoContinue:
   title: Auto-continue
   description: Clicks buttons like “Click to continue reading” as soon as they appear.
 
-pageScroll:
-  title: Page Up / Down scrolling
+pageDistance:
+  title: Page Up / Down distance
   description: Scrolls a fixed share of the screen height, keeping some overlap so you don't lose your place.
   ratio: Scroll ratio
 
