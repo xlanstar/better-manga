@@ -12,8 +12,10 @@ Source in `src/` (`@/` alias).
 - Never hand-write `manifest.json`; WXT generates it.
 - `src/entrypoints/` holds entry files only; logic goes in `sites/`, `features/`,
   `components/`, `hooks/` or `utils/`.
-- A site is `sites/<name>.ts`, registered in `sites/index.ts` and `sites/fixes.ts`.
-  Its selectors, quirks and notes stay in that file.
+- A site is `sites/<name>.ts`, registered in `sites/index.ts`. Its selectors,
+  quirks and notes stay in that file, as config for features (`Site.features`).
+- Site behaviour (ad blocking, auto-clicks, link rewrites, …) is a feature,
+  so users can toggle it; one only some sites need is `siteSpecific`.
 - A feature is `features/<name>/`, registered in `features/index.ts`,
   `starters.ts` and `controls.ts`.
 - `utils/` imports nothing from `sites/` or `features/`. The popup and options

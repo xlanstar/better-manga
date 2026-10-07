@@ -24,11 +24,11 @@ globalSettings:
 siteSettings:
   enabled: Enabled on this site
   disabled: Disabled
-  disabledHint: 'Better Manga is off on this site: no site fixes, no reading features.'
+  disabledHint: 'Better Manga is off on this site: none of its features run.'
   customised: Customised
   customisedHint: This site has its own settings
   followGlobal: Follow all sites
-  noSettings: This site has no adjustable settings; site fixes apply automatically.
+  noSettings: This site has no adjustable settings.
   hostSeparator: ', '
 
 options:
@@ -41,6 +41,18 @@ options:
   noResults: No matching sites
   noResultsHint: Try another keyword, or paste the URL of a manga page.
   showMore: Show more ($1 left)
+
+blockAds:
+  title: Block ads
+  description: Hides ad slots and stops scripts that send you to ads when you click.
+
+skipRedirects:
+  title: Direct chapter links
+  description: Opens chapters directly instead of via redirect pages, so fullscreen isn't interrupted.
+
+autoContinue:
+  title: Auto-continue
+  description: Clicks buttons like “Click to continue reading” as soon as they appear.
 
 pageScroll:
   title: Page Up / Down scrolling

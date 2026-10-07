@@ -1,4 +1,3 @@
-import { clickOnAppear, keepHidden } from '@/utils/dom';
 import { defineSite } from './types';
 
 /**
@@ -21,15 +20,16 @@ export const site = defineSite({
   name: 'baozimh',
   label: '包子漫畫',
   matches: ['*://*.baozimh.org/*', '*://*.bzmh.org/*', '*://m.baozimh.one/*'],
+  features: {
+    blockAds: {
+      // Class only, no tag — the ad containers are injected by the
+      // page's own scripts and are not always <div>.
+      // Not present in a headless probe on 2026-10-07 (desktop or mobile UA);
+      // likely injected by the ad SDK only for real browsers / some regions.
+      // Re-check on a real browser before relying on or removing these.
+      hide: ['.baozi-ad', '.mobadsq'],
+    },
+    // 「點擊繼續閱讀」之類的按鈕，出現就按一次。
+    autoContinue: { selector: '.pure-button' },
+  },
 });
-
-export function run() {
-  // Class only, no tag — the ad containers are injected by the
-  // page's own scripts and are not always <div>.
-  // Not present in a headless probe on 2026-10-07 (desktop or mobile UA);
-  // likely injected by the ad SDK only for real browsers / some regions.
-  // Re-check on a real browser before relying on or removing these.
-  keepHidden('.baozi-ad', '.mobadsq');
-  // 「點擊繼續閱讀」之類的按鈕，出現就按一次。
-  clickOnAppear('.pure-button', 500);
-}

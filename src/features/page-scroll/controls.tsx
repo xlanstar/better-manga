@@ -1,7 +1,6 @@
 import { i18n } from '@/utils/i18n';
-import { Label } from '@/components/ui/label';
+import { FeatureToggle } from '@/components/feature-toggle';
 import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
 import { formatPercent, sliderToRatio } from '@/utils/format';
 import type { FeatureControlsProps } from '../types';
 import {
@@ -19,18 +18,12 @@ export function PageScrollControls({
 
   return (
     <div className="flex flex-col gap-3">
-      <Label className="items-start justify-between gap-3">
-        <span className="flex flex-col gap-1">
-          {i18n.t('pageScroll.title')}
-          <span className="text-xs font-normal text-muted-foreground">
-            {i18n.t('pageScroll.description')}
-          </span>
-        </span>
-        <Switch
-          checked={value.enabled}
-          onCheckedChange={(enabled) => onChange({ enabled }, true)}
-        />
-      </Label>
+      <FeatureToggle
+        checked={value.enabled}
+        description={i18n.t('pageScroll.description')}
+        onCheckedChange={(enabled) => onChange({ enabled }, true)}
+        title={i18n.t('pageScroll.title')}
+      />
 
       <div className="flex flex-col gap-2">
         <div className="flex justify-between text-xs">

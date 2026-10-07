@@ -1,17 +1,28 @@
 import { describe, expect, test } from 'bun:test';
 import { isDeepStrictEqual } from 'node:util';
-import { features } from './index';
+import { featureIds, features } from './index';
 import {
   isCustomised,
   pruneUserSettings,
   resolveFeatures,
   sanitizeSiteNames,
   sanitizeUserSettings,
+  type ResolvedFeatures,
   type SiteFeatures,
   type UserSettings,
 } from './settings';
 
 const DEFAULTS = features.pageScroll.defaults;
+
+/** Every feature at its defaults: the global settings with nothing stored. */
+const ALL_DEFAULTS = Object.fromEntries(
+  featureIds.map((id) => [id, features[id].defaults]),
+) as ResolvedFeatures;
+
+/** Every feature at its defaults, except site-specific ones (off without config). */
+const SITE_DEFAULTS = Object.fromEntries(
+  featureIds.map((id) => [id, features[id].siteSpecific ? null : features[id].defaults]),
+) as ResolvedFeatures;
 
 /** Untrusted values, as `storage` may hand them back. */
 const asUser = (v: unknown) => v as UserSettings;
@@ -122,10 +133,56 @@ describe('sanitizeUserSettings', () => {
 });
 
 describe('resolveFeatures', () => {
-  test('no site config and no user layer gives the global defaults', () => {
-    expect(resolveFeatures(undefined, undefined)).toEqual({ pageScroll: DEFAULTS });
-    expect(resolveFeatures(undefined, null)).toEqual({ pageScroll: DEFAULTS });
-    expect(resolveFeatures({}, {})).toEqual({ pageScroll: DEFAULTS });
+  test('no site and no user layer gives the global defaults', () => {
+    expect(resolveFeatures(undefined)).toEqual(ALL_DEFAULTS);
+    expect(resolveFeatures(undefined, undefined)).toEqual(ALL_DEFAULTS);
+    expect(resolveFeatures(undefined, null)).toEqual(ALL_DEFAULTS);
+  });
+
+  test('a site without config gets the defaults, minus site-specific features', () => {
+    expect(resolveFeatures({}, {})).toEqual(SITE_DEFAULTS);
+    expect(SITE_DEFAULTS.blockAds).toBeNull();
+    expect(SITE_DEFAULTS.pageScroll).toEqual(DEFAULTS);
+  });
+
+  describe('site-specific features', () => {
+    test('apply on a site that configures them, with its config', () => {
+      expect(resolveFeatures({ blockAds: { hide: ['.ad'] } }, {}).blockAds).toEqual({
+        enabled: true,
+        hide: ['.ad'],
+      });
+      // An empty config still opts in.
+      expect(resolveFeatures({ autoContinue: {} }, {}).autoContinue).toEqual({ enabled: true });
+    });
+
+    test('do not apply on a site that leaves them out or sets them to false', () => {
+      expect(resolveFeatures({ pageScroll: { ratio: 0.5 } }, {}).blockAds).toBeNull();
+      expect(resolveFeatures({ blockAds: undefined }, {}).blockAds).toBeNull();
+      expect(resolveFeatures({ blockAds: false }, {}).blockAds).toBeNull();
+    });
+
+    test('apply in the global settings (no site), so they can be turned off', () => {
+      expect(resolveFeatures(undefined, { blockAds: { enabled: false } }).blockAds).toEqual({
+        enabled: false,
+      });
+    });
+
+    test('global and site user layers turn them off', () => {
+      const site: SiteFeatures = { blockAds: { remove: ['#x'] } };
+      const off = { blockAds: { enabled: false } };
+      expect(resolveFeatures(site, off).blockAds).toEqual({ enabled: false, remove: ['#x'] });
+      expect(resolveFeatures(site, off, { blockAds: { enabled: true } }).blockAds?.enabled).toBe(
+        true,
+      );
+      expect(resolveFeatures(site, {}, off).blockAds?.enabled).toBe(false);
+    });
+
+    test('a user value for a site without them is pruned', () => {
+      expect(pruneUserSettings({}, { blockAds: { enabled: false } })).toEqual({});
+      expect(pruneUserSettings(undefined, { blockAds: { enabled: false } })).toEqual({
+        blockAds: { enabled: false },
+      });
+    });
   });
 
   test('has an entry for every feature', () => {
@@ -184,9 +241,9 @@ describe('resolveFeatures', () => {
     expect(
       resolveFeatures(undefined, asUser({ pageScroll: { ratio: 99, enabled: 'off' } })).pageScroll,
     ).toEqual({ enabled: true, ratio: 1 });
-    expect(resolveFeatures(undefined, asUser({ pageScroll: { ratio: Number.NaN } }))).toEqual({
-      pageScroll: DEFAULTS,
-    });
+    expect(resolveFeatures(undefined, asUser({ pageScroll: { ratio: Number.NaN } }))).toEqual(
+      ALL_DEFAULTS,
+    );
   });
 
   test('a user cannot set a site adapter', () => {
@@ -200,7 +257,7 @@ describe('resolveFeatures', () => {
     ['array', []],
     ['number', 3],
   ])('garbage user layer (%s) falls back to defaults', (_, user) => {
-    expect(resolveFeatures(undefined, asUser(user))).toEqual({ pageScroll: DEFAULTS });
+    expect(resolveFeatures(undefined, asUser(user))).toEqual(ALL_DEFAULTS);
   });
 
   test('does not mutate the defaults, the site or the user layer', () => {
@@ -217,7 +274,8 @@ describe('resolveFeatures', () => {
     const first = resolveFeatures(undefined, undefined);
     first.pageScroll!.ratio = 0.1;
     first.pageScroll!.enabled = false;
-    expect(resolveFeatures(undefined, undefined)).toEqual({ pageScroll: DEFAULTS });
+    first.blockAds!.enabled = false;
+    expect(resolveFeatures(undefined, undefined)).toEqual(ALL_DEFAULTS);
   });
 });
 

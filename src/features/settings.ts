@@ -1,14 +1,18 @@
 /**
- * Reading features: implemented once, configured in layers.
+ * Features: implemented once, configured in layers.
  *
  *   feature default  →  site default (`Site.features`)
  *     →  user, all sites (global)  →  user, this site (override)
  *
  * Later layers override earlier ones; `undefined` falls through. The user
  * layers share one shape (`UserSettings`); a site override only stores what
- * differs from the layers below, so everything else follows the global ones. Site fixes
- * (ad hiding, anti-hijack, …) are not features — they live in each site's
- * `run()` and are not user-tunable.
+ * differs from the layers below, so everything else follows the global ones.
+ *
+ * A feature applies to every site unless the site sets it to `false`; a
+ * `siteSpecific` one (ad blocking, …) only to sites that configure it.
+ * Anything a site needs beyond the shared reading features (ad selectors,
+ * anti-hijack rules, …) is a site-specific feature too, so the user can turn
+ * it off.
  *
  * Each feature is one folder in `features/` (defaults, per-layer types, user
  * value sanitizing, content-script start, popup / options controls). This
@@ -34,7 +38,10 @@ import {
 
 // ── Shapes per layer, keyed by feature id ────────────────────────────────────
 
-/** Site layer (`Site.features`). `false` = the feature does not apply to this site. */
+/**
+ * Site layer (`Site.features`). `false` = the feature does not apply to this
+ * site; a `siteSpecific` feature applies only when it has an entry here.
+ */
 export type SiteFeatures = { [K in FeatureId]?: false | FeatureSiteConfig<K> };
 
 /** A user layer (global or per site). Missing fields fall through. */
@@ -48,6 +55,11 @@ export type ResolvedFeatures = { [K in FeatureId]: FeatureResolvedConfig<K> | nu
 /** User layers, bottom first (global, then the site override). */
 type UserLayers = readonly (UserSettings | null | undefined)[];
 
+/**
+ * Effective settings for a site (`siteFeatures`, i.e. `Site.features`) under
+ * the user layers. `undefined` = no particular site (the global settings):
+ * every feature is available there, with its defaults.
+ */
 export function resolveFeatures(
   siteFeatures: SiteFeatures | undefined,
   ...userLayers: UserLayers
@@ -56,13 +68,14 @@ export function resolveFeatures(
   const resolved: Record<string, object | null> = {};
   for (const id of featureIds) {
     const site = siteFeatures?.[id];
-    resolved[id] =
-      site === false
-        ? null
-        : Object.assign(
-            { ...features[id].defaults, ...withoutUndefined(site ?? {}) },
-            ...users.map((user) => user[id]),
-          );
+    const unavailable =
+      site === false || (siteFeatures !== undefined && features[id].siteSpecific && !site);
+    resolved[id] = unavailable
+      ? null
+      : Object.assign(
+          { ...features[id].defaults, ...withoutUndefined(site || {}) },
+          ...users.map((user) => user[id]),
+        );
   }
   return resolved as ResolvedFeatures;
 }

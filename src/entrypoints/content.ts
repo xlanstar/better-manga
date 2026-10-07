@@ -1,6 +1,5 @@
 import { allMatches, sitesFor } from '@/sites';
 import { startFeatures } from '@/features/starters';
-import { siteFixes } from '@/sites/fixes';
 import { siteUrlFor } from '@/utils/site-url';
 import { bindLifecycle } from '@/utils/lifecycle';
 
@@ -15,17 +14,16 @@ export default defineContentScript({
   main(ctx) {
     bindLifecycle(ctx);
     for (const site of sitesFor(siteUrlFor(location, document.referrer))) {
-      // Site fixes first and synchronously: some must beat the page's scripts.
-      runSafely(`${site.name} fixes`, siteFixes[site.name]);
+      // Synchronously: some features must beat the page's scripts.
       runSafely(`${site.name} features`, () => startFeatures(site));
     }
   },
 });
 
 /** Never break the host page because one site's script threw. */
-function runSafely(label: string, fn: (() => void) | null) {
+function runSafely(label: string, fn: () => void) {
   try {
-    fn?.();
+    fn();
   } catch (err) {
     console.debug(`[better-manga] ${label} failed`, err);
   }

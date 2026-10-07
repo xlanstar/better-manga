@@ -11,11 +11,10 @@ import {
   type Site,
   type SiteName,
 } from './index';
-import { siteFixes } from './fixes';
 import { defineSite } from './types';
 
 const names = (url: string) => sitesFor(url).map((s) => s.name);
-const testSite = (...matches: string[]): Site => ({ name: 't', label: 'T', matches });
+const testSite = (...matches: string[]): Site => ({ name: 't', label: 'T', matches, features: {} });
 
 describe('site registry', () => {
   test('names are unique', () => {
@@ -42,17 +41,18 @@ describe('site registry', () => {
     for (const pattern of allMatches) expect(pattern).toMatch(/^(\*|https?):\/\//);
   });
 
-  test('every site has a fixes entry (function or null)', () => {
-    expect(Object.keys(siteFixes).toSorted()).toEqual(sites.map((s) => s.name).toSorted());
+  test('site feature configs only name known features', () => {
     for (const site of sites) {
-      const fix = siteFixes[site.name];
-      expect(fix === null || typeof fix === 'function').toBe(true);
+      for (const id of Object.keys(site.features)) expect(featureIds).toContain(id as never);
     }
   });
 
-  test('site feature configs only name known features', () => {
+  test('site-specific features are configured with something to act on', () => {
     for (const site of sites) {
-      for (const id of Object.keys(site.features ?? {})) expect(featureIds).toContain(id as never);
+      const { blockAds, autoContinue, skipRedirects } = site.features;
+      if (blockAds) expect([...(blockAds.hide ?? []), ...(blockAds.remove ?? [])]).not.toEqual([]);
+      if (autoContinue) expect(autoContinue.selector?.trim()).toBeTruthy();
+      if (skipRedirects) expect(skipRedirects.rewriteLink).toBeFunction();
     }
   });
 
@@ -82,7 +82,7 @@ describe('allMatches', () => {
 
 describe('defineSite', () => {
   test('returns its argument unchanged', () => {
-    const input = { name: 'x', label: 'X', matches: ['*://x.test/*'] };
+    const input = { name: 'x', label: 'X', matches: ['*://x.test/*'], features: {} };
     expect(defineSite(input)).toBe(input);
   });
 });
@@ -252,7 +252,12 @@ describe('siteHosts', () => {
 });
 
 describe('siteMatchesQuery', () => {
-  const site = { name: 'baozimh', label: '包子漫畫', matches: ['*://*.bzmh.org/*'] } satisfies Site;
+  const site = {
+    name: 'baozimh',
+    label: '包子漫畫',
+    matches: ['*://*.bzmh.org/*'],
+    features: {},
+  } satisfies Site;
   const [baozimh] = sites;
 
   test.each(['', '  ', '包子', 'BAOZI', 'bzmh', 'zmh.o', ' bzmh.org '])('matches %p', (q) => {

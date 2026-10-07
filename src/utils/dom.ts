@@ -1,20 +1,23 @@
-/** Shared DOM helpers for site scripts. Content scripts run at document_start. */
+/** Shared DOM helpers for features. Content scripts run at document_start. */
 
 import { isAlive, onRetire } from './lifecycle';
 
 /**
  * Hide every element matching `selectors`, now and later, with a stylesheet:
- * no work per mutation, and matches never render.
+ * no work per mutation, and matches never render. Returns a stop function
+ * (which un-hides them, unless a page CSP forced the inline-style fallback).
  */
-export function keepHidden(...selectors: string[]): void {
+export function keepHidden(...selectors: string[]): () => void {
   const style = document.createElement('style');
   style.setAttribute('data-better-manga', 'keep-hidden');
   // `textContent` (not a text node) keeps Firefox from applying the page's CSP.
   style.textContent = hideRules(selectors);
 
+  let stopFallback: (() => void) | undefined;
   const stop = () => {
     observer.disconnect(); // first, or it would re-attach the style
     style.remove();
+    stopFallback?.();
   };
 
   // Child of <html> (no <head> at document_start). Some pages drop it or
@@ -29,7 +32,7 @@ export function keepHidden(...selectors: string[]): void {
     // Blocked by a page CSP after all: fall back to inline styles.
     if (!style.sheet) {
       stop();
-      onEachMatch(selectors.join(','), hideElement);
+      stopFallback = onEachMatch(selectors.join(','), hideElement);
     }
   };
 
@@ -40,6 +43,7 @@ export function keepHidden(...selectors: string[]): void {
   // In case there's no <html> yet.
   observer.observe(document, { childList: true });
   attachStyle();
+  return stop;
 }
 
 /**
@@ -58,18 +62,19 @@ export function hideRules(selectors: readonly string[]): string {
  * Remove every element matching `selectors` as soon as the parser inserts it.
  * Called at document_start, this beats the page's deferred/module scripts, so
  * they never see the element (e.g. a config node an ad script reads).
+ * Returns a stop function.
  */
-export function keepRemoved(...selectors: string[]): MutationObserver | undefined {
+export function keepRemoved(...selectors: string[]): () => void {
   return onEachMatch(selectors.join(','), (el) => el.remove());
 }
 
-/** Call `fn` on every element matching `selector`, now and as they appear. */
-function onEachMatch(
-  selector: string,
-  fn: (el: HTMLElement) => void,
-): MutationObserver | undefined {
+/**
+ * Call `fn` on every element matching `selector`, now and as they appear.
+ * Returns a stop function.
+ */
+function onEachMatch(selector: string, fn: (el: HTMLElement) => void): () => void {
   const root = document.documentElement;
-  if (!root || !selector) return;
+  if (!root || !selector) return () => {};
 
   const sweep = (node: ParentNode) => {
     for (const el of node.querySelectorAll<HTMLElement>(selector)) fn(el);
@@ -95,15 +100,22 @@ function onEachMatch(
     attributes: true,
     attributeFilter: ['class'],
   });
-  onRetire(() => observer.disconnect());
+  let stopped = false;
+  let stopReplacement: (() => void) | undefined;
+  const stop = () => {
+    stopped = true;
+    observer.disconnect();
+    stopReplacement?.();
+  };
+  onRetire(stop);
   sweep(root);
   // <html> is replaced wholesale on some pages; re-attach once the body exists.
   onDomReady(() => {
-    if (!isAlive()) return;
-    if (document.documentElement !== root) onEachMatch(selector, fn);
+    if (stopped || !isAlive()) return;
+    if (document.documentElement !== root) stopReplacement = onEachMatch(selector, fn);
     else sweep(document);
   });
-  return observer;
+  return stop;
 }
 
 /**

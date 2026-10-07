@@ -23,11 +23,11 @@ globalSettings:
 siteSettings:
   enabled: '在此网站启用'
   disabled: '已停用'
-  disabledHint: '已在此网站停用 Better Manga，网站修正与阅读功能都不会运行。'
+  disabledHint: '已在此网站停用 Better Manga，所有功能都不会运行。'
   customised: '已自定义'
   customisedHint: '此网站使用专属设置'
   followGlobal: '跟随全局'
-  noSettings: '此网站没有可调整的设置，网站修正会自动应用。'
+  noSettings: '此网站没有可调整的设置。'
   hostSeparator: '、'
 
 options:
@@ -40,6 +40,18 @@ options:
   noResults: '找不到符合的网站'
   noResultsHint: '试试其他关键字，或直接粘贴漫画页面的网址。'
   showMore: '显示更多（还有 $1 个）'
+
+blockAds:
+  title: '屏蔽广告'
+  description: '隐藏广告位，并阻止点击时跳转到广告的脚本。'
+
+skipRedirects:
+  title: '章节直达'
+  description: '直接打开章节，不经过跳转页，全屏阅读不会被打断。'
+
+autoContinue:
+  title: '自动继续阅读'
+  description: '“点击继续阅读”之类的按钮一出现就自动点击。'
 
 pageScroll:
   title: Page Up / Down 滚动

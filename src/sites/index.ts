@@ -5,9 +5,8 @@ import { site as gmh } from './g-mh';
 import { site as hipmh } from './hipmh';
 
 /**
- * Registry of site metadata — add a file next to this one, then one line here
- * (and one in `fixes.ts`). Imports only each file's `site` export, so the
- * popup doesn't bundle site fixes.
+ * Registry of sites — add a file next to this one, then one line here. Each
+ * site's own logic is in its `features` config (see `types.ts`).
  */
 export const sites = [baozimh, gmh, hipmh];
 

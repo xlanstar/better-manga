@@ -4,8 +4,11 @@
  */
 import type { Site } from '@/sites';
 import { isAlive, onRetire, retire } from '@/utils/lifecycle';
+import { startAutoContinue } from './auto-continue/start';
+import { startBlockAds } from './block-ads/start';
 import { featureIds, type FeatureId, type FeatureResolvedConfig } from './index';
 import { startPageScroll } from './page-scroll/start';
+import { startSkipRedirects } from './skip-redirects/start';
 import { resolveFeatures, type ResolvedFeatures, type UserSettings } from './settings';
 import {
   loadStoredSettings,
@@ -20,21 +23,31 @@ import type { FeatureStart } from './types';
  * can't be forgotten here.
  */
 export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedConfig<K>> } = {
+  blockAds: startBlockAds,
+  skipRedirects: startSkipRedirects,
+  autoContinue: startAutoContinue,
   pageScroll: startPageScroll,
 };
 
 /**
- * Wire up the shared reading features for `site`. Listeners are installed
- * synchronously and read the effective settings on use, so user changes in
- * the popup apply without a reload. Until storage has loaded, features stay off.
- * An orphaned instance (see `utils/lifecycle`) stops acting and watching.
+ * Wire up the features for `site`. They are installed synchronously (some
+ * must beat the page's own scripts) and read the effective settings on use,
+ * so user changes in the popup apply without a reload. Until storage has
+ * loaded they run with the site's defaults. An orphaned instance (see
+ * `utils/lifecycle`) stops acting and watching.
  *
- * If the user disabled the site, the whole instance retires (site fixes too,
- * as they also clean up on retire). Fixes run before storage can answer, so
- * on a disabled site they act for the first few milliseconds of a page load.
+ * If the user disabled the site (or a feature), it stops once storage answers;
+ * on a disabled site the whole instance retires. So it may act for the first
+ * few milliseconds of a page load.
  */
 export function startFeatures(site: Site) {
-  let resolved: ResolvedFeatures | null = null;
+  let resolved: ResolvedFeatures = resolveFeatures(site.features);
+  const listeners = new Set<() => void>();
+  const subscribe = (listener: () => void) => {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  };
+  onRetire(() => listeners.clear());
   let global: UserSettings = {};
   let override: UserSettings = {};
   const apply = (change: StoredSettingsChange) => {
@@ -42,14 +55,26 @@ export function startFeatures(site: Site) {
     if (change.global) global = change.global;
     if (change.bySite && site.name in change.bySite) override = change.bySite[site.name] ?? {};
     resolved = resolveFeatures(site.features, global, override);
+    for (const listener of listeners) {
+      try {
+        listener();
+      } catch (err) {
+        console.debug(`[better-manga] ${site.name} settings change failed`, err);
+      }
+    }
   };
 
   // Generic so TS ties each starter to its own feature's config type.
   const startFeature = <K extends FeatureId>(id: K) => {
-    // `false` = the feature doesn't fit this site; don't install it at all.
-    if (site.features?.[id] === false) return;
-    const getConfig = () => (isAlive() ? (resolved?.[id] ?? null) : null);
-    onRetire(featureStarters[id](getConfig));
+    // `null` = the feature doesn't fit this site; don't install it at all.
+    if (!resolved[id]) return;
+    const getConfig = () => (isAlive() ? resolved[id] : null);
+    try {
+      onRetire(featureStarters[id](getConfig, subscribe));
+    } catch (err) {
+      // Never break the host page, or the other features, over one of them.
+      console.debug(`[better-manga] ${site.name} ${id} failed`, err);
+    }
   };
   for (const id of featureIds) startFeature(id);
 

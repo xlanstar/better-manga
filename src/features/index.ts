@@ -1,13 +1,16 @@
+import { autoContinue } from './auto-continue';
+import { blockAds } from './block-ads';
 import { pageScroll } from './page-scroll';
+import { skipRedirects } from './skip-redirects';
 
 /**
- * Registry of feature definitions — add a file next to this one, then one line
- * here, one in `starters.ts` (content script) and one in `controls.ts`
- * (popup). The key is the
- * feature id, also its key in `Site.features` and in stored user settings, so
- * never rename one.
+ * Registry of feature definitions — add a folder next to this one, then one
+ * line here, one in `starters.ts` (content script) and one in `controls.ts`
+ * (popup). The key is the feature id, also its key in `Site.features` and in
+ * stored user settings, so never rename one. The order here is the order in
+ * the popup / options page.
  */
-export const features = { pageScroll };
+export const features = { blockAds, skipRedirects, autoContinue, pageScroll };
 
 export type FeatureId = keyof typeof features;
 export const featureIds = Object.keys(features) as FeatureId[];
