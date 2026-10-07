@@ -22,12 +22,9 @@ const name = (url: string) => siteFor(url)?.name;
 const covers = (site: Site, url: string) =>
   site.matches.some((pattern) => new MatchPattern(pattern).includes(url));
 const testSite = (...matches: string[]): Site => ({ name: 't', label: 'T', matches });
-/** A site's own layer and its sections' layers. */
-const featureLayers = (site: Site) => [
-  site.features,
-  site.sections?.main?.features,
-  site.sections?.reader?.features,
-];
+/** What each section of a site runs with: its own layer merged over the site's. */
+const sectionLayers = (site: Site) =>
+  (['main', 'reader'] as const).map((section) => sectionFeatures(site, section));
 
 describe('site registry', () => {
   test('names are unique', () => {
@@ -68,14 +65,14 @@ describe('site registry', () => {
   });
 
   test('site feature configs only name known features', () => {
-    for (const layer of sites.flatMap(featureLayers)) {
-      for (const id of Object.keys(layer ?? {})) expect(featureIds).toContain(id as never);
+    for (const layer of sites.flatMap(sectionLayers)) {
+      for (const id of Object.keys(layer)) expect(featureIds).toContain(id as never);
     }
   });
 
   test('site feature configs give their feature something to act on', () => {
-    for (const layer of sites.flatMap(featureLayers)) {
-      for (const [id, config] of Object.entries(layer ?? {})) {
+    for (const layer of sites.flatMap(sectionLayers)) {
+      for (const [id, config] of Object.entries(layer)) {
         const { isUsable } = featureDefs[id as FeatureId] as { isUsable?: (c: object) => boolean };
         if (config && isUsable) expect(isUsable(config)).toBe(true);
       }
