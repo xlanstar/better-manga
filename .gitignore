@@ -1,31 +1,30 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Dependencies
+node_modules/
 
-node_modules
-.output
+# WXT build output and generated types
+.output/
+.wxt/
 stats.html
 stats-*.json
-.wxt
+
+# Local config and secrets
 web-ext.config.ts
+.env*
+!.env.example
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-.pi
-
-# Chrome Web Store listing assets (local only)
+# Store listing assets (local only, see AGENTS.md)
 store/
+
+# Logs
+logs/
+*.log
+
+# Editors and OS
+.zed/*
+!.zed/extensions.json
+.idea/
+*.sw?
+.DS_Store
+
+# Agents
+.pi/
