@@ -56,7 +56,10 @@ export function FeatureList({
   );
 }
 
-/** One feature's switch and options, wired to its slice of the layer. */
+/**
+ * One feature's switch and options (shown only while it's on), wired to its
+ * slice of the layer.
+ */
 function FeatureSettings<K extends FeatureId>({
   id,
   resolved,
@@ -84,7 +87,9 @@ function FeatureSettings<K extends FeatureId>({
         onCheckedChange={(enabled) => change({ enabled }, true)}
         title={title()}
       />
-      {Options && <Options defaults={defaultValue} onChange={change} value={value} />}
+      {value.enabled && Options && (
+        <Options defaults={defaultValue} onChange={change} value={value} />
+      )}
     </div>
   );
 }
