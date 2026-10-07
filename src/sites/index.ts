@@ -103,16 +103,17 @@ function patternHost(pattern: string): string {
 }
 
 /**
- * Whether `site` matches a search: its label, name or one of its hosts
- * contains `query` (case-insensitive), or `query` is a URL / host the site
- * covers (`https://m.bzmh.org/manga/x`, `m.bzmh.org`). A blank query matches.
+ * A site search: matches a site whose label, name or one of its hosts
+ * contains `query` (case-insensitive), or that covers `query` as a URL / host
+ * (`https://m.bzmh.org/manga/x`, `m.bzmh.org`). A blank query matches all.
+ * The URL is looked up here, once per query, not once per site filtered.
  */
-export function siteMatchesQuery(site: Site, query: string): boolean {
+export function siteSearch(query: string): (site: Site) => boolean {
   const q = query.trim().toLowerCase();
-  if (!q) return true;
-  const haystack = [site.label, site.name, ...siteHosts(site)].map((s) => s.toLowerCase());
-  if (haystack.some((s) => s.includes(q))) return true;
-  if (!q.includes('.')) return false;
+  if (!q) return () => true;
   const url = /^[a-z][a-z\d+.-]*:\/\//.test(q) ? q : `https://${q}`;
-  return siteFor(url)?.name === site.name;
+  const covering = q.includes('.') ? siteFor(url)?.name : undefined;
+  return (site) =>
+    site.name === covering ||
+    [site.label, site.name, ...siteHosts(site)].some((s) => s.toLowerCase().includes(q));
 }

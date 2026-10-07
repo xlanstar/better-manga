@@ -9,8 +9,8 @@ import {
   sectionFor,
   settingsFeatures,
   siteHosts,
-  siteMatchesQuery,
   siteFor,
+  siteSearch,
   sites,
   type Site,
   type SiteName,
@@ -274,7 +274,7 @@ describe('siteHosts', () => {
   });
 });
 
-describe('siteMatchesQuery', () => {
+describe('siteSearch', () => {
   const site = {
     name: 'baozimh',
     label: '包子漫畫',
@@ -283,17 +283,17 @@ describe('siteMatchesQuery', () => {
   const [baozimh] = sites;
 
   test.each(['', '  ', '包子', 'BAOZI', 'bzmh', 'zmh.o', ' bzmh.org '])('matches %p', (q) => {
-    expect(siteMatchesQuery(site, q)).toBe(true);
+    expect(siteSearch(q)(site)).toBe(true);
   });
 
   test.each(['g站', 'hipmh', 'bzmh.com', 'evil.test'])('does not match %p', (q) => {
-    expect(siteMatchesQuery(site, q)).toBe(false);
+    expect(siteSearch(q)(site)).toBe(false);
   });
 
   test('a URL or subdomain the site covers matches', () => {
-    expect(siteMatchesQuery(baozimh!, 'https://m.bzmh.org/manga/abc')).toBe(true);
-    expect(siteMatchesQuery(baozimh!, 'www.bzmh.org/x')).toBe(true);
-    expect(siteMatchesQuery(baozimh!, 'https://evil.test/?u=bzmh')).toBe(false);
+    expect(siteSearch('https://m.bzmh.org/manga/abc')(baozimh!)).toBe(true);
+    expect(siteSearch('www.bzmh.org/x')(baozimh!)).toBe(true);
+    expect(siteSearch('https://evil.test/?u=bzmh')(baozimh!)).toBe(false);
   });
 });
 

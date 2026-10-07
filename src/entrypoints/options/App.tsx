@@ -15,7 +15,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useLocalePreference } from '@/hooks/use-locale';
 import { useSettings } from '@/hooks/use-settings';
-import { siteMatchesQuery, sites } from '@/sites';
+import { siteSearch, sites } from '@/sites';
 import { i18n } from '@/utils/i18n';
 
 const FILTERS = ['all', 'customised', 'disabled'] as const;
@@ -49,10 +49,11 @@ export default function App() {
     customised: all.filter(isSiteCustomised).length,
     disabled: all.filter((p) => p.disabled).length,
   };
+  const matchesQuery = siteSearch(deferredQuery);
   const matching = all.filter(
     (p) =>
       (filter === 'all' || (filter === 'customised' ? isSiteCustomised(p) : p.disabled)) &&
-      siteMatchesQuery(p.site, deferredQuery),
+      matchesQuery(p.site),
   );
   const shown = matching.slice(0, limit);
   const filterLabels: Record<Filter, string> = {
