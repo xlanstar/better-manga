@@ -1,23 +1,20 @@
 /** Shared DOM helpers for features. Content scripts run at document_start. */
 
-import { isAlive, onRetire } from './lifecycle';
-
 /**
  * Hide every element matching `selectors`, now and later, with a stylesheet:
- * no work per mutation, and matches never render. Returns a stop function
+ * no work per mutation, and matches never render. Stops when `signal` aborts
  * (which un-hides them, unless a page CSP forced the inline-style fallback).
  */
-export function keepHidden(...selectors: string[]): () => void {
+export function keepHidden(selectors: readonly string[], signal: AbortSignal): void {
+  if (signal.aborted) return;
   const style = document.createElement('style');
   style.setAttribute('data-better-manga', 'keep-hidden');
   // `textContent` (not a text node) keeps Firefox from applying the page's CSP.
   style.textContent = hideRules(selectors);
 
-  let stopFallback: (() => void) | undefined;
   const stop = () => {
     observer.disconnect(); // first, or it would re-attach the style
     style.remove();
-    stopFallback?.();
   };
 
   // Child of <html> (no <head> at document_start). Some pages drop it or
@@ -32,18 +29,15 @@ export function keepHidden(...selectors: string[]): () => void {
     // Blocked by a page CSP after all: fall back to inline styles.
     if (!style.sheet) {
       stop();
-      stopFallback = onEachMatch(selectors.join(','), hideElement);
+      onEachMatch(selectors.join(','), hideElement, signal);
     }
   };
 
-  const observer = new MutationObserver(() => {
-    if (isAlive()) attachStyle();
-  });
-  onRetire(stop);
+  const observer = new MutationObserver(attachStyle);
+  signal.addEventListener('abort', stop, { once: true });
   // In case there's no <html> yet.
   observer.observe(document, { childList: true });
   attachStyle();
-  return stop;
 }
 
 /**
@@ -62,19 +56,19 @@ export function hideRules(selectors: readonly string[]): string {
  * Remove every element matching `selectors` as soon as the parser inserts it.
  * Called at document_start, this beats the page's deferred/module scripts, so
  * they never see the element (e.g. a config node an ad script reads).
- * Returns a stop function.
+ * Stops when `signal` aborts.
  */
-export function keepRemoved(...selectors: string[]): () => void {
-  return onEachMatch(selectors.join(','), (el) => el.remove());
+export function keepRemoved(selectors: readonly string[], signal: AbortSignal): void {
+  onEachMatch(selectors.join(','), (el) => el.remove(), signal);
 }
 
 /**
- * Call `fn` on every element matching `selector`, now and as they appear.
- * Returns a stop function.
+ * Call `fn` on every element matching `selector`, now and as they appear,
+ * until `signal` aborts.
  */
-function onEachMatch(selector: string, fn: (el: HTMLElement) => void): () => void {
+function onEachMatch(selector: string, fn: (el: HTMLElement) => void, signal: AbortSignal) {
   const root = document.documentElement;
-  if (!root || !selector) return () => {};
+  if (!root || !selector || signal.aborted) return;
 
   const sweep = (node: ParentNode) => {
     for (const el of node.querySelectorAll<HTMLElement>(selector)) fn(el);
@@ -100,44 +94,34 @@ function onEachMatch(selector: string, fn: (el: HTMLElement) => void): () => voi
     attributes: true,
     attributeFilter: ['class'],
   });
-  let stopped = false;
-  let stopReplacement: (() => void) | undefined;
-  const stop = () => {
-    stopped = true;
-    observer.disconnect();
-    stopReplacement?.();
-  };
-  onRetire(stop);
+  signal.addEventListener('abort', () => observer.disconnect(), { once: true });
   sweep(root);
   // <html> is replaced wholesale on some pages; re-attach once the body exists.
   onDomReady(() => {
-    if (stopped || !isAlive()) return;
-    if (document.documentElement !== root) stopReplacement = onEachMatch(selector, fn);
+    if (signal.aborted) return;
+    if (document.documentElement !== root) onEachMatch(selector, fn, signal);
     else sweep(document);
   });
-  return stop;
 }
 
 /**
  * Click each element matching `selector` once, including ones the page adds
- * later. Returns a stop function.
+ * later, until `signal` aborts.
  *
  * Polling, not a MutationObserver — a poll can't miss a node that
  * appears and vanishes between callbacks, and this needs no burst handling.
  */
-export function clickOnAppear(selector: string, pollMs = 500) {
+export function clickOnAppear(selector: string, signal: AbortSignal, pollMs = 500): void {
+  if (signal.aborted) return;
   const clicked = new WeakSet<HTMLElement>();
   const timer = setInterval(() => {
-    // An orphaned instance must not click alongside its replacement.
-    if (!isAlive()) return clearInterval(timer);
     for (const el of document.querySelectorAll<HTMLElement>(selector)) {
       if (clicked.has(el)) continue;
       clicked.add(el);
       el.click();
     }
   }, pollMs);
-  onRetire(() => clearInterval(timer));
-  return () => clearInterval(timer);
+  signal.addEventListener('abort', () => clearInterval(timer), { once: true });
 }
 
 function hideElement(el: HTMLElement) {

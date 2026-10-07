@@ -30,8 +30,8 @@ export type Feature<
   types?: { site: SiteConfig; user: UserConfig; resolved: ResolvedConfig };
 };
 
-/** Call `listener` after the effective settings change. Returns unsubscribe. */
-export type SubscribeConfig = (listener: () => void) => () => void;
+/** Call `listener` after the effective settings change, until `signal` aborts. */
+export type SubscribeConfig = (listener: () => void, signal: AbortSignal) => void;
 
 /**
  * Content-script side of a feature: install it on the page, synchronously at
@@ -39,12 +39,14 @@ export type SubscribeConfig = (listener: () => void) => () => void;
  * `getConfig` returns the current effective settings on every use — the site's
  * defaults until the user settings load, `null` once this instance is retired
  * — so popup changes apply live; `subscribe` tells when they change, for
- * features that keep state (a stylesheet, a timer). Returns a stop function.
+ * features that keep state (a stylesheet, a timer). Cleans up when `signal`
+ * aborts (this instance retires).
  */
 export type FeatureStart<ResolvedConfig> = (
   getConfig: () => ResolvedConfig | null,
   subscribe: SubscribeConfig,
-) => () => void;
+  signal: AbortSignal,
+) => void;
 
 /** Props of a feature's popup / options controls (see `features/controls.ts`). */
 export type FeatureControlsProps<UserConfig, ResolvedConfig> = {

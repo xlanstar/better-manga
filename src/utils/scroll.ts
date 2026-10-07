@@ -27,10 +27,13 @@ export type PageKeyEvent = Pick<
  * return `null` to leave the key to the browser.
  *
  * Scrolls whichever container actually holds the content — many readers put it
- * in their own overflow box rather than the document.
+ * in their own overflow box rather than the document. Removed when `signal`
+ * aborts.
  */
-export function overridePageKeyScroll(getOptions: () => PageKeyScrollOptions | null) {
-  const controller = new AbortController();
+export function overridePageKeyScroll(
+  getOptions: () => PageKeyScrollOptions | null,
+  signal: AbortSignal,
+): void {
   const onKeyDown = (event: KeyboardEvent) => {
     const direction = pageKeyDirection(event);
     if (!direction) return;
@@ -50,9 +53,7 @@ export function overridePageKeyScroll(getOptions: () => PageKeyScrollOptions | n
     });
   };
   // Capture, so we win against the site's own Page Up/Down handler.
-  window.addEventListener('keydown', onKeyDown, { capture: true, signal: controller.signal });
-  /** Remove the override. */
-  return () => controller.abort();
+  window.addEventListener('keydown', onKeyDown, { capture: true, signal });
 }
 
 /**

@@ -3,7 +3,7 @@
  * doesn't bundle it.
  */
 import type { Site } from '@/sites';
-import { isAlive, onRetire, retire } from '@/utils/lifecycle';
+import { isAlive, lifetimeSignal, retire } from '@/utils/lifecycle';
 import { startAutoContinue } from './auto-continue/start';
 import { startBlockAds } from './block-ads/start';
 import { featureIds, type FeatureId, type FeatureResolvedConfig } from './index';
@@ -16,7 +16,7 @@ import {
   type StoredSettings,
   type StoredSettingsChange,
 } from './settings-storage';
-import type { FeatureStart } from './types';
+import type { FeatureStart, SubscribeConfig } from './types';
 
 /**
  * How to start each feature. Typed over every `FeatureId`, so a new feature
@@ -34,20 +34,22 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
  * must beat the page's own scripts) and read the effective settings on use,
  * so user changes in the popup apply without a reload. Until storage has
  * loaded they run with the site's defaults. An orphaned instance (see
- * `utils/lifecycle`) stops acting and watching.
+ * `utils/lifecycle`) stops acting and watching: everything is tied to its
+ * lifetime signal.
  *
  * If the user disabled the site (or a feature), it stops once storage answers;
  * on a disabled site the whole instance retires. So it may act for the first
  * few milliseconds of a page load.
  */
 export function startFeatures(site: Site) {
+  const lifetime = lifetimeSignal();
   let resolved: ResolvedFeatures = resolveFeatures(site.features);
   const listeners = new Set<() => void>();
-  const subscribe = (listener: () => void) => {
+  const subscribe: SubscribeConfig = (listener, signal) => {
+    if (signal.aborted) return;
     listeners.add(listener);
-    return () => listeners.delete(listener);
+    signal.addEventListener('abort', () => listeners.delete(listener), { once: true });
   };
-  onRetire(() => listeners.clear());
   let global: UserSettings = {};
   let override: UserSettings = {};
   const apply = (change: StoredSettingsChange) => {
@@ -70,7 +72,7 @@ export function startFeatures(site: Site) {
     if (!resolved[id]) return;
     const getConfig = () => (isAlive() ? resolved[id] : null);
     try {
-      onRetire(featureStarters[id](getConfig, subscribe));
+      featureStarters[id](getConfig, subscribe, lifetime);
     } catch (err) {
       // Never break the host page, or the other features, over one of them.
       console.debug(`[better-manga] ${site.name} ${id} failed`, err);
@@ -84,12 +86,11 @@ export function startFeatures(site: Site) {
   // (possibly slow) load must not overwrite what has arrived since.
   const watchedKeys = new Set<keyof StoredSettingsChange>();
   try {
-    onRetire(
-      watchStoredSettings([site.name], (change) => {
-        for (const key of Object.keys(change)) watchedKeys.add(key as keyof StoredSettingsChange);
-        apply(change);
-      }),
-    );
+    const unwatch = watchStoredSettings([site.name], (change) => {
+      for (const key of Object.keys(change)) watchedKeys.add(key as keyof StoredSettingsChange);
+      apply(change);
+    });
+    lifetime.addEventListener('abort', unwatch, { once: true });
   } catch {
     // storage unavailable — the load below falls back to defaults
   }

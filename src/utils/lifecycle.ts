@@ -9,11 +9,14 @@ import type { ContentScriptContext } from 'wxt/utils/content-script-context';
  * a fresh instance (see `entrypoints/background.ts`); the old one must stand
  * down so the two don't both act on the page.
  *
- * Helpers use `isAlive()` for a lazy check (it also notices the extension being
- * gone) and `onRetire()` for eager cleanup when a newer instance announces
- * itself.
+ * Long-lived work ties its cleanup to `lifetimeSignal()`, which aborts when a
+ * newer instance announces itself; `isAlive()` is a lazy check that also
+ * notices the extension being gone.
  */
 let ctx: ContentScriptContext | undefined;
+
+/** Stands in for the instance's signal when unbound (tests): never aborts. */
+const unboundSignal = new AbortController().signal;
 
 export function bindLifecycle(context: ContentScriptContext) {
   ctx = context;
@@ -24,16 +27,16 @@ export function isAlive(): boolean {
   return ctx ? ctx.isValid : true;
 }
 
+/** Aborts when this instance is retired. */
+export function lifetimeSignal(): AbortSignal {
+  return ctx ? ctx.signal : unboundSignal;
+}
+
 /**
- * Stand this instance down now, as if a newer one took over: every `onRetire`
- * cleanup runs and `isAlive()` turns false. Used when the user disables the
- * site; turning it back on takes a reload.
+ * Stand this instance down now, as if a newer one took over:
+ * `lifetimeSignal()` aborts and `isAlive()` turns false. Used when the user
+ * disables the site; turning it back on takes a reload.
  */
 export function retire() {
   ctx?.abort('disabled');
-}
-
-/** Run `fn` when this instance is retired. */
-export function onRetire(fn: () => void) {
-  ctx?.onInvalidated(fn);
 }
