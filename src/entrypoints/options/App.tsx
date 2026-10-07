@@ -44,17 +44,14 @@ export default function App() {
     onDisabledChange: (disabled) => setDisabled(site, disabled),
   });
   const all = sites.map(propsFor);
-  const counts: Record<Filter, number> = {
-    all: all.length,
-    customised: all.filter(isSiteCustomised).length,
-    disabled: all.filter((p) => p.disabled).length,
+  // Each filter's sites, worked out once for both its count and the list.
+  const filtered: Record<Filter, SiteSettingsProps[]> = {
+    all,
+    customised: all.filter(isSiteCustomised),
+    disabled: all.filter((p) => p.disabled),
   };
   const matchesQuery = siteSearch(deferredQuery);
-  const matching = all.filter(
-    (p) =>
-      (filter === 'all' || (filter === 'customised' ? isSiteCustomised(p) : p.disabled)) &&
-      matchesQuery(p.site),
-  );
+  const matching = filtered[filter].filter((p) => matchesQuery(p.site));
   const shown = matching.slice(0, limit);
   const filterLabels: Record<Filter, string> = {
     all: i18n.t('options.filterAll'),
@@ -107,7 +104,9 @@ export default function App() {
             {FILTERS.map((f) => (
               <ToggleGroupItem key={f} value={f}>
                 {filterLabels[f]}
-                <span className="text-xs text-muted-foreground tabular-nums">{counts[f]}</span>
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  {filtered[f].length}
+                </span>
               </ToggleGroupItem>
             ))}
           </ToggleGroup>

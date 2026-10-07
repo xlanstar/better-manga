@@ -23,7 +23,11 @@ export type SiteSettingsProps = {
 
 /** Whether the site's override changes anything over the global layer. */
 export function isSiteCustomised({ site, override, global }: SiteSettingsProps): boolean {
-  return isCustomised(pruneUserSettings(settingsFeatures(site), override, global));
+  // Most sites have no override: nothing to prune, so skip resolving the layers.
+  return (
+    isCustomised(override) &&
+    isCustomised(pruneUserSettings(settingsFeatures(site), override, global))
+  );
 }
 
 /** The popup's card for the site in the current tab. */
@@ -41,7 +45,7 @@ export function CurrentSiteSettings(props: SiteSettingsProps) {
         />
       </FrameHeader>
       <FramePanel className="p-4">
-        <SiteBody {...props} />
+        <SiteBody {...props} customised={isSiteCustomised(props)} />
       </FramePanel>
     </Frame>
   );
@@ -50,17 +54,18 @@ export function CurrentSiteSettings(props: SiteSettingsProps) {
 /** One site in the options page's list, collapsed until opened. */
 export function SiteSettingsItem(props: SiteSettingsProps) {
   const { site, disabled, onDisabledChange } = props;
+  const customised = isSiteCustomised(props);
   return (
     <AccordionItem value={site.name}>
       <AccordionTrigger className="items-center px-4 py-3 hover:bg-accent/50">
-        <SiteHeading customised={isSiteCustomised(props)} disabled={disabled} site={site} />
+        <SiteHeading customised={customised} disabled={disabled} site={site} />
       </AccordionTrigger>
       <AccordionPanel className="flex flex-col gap-4 px-4 pt-1 text-foreground">
         <Label className="justify-between gap-4 rounded-lg bg-muted/64 px-3 py-2">
           {i18n.t('siteSettings.enabled')}
           <Switch checked={!disabled} onCheckedChange={(enabled) => onDisabledChange(!enabled)} />
         </Label>
-        <SiteBody {...props} />
+        <SiteBody {...props} customised={customised} />
       </AccordionPanel>
     </AccordionItem>
   );
@@ -98,8 +103,14 @@ function SiteHeading({
 }
 
 /** The site's feature controls over the global layer, or a note when disabled. */
-function SiteBody(props: SiteSettingsProps) {
-  const { site, global, override, disabled, onChange } = props;
+function SiteBody({
+  site,
+  global,
+  override,
+  disabled,
+  customised,
+  onChange,
+}: SiteSettingsProps & { customised: boolean }) {
   if (disabled) {
     return (
       <p className="flex items-start gap-2 text-xs text-muted-foreground">
@@ -116,7 +127,7 @@ function SiteBody(props: SiteSettingsProps) {
         onChange={onChange}
         scope={settingsFeatures(site)}
       />
-      {isSiteCustomised(props) && (
+      {customised && (
         <div className="flex items-center justify-between gap-2 border-t pt-3">
           <span className="text-xs text-muted-foreground">
             {i18n.t('siteSettings.customisedHint')}
