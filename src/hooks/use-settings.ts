@@ -8,18 +8,19 @@ import {
   subscribeStoredSettings,
   type StoredSettings,
 } from '@/features/settings-storage';
-import { sites, type Site } from '@/sites';
+import type { Site } from '@/sites';
 
 const EMPTY: StoredSettings = { global: {}, bySite: {}, disabledSites: new Set() };
 
 /**
- * Every site's user settings, kept in sync with storage (so the popup and the
- * options page can both be open). `settings` is `null` until loaded.
+ * The global layer, the disabled sites and the overrides of `sites`, kept in
+ * sync with storage (so the popup and the options page can both be open).
+ * `settings` is `null` until loaded; `sites: null` waits before loading.
  *
  * Updates take `persist`: `false` updates the UI only (e.g. while dragging a
  * slider); `true` also prunes and stores.
  */
-export function useSettings() {
+export function useSettings(sites: readonly Site[] | null) {
   const [settings, setSettings] = useState<StoredSettings | null>(null);
   // Latest state, for pruning in event handlers.
   const latest = useRef<StoredSettings>(EMPTY);
@@ -27,10 +28,11 @@ export function useSettings() {
     latest.current = settings ?? EMPTY;
   }, [settings]);
 
+  // Compared by names, so callers needn't keep `sites` stable.
+  const names = sites && JSON.stringify(sites.map((s) => s.name));
   useEffect(() => {
-    const names = sites.map((s) => s.name);
-    return subscribeStoredSettings(names, setSettings);
-  }, []);
+    if (names) return subscribeStoredSettings(JSON.parse(names) as string[], setSettings);
+  }, [names]);
 
   const updateGlobal = (next: UserSettings, persist: boolean) => {
     const value = persist ? pruneUserSettings(undefined, next) : next;

@@ -25,7 +25,10 @@ import { i18n } from '@/utils/i18n';
  */
 export default function App() {
   const tab = useCurrentTab();
-  const { settings, updateGlobal, updateSite, setDisabled } = useSettings();
+  // Only what the popup shows: the global layer and the tab's site.
+  const { settings, updateGlobal, updateSite, setDisabled } = useSettings(
+    tab && (tab.site ? [tab.site] : []),
+  );
   // Re-render all text when the language changes.
   useLocalePreference();
   // Turning a site on (or off) only fully applies after a reload.

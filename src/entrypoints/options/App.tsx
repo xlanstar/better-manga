@@ -26,7 +26,7 @@ const PAGE_SIZE = 50;
 
 /** Every site's settings: the global layer, then a searchable site list. */
 export default function App() {
-  const { settings, updateGlobal, updateSite, setDisabled } = useSettings();
+  const { settings, updateGlobal, updateSite, setDisabled } = useSettings(sites);
   useLocalePreference();
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
