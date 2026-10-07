@@ -2,8 +2,9 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* The popup viewport is narrower than `sm`, but it's a pointer-driven desktop
-   UI: always use coss ui's compact `sm:` sizing. */
+/* Shared by the popup and the options page. The popup is narrower than `sm`,
+   but both are pointer-driven desktop UIs: always use coss ui's compact `sm:`
+   sizing. */
 @theme {
   --breakpoint-sm: 0rem;
 }

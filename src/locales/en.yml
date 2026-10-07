@@ -4,15 +4,43 @@ extName: Better Manga
 extDescription: Enhances manga reading sites.
 
 popup:
-  currentSiteHint: Adjust settings for this site or other supported sites
+  currentSite: This page
   unsupportedSite: The current tab is not a supported site
+  unsupportedSiteHint: Browse every supported site in the settings.
+  openOptions: Settings
+  manageSites: Manage all $1 sites
+  reloadHint: Reload the page to fully apply
+  reload: Reload
+
+language:
+  label: Language
+  auto: Browser default
+
+globalSettings:
+  title: All sites
+  description: Applies everywhere; any site can override it.
+  reset: Reset to defaults
 
 siteSettings:
-  current: Current page
+  enabled: Enabled on this site
+  disabled: Disabled
+  disabledHint: 'Better Manga is off on this site: no site fixes, no reading features.'
   customised: Customised
+  customisedHint: This site has its own settings
+  followGlobal: Follow all sites
   noSettings: This site has no adjustable settings; site fixes apply automatically.
-  reset: Reset to defaults
   hostSeparator: ', '
+
+options:
+  sites: Sites
+  sitesDescription: Open a site to give it its own settings or turn it off.
+  search: Search by name, domain or URL
+  filterAll: All
+  filterCustomised: Customised
+  filterDisabled: Disabled
+  noResults: No matching sites
+  noResultsHint: Try another keyword, or paste the URL of a manga page.
+  showMore: Show more ($1 left)
 
 pageScroll:
   title: Page Up / Down scrolling

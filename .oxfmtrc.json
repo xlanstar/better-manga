@@ -2,7 +2,7 @@
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "singleQuote": true,
   "sortTailwindcss": {
-    "stylesheet": "./src/entrypoints/popup/style.css",
+    "stylesheet": "./src/assets/style.css",
     "functions": ["cn", "cva"]
   },
   "ignorePatterns": []

@@ -32,11 +32,11 @@ export type Feature<
  */
 export type FeatureStart<ResolvedConfig> = (getConfig: () => ResolvedConfig | null) => () => void;
 
-/** Props of a feature's popup controls (see `features/controls.ts`). */
+/** Props of a feature's popup / options controls (see `features/controls.ts`). */
 export type FeatureControlsProps<UserConfig, ResolvedConfig> = {
   /** Effective settings. */
   value: ResolvedConfig;
-  /** What `value` would be without the user layer. */
+  /** What `value` would be without the layer being edited. */
   defaults: ResolvedConfig;
   /**
    * Merged into the user layer. `persist: false` updates the UI only (e.g.

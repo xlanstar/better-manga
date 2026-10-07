@@ -24,6 +24,15 @@ export function isAlive(): boolean {
   return ctx ? ctx.isValid : true;
 }
 
+/**
+ * Stand this instance down now, as if a newer one took over: every `onRetire`
+ * cleanup runs and `isAlive()` turns false. Used when the user disables the
+ * site; turning it back on takes a reload.
+ */
+export function retire() {
+  ctx?.abort('disabled');
+}
+
 /** Run `fn` when this instance is retired. */
 export function onRetire(fn: () => void) {
   ctx?.onInvalidated(fn);

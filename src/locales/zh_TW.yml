@@ -1,21 +1,49 @@
-# BCP 47 tag for the popup's <html lang>.
+# BCP 47 tag for the pages' <html lang>.
 lang: zh-Hant
 extName: Better Manga
 extDescription: 讓漫畫網站讀起來更順手。
 
 popup:
-  currentSiteHint: 調整此網站或其他支援網站的設定
-  unsupportedSite: 目前分頁不是支援的網站
+  currentSite: '目前頁面'
+  unsupportedSite: '目前分頁不是支援的網站'
+  unsupportedSiteHint: '在設定頁瀏覽所有支援的網站。'
+  openOptions: '設定'
+  manageSites: '管理全部 $1 個網站'
+  reloadHint: '重新載入頁面後完整生效'
+  reload: '重新載入'
+
+language:
+  label: '語言'
+  auto: '跟隨瀏覽器'
+
+globalSettings:
+  title: '全域設定'
+  description: '套用到所有網站，個別網站可另外調整。'
+  reset: '還原預設'
 
 siteSettings:
-  current: 目前頁面
-  customised: 已自訂
-  noSettings: 此網站沒有可調整的設定，網站修正會自動套用。
-  reset: 還原預設
-  hostSeparator: 、
+  enabled: '在此網站啟用'
+  disabled: '已停用'
+  disabledHint: '已在此網站停用 Better Manga，網站修正與閱讀功能都不會執行。'
+  customised: '已自訂'
+  customisedHint: '此網站使用專屬設定'
+  followGlobal: '跟隨全域'
+  noSettings: '此網站沒有可調整的設定，網站修正會自動套用。'
+  hostSeparator: '、'
+
+options:
+  sites: '網站'
+  sitesDescription: '展開網站即可調整專屬設定，或在該網站停用。'
+  search: '搜尋網站名稱、網域或網址'
+  filterAll: '全部'
+  filterCustomised: '已自訂'
+  filterDisabled: '已停用'
+  noResults: '找不到符合的網站'
+  noResultsHint: '試試其他關鍵字，或直接貼上漫畫頁面的網址。'
+  showMore: '顯示更多（還有 $1 個）'
 
 pageScroll:
   title: Page Up / Down 捲動
-  description: 每次捲動畫面高度的固定比例，保留重疊方便接續閱讀。
-  ratio: 捲動比例
-  default: 預設 $1
+  description: '每次捲動畫面高度的固定比例，保留重疊方便接續閱讀。'
+  ratio: '捲動比例'
+  default: '預設 $1'

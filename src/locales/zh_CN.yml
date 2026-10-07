@@ -3,18 +3,46 @@ extName: Better Manga
 extDescription: 让漫画网站读起来更顺手。
 
 popup:
-  currentSiteHint: 调整此网站或其他支持网站的设置
-  unsupportedSite: 当前标签页不是支持的网站
+  currentSite: '当前页面'
+  unsupportedSite: '当前标签页不是支持的网站'
+  unsupportedSiteHint: '在设置页浏览所有支持的网站。'
+  openOptions: '设置'
+  manageSites: '管理全部 $1 个网站'
+  reloadHint: '重新加载页面后完整生效'
+  reload: '重新加载'
+
+language:
+  label: '语言'
+  auto: '跟随浏览器'
+
+globalSettings:
+  title: '全局设置'
+  description: '应用到所有网站，个别网站可另外调整。'
+  reset: '恢复默认'
 
 siteSettings:
-  current: 当前页面
-  customised: 已自定义
-  noSettings: 此网站没有可调整的设置，网站修正会自动应用。
-  reset: 恢复默认
-  hostSeparator: 、
+  enabled: '在此网站启用'
+  disabled: '已停用'
+  disabledHint: '已在此网站停用 Better Manga，网站修正与阅读功能都不会运行。'
+  customised: '已自定义'
+  customisedHint: '此网站使用专属设置'
+  followGlobal: '跟随全局'
+  noSettings: '此网站没有可调整的设置，网站修正会自动应用。'
+  hostSeparator: '、'
+
+options:
+  sites: '网站'
+  sitesDescription: '展开网站即可调整专属设置，或在该网站停用。'
+  search: '搜索网站名称、域名或网址'
+  filterAll: '全部'
+  filterCustomised: '已自定义'
+  filterDisabled: '已停用'
+  noResults: '找不到符合的网站'
+  noResultsHint: '试试其他关键字，或直接粘贴漫画页面的网址。'
+  showMore: '显示更多（还有 $1 个）'
 
 pageScroll:
   title: Page Up / Down 滚动
-  description: 每次滚动屏幕高度的固定比例，保留重叠方便接续阅读。
-  ratio: 滚动比例
-  default: 默认 $1
+  description: '每次滚动屏幕高度的固定比例，保留重叠方便接续阅读。'
+  ratio: '滚动比例'
+  default: '默认 $1'

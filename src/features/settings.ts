@@ -1,15 +1,18 @@
 /**
- * Reading features: implemented once, configured in three layers.
+ * Reading features: implemented once, configured in layers.
  *
- *   global default  →  site default (`Site.features`)  →  user setting (per site)
+ *   feature default  →  site default (`Site.features`)
+ *     →  user, all sites (global)  →  user, this site (override)
  *
- * Later layers override earlier ones; `undefined` falls through. Site fixes
+ * Later layers override earlier ones; `undefined` falls through. The user
+ * layers share one shape (`UserSettings`); a site override only stores what
+ * differs from the layers below, so everything else follows the global ones. Site fixes
  * (ad hiding, anti-hijack, …) are not features — they live in each site's
  * `run()` and are not user-tunable.
  *
  * Each feature is one folder in `features/` (defaults, per-layer types, user
- * value sanitizing, content-script start, popup controls). This file only loops over the
- * registry, so adding a feature means:
+ * value sanitizing, content-script start, popup / options controls). This
+ * file only loops over the registry, so adding a feature means:
  *
  * 1. `features/<name>/`: `index.ts` exports a `Feature` definition, `start.ts`
  *    a `FeatureStart`, `controls.tsx` the popup controls (see `page-scroll/`).
@@ -34,7 +37,7 @@ import {
 /** Site layer (`Site.features`). `false` = the feature does not apply to this site. */
 export type SiteFeatures = { [K in FeatureId]?: false | FeatureSiteConfig<K> };
 
-/** User layer, stored per site. Missing fields fall through. */
+/** A user layer (global or per site). Missing fields fall through. */
 export type UserSettings = { [K in FeatureId]?: FeatureUserConfig<K> };
 
 /** Effective settings. `null` = not available on this site. */
@@ -42,18 +45,24 @@ export type ResolvedFeatures = { [K in FeatureId]: FeatureResolvedConfig<K> | nu
 
 // ── Layering ─────────────────────────────────────────────────────────────────
 
+/** User layers, bottom first (global, then the site override). */
+type UserLayers = readonly (UserSettings | null | undefined)[];
+
 export function resolveFeatures(
   siteFeatures: SiteFeatures | undefined,
-  userSettings: UserSettings | null | undefined,
+  ...userLayers: UserLayers
 ): ResolvedFeatures {
-  const user = sanitizeUserSettings(userSettings);
+  const users = userLayers.map(sanitizeUserSettings);
   const resolved: Record<string, object | null> = {};
   for (const id of featureIds) {
     const site = siteFeatures?.[id];
     resolved[id] =
       site === false
         ? null
-        : { ...features[id].defaults, ...withoutUndefined(site ?? {}), ...user[id] };
+        : Object.assign(
+            { ...features[id].defaults, ...withoutUndefined(site ?? {}) },
+            ...users.map((user) => user[id]),
+          );
   }
   return resolved as ResolvedFeatures;
 }
@@ -76,14 +85,17 @@ export function sanitizeUserSettings(raw: unknown): UserSettings {
 }
 
 /**
- * Drop user values equal to the defaults for this site, so a stored setting
- * always means "differs from default". Returns `{}` when nothing differs.
+ * Drop values of the top user layer equal to what the layers below
+ * (`beneath`, bottom first) already give for this site, so a stored setting
+ * always means "differs from what it would inherit". Returns `{}` when nothing
+ * differs.
  */
 export function pruneUserSettings(
   siteFeatures: SiteFeatures | undefined,
   userSettings: UserSettings,
+  ...beneath: UserLayers
 ): UserSettings {
-  const defaults = resolveFeatures(siteFeatures, {});
+  const defaults = resolveFeatures(siteFeatures, ...beneath);
   const pruned: Record<string, object> = {};
   for (const [id, config] of Object.entries(sanitizeUserSettings(userSettings))) {
     const base = defaults[id as FeatureId] as Record<string, unknown> | null;
@@ -92,6 +104,12 @@ export function pruneUserSettings(
     if (changed.length) pruned[id] = Object.fromEntries(changed);
   }
   return pruned as UserSettings;
+}
+
+/** Coerce an untrusted stored list of site names: unique non-empty strings. */
+export function sanitizeSiteNames(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return [...new Set(raw.filter((name): name is string => typeof name === 'string' && !!name))];
 }
 
 /** Whether a (pruned) user layer changes anything. */

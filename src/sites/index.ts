@@ -49,3 +49,18 @@ function patternHost(pattern: string): string {
     .replace(/^\*\./, '') // subdomain wildcard
     .replace(/\/.*$/, ''); // path
 }
+
+/**
+ * Whether `site` matches a search: its label, name or one of its hosts
+ * contains `query` (case-insensitive), or `query` is a URL / host the site
+ * covers (`https://m.bzmh.org/manga/x`, `m.bzmh.org`). A blank query matches.
+ */
+export function siteMatchesQuery(site: Site, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const haystack = [site.label, site.name, ...siteHosts(site)].map((s) => s.toLowerCase());
+  if (haystack.some((s) => s.includes(q))) return true;
+  if (!q.includes('.')) return false;
+  const url = /^[a-z][a-z\d+.-]*:\/\//.test(q) ? q : `https://${q}`;
+  return sitesFor(url).some((s) => s.name === site.name);
+}

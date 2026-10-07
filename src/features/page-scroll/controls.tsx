@@ -1,4 +1,4 @@
-import { i18n } from '#i18n';
+import { i18n } from '@/utils/i18n';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';

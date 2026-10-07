@@ -2,7 +2,15 @@ import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { MatchPattern } from 'wxt/utils/match-patterns';
 import { featureIds } from '@/features';
-import { allMatches, siteHosts, sites, sitesFor, type Site, type SiteName } from './index';
+import {
+  allMatches,
+  siteHosts,
+  siteMatchesQuery,
+  sites,
+  sitesFor,
+  type Site,
+  type SiteName,
+} from './index';
 import { siteFixes } from './fixes';
 import { defineSite } from './types';
 
@@ -45,6 +53,16 @@ describe('site registry', () => {
   test('site feature configs only name known features', () => {
     for (const site of sites) {
       for (const id of Object.keys(site.features ?? {})) expect(featureIds).toContain(id as never);
+    }
+  });
+
+  // The content script treats a page as one site (disabling it retires the
+  // whole instance), so no two sites may claim the same host.
+  test('no host belongs to two sites', () => {
+    for (const site of sites) {
+      for (const host of siteHosts(site)) {
+        expect(sitesFor(`https://${host}/`).map((s) => s.name)).toEqual([site.name]);
+      }
     }
   });
 
@@ -230,5 +248,24 @@ describe('siteHosts', () => {
   test('returns a new array each call', () => {
     const [site] = sites;
     expect(siteHosts(site!)).not.toBe(siteHosts(site!));
+  });
+});
+
+describe('siteMatchesQuery', () => {
+  const site = { name: 'baozimh', label: '包子漫畫', matches: ['*://*.bzmh.org/*'] } satisfies Site;
+  const [baozimh] = sites;
+
+  test.each(['', '  ', '包子', 'BAOZI', 'bzmh', 'zmh.o', ' bzmh.org '])('matches %p', (q) => {
+    expect(siteMatchesQuery(site, q)).toBe(true);
+  });
+
+  test.each(['g站', 'hipmh', 'bzmh.com', 'evil.test'])('does not match %p', (q) => {
+    expect(siteMatchesQuery(site, q)).toBe(false);
+  });
+
+  test('a URL or subdomain the site covers matches', () => {
+    expect(siteMatchesQuery(baozimh!, 'https://m.bzmh.org/manga/abc')).toBe(true);
+    expect(siteMatchesQuery(baozimh!, 'www.bzmh.org/x')).toBe(true);
+    expect(siteMatchesQuery(baozimh!, 'https://evil.test/?u=bzmh')).toBe(false);
   });
 });

@@ -5,6 +5,7 @@ import {
   isCustomised,
   pruneUserSettings,
   resolveFeatures,
+  sanitizeSiteNames,
   sanitizeUserSettings,
   type SiteFeatures,
   type UserSettings,
@@ -337,5 +338,66 @@ describe('isCustomised', () => {
     expect(isCustomised({ pageScroll: { ratio: 0.5 } })).toBe(true);
     // Only meaningful after pruning; on its own it just checks for entries.
     expect(isCustomised({ pageScroll: {} })).toBe(true);
+  });
+});
+
+describe('global and site user layers', () => {
+  const site: SiteFeatures = { pageScroll: { ratio: 0.5, container: '#c' } };
+  const global: UserSettings = { pageScroll: { ratio: 0.8 } };
+
+  test('global overrides the site default', () => {
+    expect(resolveFeatures(site, global).pageScroll).toEqual({
+      enabled: true,
+      ratio: 0.8,
+      container: '#c',
+    });
+  });
+
+  test('the site override wins over global, field by field', () => {
+    expect(resolveFeatures(site, global, { pageScroll: { enabled: false } }).pageScroll).toEqual({
+      enabled: false,
+      ratio: 0.8,
+      container: '#c',
+    });
+    expect(resolveFeatures(site, global, { pageScroll: { ratio: 0.4 } }).pageScroll?.ratio).toBe(
+      0.4,
+    );
+  });
+
+  test('every layer is sanitized', () => {
+    expect(
+      resolveFeatures(undefined, asUser({ pageScroll: { ratio: 9 } }), asUser('x')).pageScroll,
+    ).toEqual({ enabled: true, ratio: 1 });
+  });
+
+  test('site `false` still wins', () => {
+    expect(resolveFeatures({ pageScroll: false }, global, global).pageScroll).toBeNull();
+  });
+
+  test('an override equal to the global value is pruned', () => {
+    expect(pruneUserSettings(site, { pageScroll: { ratio: 0.8 } }, global)).toEqual({});
+    expect(pruneUserSettings(site, { pageScroll: { ratio: 0.5 } }, global)).toEqual({
+      pageScroll: { ratio: 0.5 },
+    });
+  });
+
+  test('pruning an override keeps the effective settings', () => {
+    for (const ratio of [0.3, 0.5, 0.8, 1]) {
+      for (const enabled of [true, false]) {
+        const user: UserSettings = { pageScroll: { ratio, enabled } };
+        const pruned = pruneUserSettings(site, user, global);
+        expect(resolveFeatures(site, global, pruned)).toEqual(resolveFeatures(site, global, user));
+      }
+    }
+  });
+});
+
+describe('sanitizeSiteNames', () => {
+  test.each([[undefined], [null], ['hipmh'], [{ 0: 'hipmh' }]])('non-array %p gives []', (raw) => {
+    expect(sanitizeSiteNames(raw)).toEqual([]);
+  });
+
+  test('keeps unique non-empty strings, in order', () => {
+    expect(sanitizeSiteNames(['b', 1, '', 'a', 'b', null])).toEqual(['b', 'a']);
   });
 });

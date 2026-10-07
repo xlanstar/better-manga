@@ -3,11 +3,16 @@
  * doesn't bundle it.
  */
 import type { Site } from '@/sites';
-import { isAlive, onRetire } from '@/utils/lifecycle';
+import { isAlive, onRetire, retire } from '@/utils/lifecycle';
 import { featureIds, type FeatureId, type FeatureResolvedConfig } from './index';
 import { startPageScroll } from './page-scroll/start';
 import { resolveFeatures, type ResolvedFeatures, type UserSettings } from './settings';
-import { loadUserSettings, watchUserSettings } from './settings-storage';
+import {
+  loadStoredSettings,
+  watchStoredSettings,
+  type StoredSettings,
+  type StoredSettingsChange,
+} from './settings-storage';
 import type { FeatureStart } from './types';
 
 /**
@@ -23,11 +28,20 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
  * synchronously and read the effective settings on use, so user changes in
  * the popup apply without a reload. Until storage has loaded, features stay off.
  * An orphaned instance (see `utils/lifecycle`) stops acting and watching.
+ *
+ * If the user disabled the site, the whole instance retires (site fixes too,
+ * as they also clean up on retire). Fixes run before storage can answer, so
+ * on a disabled site they act for the first few milliseconds of a page load.
  */
 export function startFeatures(site: Site) {
   let resolved: ResolvedFeatures | null = null;
-  const applyUserSettings = (user: UserSettings) => {
-    resolved = resolveFeatures(site.features, user);
+  let global: UserSettings = {};
+  let override: UserSettings = {};
+  const apply = (change: StoredSettingsChange) => {
+    if (change.disabledSites?.has(site.name)) return retire();
+    if (change.global) global = change.global;
+    if (change.bySite && site.name in change.bySite) override = change.bySite[site.name] ?? {};
+    resolved = resolveFeatures(site.features, global, override);
   };
 
   // Generic so TS ties each starter to its own feature's config type.
@@ -41,22 +55,28 @@ export function startFeatures(site: Site) {
 
   if (!isAlive()) return;
   // Watch before loading so a change made while the load is in flight isn't
-  // lost. A watched value is always newer than the load result, so once one
-  // has arrived the (possibly slow) load must not overwrite it.
-  let hasWatchedValue = false;
+  // lost. A watched value is always newer than the load result, so the
+  // (possibly slow) load must not overwrite what has arrived since.
+  const watchedKeys = new Set<keyof StoredSettingsChange>();
   try {
     onRetire(
-      watchUserSettings(site.name, (user) => {
-        hasWatchedValue = true;
-        applyUserSettings(user);
+      watchStoredSettings([site.name], (change) => {
+        for (const key of Object.keys(change)) watchedKeys.add(key as keyof StoredSettingsChange);
+        apply(change);
       }),
     );
   } catch {
     // storage unavailable — the load below falls back to defaults
   }
-  loadUserSettings(site.name)
-    .catch(() => ({})) // storage unavailable — fall back to defaults
-    .then((user) => {
-      if (!hasWatchedValue) applyUserSettings(user);
+  loadStoredSettings([site.name])
+    .catch((): StoredSettings => ({ global: {}, bySite: {}, disabledSites: new Set() }))
+    .then((stored) => {
+      if (!isAlive()) return;
+      const fresh: StoredSettingsChange = {};
+      if (!watchedKeys.has('global')) fresh.global = stored.global;
+      if (!watchedKeys.has('bySite'))
+        fresh.bySite = { [site.name]: stored.bySite[site.name] ?? {} };
+      if (!watchedKeys.has('disabledSites')) fresh.disabledSites = stored.disabledSites;
+      apply(fresh);
     });
 }

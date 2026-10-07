@@ -1,122 +1,132 @@
-import { i18n } from '#i18n';
-import { RotateCcwIcon } from 'lucide-react';
-import type { ComponentType } from 'react';
+import { CircleOffIcon, Undo2Icon } from 'lucide-react';
 import { AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { featureIds, type FeatureId } from '@/features';
-import {
-  isCustomised,
-  pruneUserSettings,
-  resolveFeatures,
-  type ResolvedFeatures,
-  type UserSettings,
-} from '@/features/settings';
+import { Frame, FrameHeader, FramePanel } from '@/components/ui/frame';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { isCustomised, pruneUserSettings, type UserSettings } from '@/features/settings';
 import { siteHosts, type Site } from '@/sites';
-import { featureControls, type ControlsPropsOf } from '@/features/controls';
+import { i18n } from '@/utils/i18n';
+import { FeatureList, type OnLayerChange } from './feature-list';
 
-type OnSettingsChange = (next: UserSettings, persist: boolean) => void;
-
-/** One site's accordion item: its feature controls and a reset button. */
-export function SiteSettings({
-  site,
-  userSettings,
-  isCurrent,
-  onChange,
-}: {
+export type SiteSettingsProps = {
   site: Site;
-  userSettings: UserSettings;
-  isCurrent: boolean;
+  global: UserSettings;
+  /** This site's override layer. */
+  override: UserSettings;
+  disabled: boolean;
   /** `persist: false` updates the UI only (e.g. while dragging a slider). */
-  onChange: OnSettingsChange;
-}) {
-  const resolved = resolveFeatures(site.features, userSettings);
-  const defaults = resolveFeatures(site.features, {});
-  const customised = isCustomised(pruneUserSettings(site.features, userSettings));
-  // `null` = the feature doesn't apply to this site; it gets no controls.
-  const available = featureIds.filter((id) => resolved[id] && defaults[id]);
+  onChange: OnLayerChange;
+  onDisabledChange: (disabled: boolean) => void;
+};
 
+/** Whether the site's override changes anything over the global layer. */
+export function isSiteCustomised({ site, override, global }: SiteSettingsProps): boolean {
+  return isCustomised(pruneUserSettings(site.features, override, global));
+}
+
+/** The popup's card for the site in the current tab. */
+export function CurrentSiteSettings(props: SiteSettingsProps) {
+  const { site, disabled, onDisabledChange } = props;
+  return (
+    <Frame>
+      <FrameHeader className="flex-row items-center gap-3 px-4 py-3">
+        <SiteHeading site={site} />
+        <Switch
+          aria-label={i18n.t('siteSettings.enabled')}
+          checked={!disabled}
+          onCheckedChange={(enabled) => onDisabledChange(!enabled)}
+          title={i18n.t('siteSettings.enabled')}
+        />
+      </FrameHeader>
+      <FramePanel className="p-4">
+        <SiteBody {...props} />
+      </FramePanel>
+    </Frame>
+  );
+}
+
+/** One site in the options page's list, collapsed until opened. */
+export function SiteSettingsItem(props: SiteSettingsProps) {
+  const { site, disabled, onDisabledChange } = props;
   return (
     <AccordionItem value={site.name}>
-      <AccordionTrigger>
-        <span className="flex min-w-0 flex-col gap-1">
-          <span className="flex items-center gap-1.5">
-            {site.label}
-            {isCurrent && (
-              <Badge size="sm" variant="info">
-                {i18n.t('siteSettings.current')}
-              </Badge>
-            )}
-            {customised && (
-              <Badge size="sm" variant="secondary">
-                {i18n.t('siteSettings.customised')}
-              </Badge>
-            )}
-          </span>
-          <span className="truncate text-xs font-normal text-muted-foreground">
-            {siteHosts(site).join(i18n.t('siteSettings.hostSeparator'))}
-          </span>
-        </span>
+      <AccordionTrigger className="items-center px-4 py-3 hover:bg-accent/50">
+        <SiteHeading customised={isSiteCustomised(props)} disabled={disabled} site={site} />
       </AccordionTrigger>
-
-      <AccordionPanel className="flex flex-col gap-4 text-foreground">
-        {available.length ? (
-          available.map((id) => (
-            <FeatureSettings
-              defaults={defaults}
-              id={id}
-              key={id}
-              onChange={onChange}
-              resolved={resolved}
-              userSettings={userSettings}
-            />
-          ))
-        ) : (
-          <p className="text-muted-foreground">{i18n.t('siteSettings.noSettings')}</p>
-        )}
-
-        <div className="flex justify-end">
-          <Button
-            disabled={!customised}
-            onClick={() => onChange({}, true)}
-            size="xs"
-            variant="ghost"
-          >
-            <RotateCcwIcon />
-            {i18n.t('siteSettings.reset')}
-          </Button>
-        </div>
+      <AccordionPanel className="flex flex-col gap-4 px-4 pt-1 text-foreground">
+        <Label className="justify-between gap-3 rounded-lg bg-muted/64 px-3 py-2">
+          {i18n.t('siteSettings.enabled')}
+          <Switch checked={!disabled} onCheckedChange={(enabled) => onDisabledChange(!enabled)} />
+        </Label>
+        <SiteBody {...props} />
       </AccordionPanel>
     </AccordionItem>
   );
 }
 
-/** One feature's controls, wired to its slice of the site's settings. */
-function FeatureSettings<K extends FeatureId>({
-  id,
-  resolved,
-  defaults,
-  userSettings,
-  onChange,
+function SiteHeading({
+  site,
+  customised,
+  disabled,
 }: {
-  id: K;
-  resolved: ResolvedFeatures;
-  defaults: ResolvedFeatures;
-  userSettings: UserSettings;
-  onChange: OnSettingsChange;
+  site: Site;
+  customised?: boolean;
+  disabled?: boolean;
 }) {
-  // TS can't correlate the map entry with `K` through JSX props on its own.
-  const Controls = featureControls[id] as ComponentType<ControlsPropsOf<K>>;
-  const value = resolved[id];
-  const defaultValue = defaults[id];
-  if (!value || !defaultValue) return null;
   return (
-    <Controls
-      defaults={defaultValue}
-      onChange={(patch, persist) =>
-        onChange({ ...userSettings, [id]: { ...userSettings[id], ...patch } }, persist)
-      }
-      value={value}
-    />
+    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <span className="flex items-center gap-1.5 text-sm font-semibold">
+        {site.label}
+        {disabled && (
+          <Badge size="sm" variant="warning">
+            {i18n.t('siteSettings.disabled')}
+          </Badge>
+        )}
+        {customised && (
+          <Badge size="sm" variant="secondary">
+            {i18n.t('siteSettings.customised')}
+          </Badge>
+        )}
+      </span>
+      <span className="truncate text-xs font-normal text-muted-foreground">
+        {siteHosts(site).join(i18n.t('siteSettings.hostSeparator'))}
+      </span>
+    </span>
+  );
+}
+
+/** The site's feature controls over the global layer, or a note when disabled. */
+function SiteBody(props: SiteSettingsProps) {
+  const { site, global, override, disabled, onChange } = props;
+  if (disabled) {
+    return (
+      <p className="flex items-start gap-2 text-xs text-muted-foreground">
+        <CircleOffIcon className="mt-px size-3.5 shrink-0" />
+        {i18n.t('siteSettings.disabledHint')}
+      </p>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-4">
+      <FeatureList
+        beneath={[global]}
+        layer={override}
+        onChange={onChange}
+        siteFeatures={site.features}
+      />
+      {isSiteCustomised(props) && (
+        <div className="flex items-center justify-between gap-2 border-t pt-3">
+          <span className="text-xs text-muted-foreground">
+            {i18n.t('siteSettings.customisedHint')}
+          </span>
+          <Button onClick={() => onChange({}, true)} size="xs" variant="ghost">
+            <Undo2Icon />
+            {i18n.t('siteSettings.followGlobal')}
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }
