@@ -15,6 +15,10 @@ Add components with `npx shadcn@latest add @coss/<name>`.
 - `bun run build` / `bun run zip` — production output in `.output/`
 - `bun run compile` — typecheck (`tsc --noEmit`)
 
+## Docs
+
+- `docs/manga-sites.md` — all manga site URLs; update it whenever a site's `matches` change.
+
 ## Versioning
 
 Follow semver in `package.json` — that version becomes the extension version.
