@@ -1,7 +1,9 @@
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipPopup, TooltipTrigger } from '@/components/ui/tooltip';
+import { InfoIcon } from 'lucide-react';
 
-/** A feature's title and description with its on/off switch. */
+/** A feature's title, with its description in a tooltip, and its on/off switch. */
 export function FeatureToggle({
   title,
   description,
@@ -14,10 +16,21 @@ export function FeatureToggle({
   onCheckedChange: (checked: boolean) => void;
 }) {
   return (
-    <Label className="items-start justify-between gap-3">
-      <span className="flex flex-col gap-1">
+    <Label className="justify-between gap-3">
+      <span className="flex items-center gap-2">
         {title}
-        <span className="text-xs font-normal text-muted-foreground">{description}</span>
+        <Tooltip>
+          <TooltipTrigger
+            aria-label={description}
+            // A span, not a button: a button inside the label would take its
+            // association from the switch. Clicks must not toggle the switch.
+            onClick={(e) => e.preventDefault()}
+            render={<span tabIndex={0} />}
+          >
+            <InfoIcon className="size-4 text-muted-foreground" />
+          </TooltipTrigger>
+          <TooltipPopup>{description}</TooltipPopup>
+        </Tooltip>
       </span>
       <Switch checked={checked} onCheckedChange={onCheckedChange} />
     </Label>
