@@ -384,6 +384,23 @@ describe('sections', () => {
       });
     });
 
+    test("a section's lists add to the site's; other fields replace them", () => {
+      const s: Site = {
+        ...site,
+        features: { autoContinue: { selector: '.a' }, blockAds: { hide } },
+        sections: {
+          main: {
+            features: { autoContinue: { selector: '.b' }, blockAds: { hide: ['.more'] } },
+          },
+        },
+      };
+      expect(sectionFeatures(s, 'main')).toMatchObject({
+        autoContinue: { selector: '.b' },
+        blockAds: { hide: ['.ad', '.more'] },
+      });
+      expect(sectionFeatures(s, 'reader').blockAds).toEqual({ hide });
+    });
+
     test('a section can configure a feature the site turned off', () => {
       const s: Site = {
         ...site,

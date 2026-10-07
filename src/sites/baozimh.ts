@@ -18,14 +18,6 @@ export const site = defineSite({
   name: 'baozimh',
   label: '包子漫畫',
   matches: ['*://*.baozimh.org/*', '*://*.bzmh.org/*', '*://m.baozimh.one/*'],
-  features: {
-    blockAds: {
-      // Unverified: not seen in a headless probe (2026-10-07). Check in a real
-      // browser, then move each to the section it appears in. No tag, as the
-      // injected element varies.
-      hide: ['.baozi-ad', '.mobadsq'],
-    },
-  },
   sections: {
     reader: {
       matches: [
@@ -36,6 +28,14 @@ export const site = defineSite({
       features: {
         // 「點擊繼續閱讀」. Generic class, also on main-site pages: reader only.
         autoContinue: { selector: '.pure-button' },
+        blockAds: {
+          hide: [
+            // Around the prev / next chapter buttons: 18gallery banner above,
+            // 18mh.org card below.
+            'div.py-2:has(+ #nextbutton)',
+            '#nextbutton + div.md\\:mx-2',
+          ],
+        },
       },
     },
   },

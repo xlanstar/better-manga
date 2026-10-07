@@ -28,9 +28,10 @@ export type SiteSection = keyof SiteSections;
 /**
  * A site's main site (catalogue, works pages) and reader (chapter pages),
  * however it routes them (subdomain or path). Each section's `features` are
- * merged over `Site.features`, feature by feature: its fields win, `false`
- * turns the feature off there. They are still one site to the user, with
- * one switch per feature.
+ * merged over `Site.features`, feature by feature: its fields win, except
+ * lists (selectors, …), which add to the site's; `false` turns the feature
+ * off there. They are still one site to the user, with one switch per
+ * feature.
  */
 export type SiteSections = {
   /** Every page the reader's patterns don't match. */

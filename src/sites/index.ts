@@ -90,14 +90,27 @@ export function followsSections(site: Site, protocol: string, isTopFrame: boolea
 
 const SECTIONS: readonly SiteSection[] = ['main', 'reader'];
 
-/** The site layer on pages of `section`: `Site.features`, the section's on top. */
+/**
+ * The site layer on pages of `section`: `Site.features`, the section's on top.
+ * Field by field, the section's wins, except lists (selectors, …): those add
+ * to the site's.
+ */
 export function sectionFeatures(site: Site, section: SiteSection): SiteFeatures {
   const merged: Record<string, unknown> = { ...site.features };
   for (const [id, config] of Object.entries(site.sections?.[section]?.features ?? {})) {
     const base = merged[id];
-    merged[id] = config && base ? { ...base, ...config } : (config ?? base);
+    merged[id] = config && base ? mergeConfig(base, config) : (config ?? base);
   }
   return merged as SiteFeatures;
+}
+
+function mergeConfig(base: object, config: object): object {
+  const merged: Record<string, unknown> = { ...base };
+  for (const [key, value] of Object.entries(config)) {
+    const below = merged[key];
+    merged[key] = Array.isArray(below) && Array.isArray(value) ? [...below, ...value] : value;
+  }
+  return merged;
 }
 
 /**
