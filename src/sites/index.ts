@@ -17,18 +17,52 @@ export type SiteName = (typeof sites)[number]['name'];
 
 export const allMatches = sites.flatMap((s) => s.matches);
 
-// Parsed once; an invalid pattern throws here, i.e. already at build time
-// (WXT evaluates the content script's `matches`).
-const sitePatterns = sites.map((s) => s.matches.map((p) => new MatchPattern(p)));
-
 /**
  * The site whose match patterns cover `url`; `null` for anything unparsable.
  * At most one does: sites never share a host (enforced by the registry test).
+ * Only the sites listing one of the URL's host suffixes are checked, so the
+ * lookup doesn't grow with the registry.
  */
 export function siteFor(url: string): Site<SiteName> | null {
-  const href = matchableHref(url);
-  if (!href) return null;
-  return sites.find((_, i) => sitePatterns[i]?.some((pattern) => pattern.includes(href))) ?? null;
+  const parsed = matchableUrl(url);
+  if (!parsed) return null;
+  const index = sitesByHost();
+  const candidates = hostSuffixes(parsed.hostname).flatMap((host) => index.get(host) ?? []);
+  return candidates.find((site) => matchesAny(site.matches, parsed.href)) ?? null;
+}
+
+let hostIndex: Map<string, Site<SiteName>[]> | undefined;
+
+/** Sites by the hosts their patterns name (`siteHosts`), built on first use. */
+function sitesByHost(): Map<string, Site<SiteName>[]> {
+  if (hostIndex) return hostIndex;
+  const index = new Map<string, Site<SiteName>[]>();
+  for (const site of sites) {
+    for (const host of siteHosts(site)) index.set(host, [...(index.get(host) ?? []), site]);
+  }
+  return (hostIndex = index);
+}
+
+/**
+ * The keys a pattern covering `hostname` is indexed under: the host itself,
+ * each parent domain (`*.` patterns) and `*` (any host).
+ * `m.bzmh.org` → `m.bzmh.org`, `bzmh.org`, `org`, `*`.
+ */
+function hostSuffixes(hostname: string): string[] {
+  const labels = hostname.split('.');
+  return [...labels.map((_, i) => labels.slice(i).join('.')), '*'];
+}
+
+/** Parsed patterns by their source list, so each list is parsed once. */
+const parsedPatterns = new WeakMap<readonly string[], MatchPattern[]>();
+
+function matchesAny(patterns: readonly string[], href: string): boolean {
+  let parsed = parsedPatterns.get(patterns);
+  if (!parsed) {
+    parsed = patterns.map((pattern) => new MatchPattern(pattern));
+    parsedPatterns.set(patterns, parsed);
+  }
+  return parsed.some((pattern) => pattern.includes(href));
 }
 
 /**
@@ -38,9 +72,9 @@ export function siteFor(url: string): Site<SiteName> | null {
  * reader has a host of its own.
  */
 export function sectionFor(site: Site, url: string): SiteSection {
-  const href = matchableHref(url);
-  const reader = site.sections?.reader?.matches ?? [];
-  return href && reader.some((p) => new MatchPattern(p).includes(href)) ? 'reader' : 'main';
+  const parsed = matchableUrl(url);
+  const reader = site.sections?.reader?.matches;
+  return parsed && reader && matchesAny(reader, parsed.href) ? 'reader' : 'main';
 }
 
 /**
@@ -88,14 +122,14 @@ export function settingsFeatures(site: Site): SiteFeatures {
  * `url` as match patterns should see it, `null` if unparsable (the popup
  * passes any tab URL). Chrome matches `example.com.` (fully-qualified,
  * trailing dot) like `example.com` and injects there; the library doesn't.
- * A string, not a URL: `includes()` checks `instanceof Location`, which
- * doesn't exist in workers.
+ * Pass its `href` to `includes()`, not the URL: that checks
+ * `instanceof Location`, which doesn't exist in workers.
  */
-function matchableHref(url: string): string | null {
+function matchableUrl(url: string): URL | null {
   try {
     const parsed = new URL(url);
     parsed.hostname = parsed.hostname.replace(/\.$/, '');
-    return parsed.href;
+    return parsed;
   } catch {
     return null;
   }
