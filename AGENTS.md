@@ -32,3 +32,7 @@ Patch for fixes, minor for new site support or features, major for breaking chan
   content scripts.
 - Store state with `browser.storage`, not `localStorage`.
 - No user data leaves the browser without an explicit user action.
+- Keep `PRIVACY.md` in sync with what the extension stores, sends, and runs on
+  (sites, permissions, data); update its date when you change it.
+- Keep `store/` (Chrome Web Store listing, git-ignored) in sync with features,
+  supported sites, permissions, and UI (re-take screenshots when the popup changes).
