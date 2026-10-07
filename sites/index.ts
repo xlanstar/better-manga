@@ -1,18 +1,34 @@
 import type { Site } from './types';
-import baozimh from './baozimh';
-import gmh from './g-mh';
-import hipmh from './hipmh';
+import { site as baozimh } from './baozimh';
+import { site as gmh } from './g-mh';
+import { site as hipmh } from './hipmh';
 
-/** Registry — add a file next to this one, then one line here. */
-export const sites: Site[] = [baozimh, gmh, hipmh];
+/**
+ * Registry of site metadata — add a file next to this one, then one line here
+ * (and one in `runtime.ts`). Imports only each file's `site` export, so the
+ * popup doesn't bundle site fixes.
+ */
+export const sites = [baozimh, gmh, hipmh];
 
-export type { Site };
+export type { Site } from './types';
+export type SiteName = (typeof sites)[number]['name'];
 
 export const allMatches = sites.flatMap((s) => s.matches);
 
 /** Sites whose match patterns cover `url`. */
-export function sitesFor(url: string): Site[] {
+export function sitesFor(url: string): typeof sites {
   return sites.filter((s) => s.matches.some((p) => matchPattern(p).test(url)));
+}
+
+/** `*://*.baozimh.org/*` → `baozimh.org`, for display. */
+export function siteHosts(site: Site): string {
+  const hosts = site.matches.map((p) =>
+    p
+      .replace(/^[^:]+:\/\//, '')
+      .replace(/^\*\./, '')
+      .replace(/\/.*$/, ''),
+  );
+  return [...new Set(hosts)].join('、');
 }
 
 // Enough of the match-pattern grammar for our own patterns.

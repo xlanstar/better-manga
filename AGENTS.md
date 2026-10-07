@@ -23,7 +23,7 @@ Git hooks are managed by [prek](https://prek.j178.dev) via `prek.toml`
 ## Docs
 
 - `docs/manga-sites.md` — manga sites and domains only; update it whenever a site's `matches` change.
-  Site technical details go in comments in `entrypoints/content/sites/<name>.ts`.
+  Site technical details go in comments in `sites/<name>.ts`.
 
 ## Versioning
 

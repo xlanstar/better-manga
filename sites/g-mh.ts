@@ -1,4 +1,4 @@
-import type { Site } from './types';
+import { defineSite } from './types';
 
 /**
  * GoDa network, G站 front end. Same operator and content backend as
@@ -18,8 +18,8 @@ import type { Site } from './types';
  * only 301 to the apex, so they are not matched.
  * All domains: docs/manga-sites.md.
  */
-export default {
+export const site = defineSite({
   name: 'g-mh',
   label: 'G站漫畫',
   matches: ['*://m.g-mh.org/*', '*://g-mh.org/*', '*://godamh.com/*'],
-} satisfies Site;
+});

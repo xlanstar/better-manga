@@ -1,5 +1,7 @@
+import { featureIds, type FeatureId } from '@/features';
+import { featureStarters } from '@/features/runtime';
+import type { Site } from '@/sites';
 import { isAlive, onRetire } from '@/utils/lifecycle';
-import { overridePageKeyScroll } from '@/utils/scroll';
 import {
   loadUserSettings,
   resolveFeatures,
@@ -7,7 +9,6 @@ import {
   type ResolvedFeatures,
   type UserSiteSettings,
 } from '@/utils/settings';
-import type { Site } from './sites';
 
 /**
  * Wire up the shared reading features for `site`. Listeners are installed
@@ -18,14 +19,13 @@ import type { Site } from './sites';
 export function startFeatures(site: Site) {
   let current: ResolvedFeatures | null = null;
 
-  if (site.features?.pageScroll !== false) {
-    const stop = overridePageKeyScroll(() => {
-      if (!isAlive()) return null;
-      const s = current?.pageScroll;
-      return s?.enabled ? s : null;
-    });
-    onRetire(stop);
-  }
+  // Generic so TS ties each starter to its own feature's settings type.
+  const start = <K extends FeatureId>(id: K) => {
+    // `false` = the feature doesn't fit this site; don't install it at all.
+    if (site.features?.[id] === false) return;
+    onRetire(featureStarters[id](() => (isAlive() ? (current?.[id] ?? null) : null)));
+  };
+  for (const id of featureIds) start(id);
 
   const apply = (user: UserSiteSettings) => {
     current = resolveFeatures(site.features, user);

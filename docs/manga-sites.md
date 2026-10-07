@@ -2,7 +2,7 @@
 
 追蹤已支援、候選與相關的漫畫網站網址（含同一站的所有網域）。
 只記錄網站與網域；技術細節（前端差異、廣告、選擇器、為什麼某些網域不涵蓋）寫在
-`entrypoints/content/sites/<name>.ts` 的註解裡。`matches` 以程式碼為準，不一致時回頭修正本文件。
+`sites/<name>.ts` 的註解裡。`matches` 以程式碼為準，不一致時回頭修正本文件。
 
 最後查證：2026-10-07。狀態是從開發機用 `curl` 開首頁的結果，會因地區與網路而不同。
 
@@ -210,7 +210,7 @@ COLAMANGA：
 
 ## 新增或變更網址時
 
-1. 修改 `entrypoints/content/sites/<name>.ts` 的 `matches`（新網站還要在 `sites/index.ts` 登記）。
+1. 修改 `sites/<name>.ts` 的 `matches`（新網站還要在 `sites/index.ts` 與 `sites/runtime.ts` 登記）。
 2. 更新本文件。
 3. 同步 `PRIVACY.md` 的網站清單與日期，以及 `store/chrome-web-store.md` 的主機權限說明。
 4. 依 semver 更新 `package.json` 版本（新網站 → minor）。

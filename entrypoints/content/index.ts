@@ -1,6 +1,7 @@
 import { bindLifecycle } from '@/utils/lifecycle';
+import { allMatches, sitesFor } from '@/sites';
+import { siteFixes } from '@/sites/runtime';
 import { startFeatures } from './features';
-import { allMatches, sitesFor } from './sites';
 
 export default defineContentScript({
   matches: allMatches,
@@ -16,7 +17,7 @@ export default defineContentScript({
       // Never break the host page because one site's script threw.
       try {
         // Site fixes first and synchronously: some must beat the page's scripts.
-        site.run?.();
+        siteFixes[site.name]?.();
       } catch (err) {
         console.debug(`[better-manga] ${site.name} fixes failed`, err);
       }

@@ -3,55 +3,54 @@
  *
  *   global default  →  site default (`Site.features`)  →  user setting (per site)
  *
- * Later layers override earlier ones. Site fixes (ad hiding, anti-hijack, …)
- * are not features — they live in each site's `run()` and are not user-tunable.
+ * Later layers override earlier ones; `undefined` falls through. Site fixes
+ * (ad hiding, anti-hijack, …) are not features — they live in each site's
+ * `run()` and are not user-tunable.
+ *
+ * Each feature is one module in `features/` (defaults, per-layer types, user
+ * value sanitizing, content-script start). This file only loops over the
+ * registry, so adding a feature means:
+ *
+ * 1. `features/<name>.ts`: export a `Feature` definition and a `FeatureStart`.
+ * 2. Register them in `features/index.ts` and `features/runtime.ts`.
+ * 3. Add its controls in `entrypoints/popup/features/` and register them there.
+ *
+ * Steps 2–3 are typed over `FeatureId`, so a missing entry is a compile error.
  */
-
-// ── Page Up/Down scroll ──────────────────────────────────────────────────────
-
-/** What a site may declare. `container` is an adapter, not a user setting. */
-export type PageScrollSiteConfig = { ratio?: number; container?: string };
-export type PageScrollUserConfig = { enabled?: boolean; ratio?: number };
-export type PageScrollResolved = { enabled: boolean; ratio: number; container?: string };
-
-export const PAGE_SCROLL_RATIO = { min: 0.3, max: 1, step: 0.05 } as const;
+import {
+  featureIds,
+  features,
+  type FeatureId,
+  type FeatureResolved,
+  type FeatureSiteConfig,
+  type FeatureUserConfig,
+} from '@/features';
 
 // ── Shapes per layer ─────────────────────────────────────────────────────────
 
 /** Site defaults. `false` = the feature does not apply to this site at all. */
-export type SiteFeatures = {
-  pageScroll?: false | PageScrollSiteConfig;
-};
+export type SiteFeatures = { [K in FeatureId]?: false | FeatureSiteConfig<K> };
 
 /** What the user stored for one site. Missing fields fall through. */
-export type UserSiteSettings = {
-  pageScroll?: PageScrollUserConfig;
-};
+export type UserSiteSettings = { [K in FeatureId]?: FeatureUserConfig<K> };
 
 /** Effective settings. `null` = not available on this site. */
-export type ResolvedFeatures = {
-  pageScroll: PageScrollResolved | null;
-};
-
-export const GLOBAL_DEFAULTS = {
-  pageScroll: { enabled: true, ratio: 0.7 },
-} as const;
+export type ResolvedFeatures = { [K in FeatureId]: FeatureResolved<K> | null };
 
 export function resolveFeatures(
   site: SiteFeatures | undefined,
   user: UserSiteSettings | null | undefined,
 ): ResolvedFeatures {
-  const siteScroll = site?.pageScroll;
-  return {
-    pageScroll:
-      siteScroll === false
+  const clean = sanitizeUserSettings(user);
+  const out: Record<string, object | null> = {};
+  for (const id of featureIds) {
+    const siteConfig = site?.[id];
+    out[id] =
+      siteConfig === false
         ? null
-        : {
-            ...GLOBAL_DEFAULTS.pageScroll,
-            ...stripUndefined(siteScroll ?? {}),
-            ...sanitizeUserSettings(user).pageScroll,
-          },
-  };
+        : { ...features[id].defaults, ...stripUndefined(siteConfig ?? {}), ...clean[id] };
+  }
+  return out as ResolvedFeatures;
 }
 
 /**
@@ -60,14 +59,15 @@ export function resolveFeatures(
  * and range; everything else falls through to the defaults. Idempotent.
  */
 export function sanitizeUserSettings(raw: unknown): UserSiteSettings {
-  if (!isObject(raw) || !isObject(raw.pageScroll)) return {};
-  const { enabled, ratio } = raw.pageScroll;
-  const pageScroll: PageScrollUserConfig = {};
-  if (typeof enabled === 'boolean') pageScroll.enabled = enabled;
-  if (typeof ratio === 'number' && Number.isFinite(ratio)) {
-    pageScroll.ratio = Math.min(PAGE_SCROLL_RATIO.max, Math.max(PAGE_SCROLL_RATIO.min, ratio));
+  if (!isObject(raw)) return {};
+  const out: Record<string, object> = {};
+  for (const id of featureIds) {
+    const value = raw[id];
+    if (!isObject(value)) continue;
+    const clean = features[id].sanitize(value);
+    if (Object.keys(clean).length) out[id] = clean;
   }
-  return Object.keys(pageScroll).length ? { pageScroll } : {};
+  return out as UserSiteSettings;
 }
 
 // ── Storage (user layer) ─────────────────────────────────────────────────────
@@ -102,7 +102,7 @@ export function pruneUserSettings(
   const defaults = resolveFeatures(site, {});
   const out: Record<string, object> = {};
   for (const [name, values] of Object.entries(sanitizeUserSettings(user))) {
-    const base = defaults[name as keyof ResolvedFeatures] as Record<string, unknown> | null;
+    const base = defaults[name as FeatureId] as Record<string, unknown> | null;
     if (!base || !values) continue;
     const kept = Object.entries(values).filter(([k, v]) => v !== undefined && v !== base[k]);
     if (kept.length) out[name] = Object.fromEntries(kept);
