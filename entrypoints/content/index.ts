@@ -6,6 +6,10 @@ export default defineContentScript({
   matches: allMatches,
   runAt: 'document_start',
   allFrames: true,
+  // Also run in `about:blank` / `about:srcdoc` frames of matching pages, so a
+  // normal page load reaches the same frames as background re-injection
+  // (`allFrames`); `pageUrl()` resolves which site they belong to.
+  matchAboutBlank: true,
   main(ctx) {
     bindLifecycle(ctx);
     for (const site of sitesFor(pageUrl())) {
@@ -27,8 +31,10 @@ export default defineContentScript({
 
 /**
  * The URL to match sites against. Script-injected frames are `about:blank` /
- * `about:srcdoc` but inherit the parent's origin, so fall back to the outermost
- * ancestor — the browser already gated injection on the manifest patterns.
+ * `about:srcdoc` (reached via `matchAboutBlank`, or `allFrames` re-injection
+ * from the background) but inherit the parent's origin, so fall back to the
+ * outermost ancestor — the browser only injects there when the parent frame
+ * matches the manifest patterns.
  */
 function pageUrl(): string {
   if (location.protocol === 'http:' || location.protocol === 'https:') {

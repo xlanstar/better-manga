@@ -49,9 +49,25 @@ export function resolveFeatures(
         : {
             ...GLOBAL_DEFAULTS.pageScroll,
             ...stripUndefined(siteScroll ?? {}),
-            ...stripUndefined(user?.pageScroll ?? {}),
+            ...sanitizeUserSettings(user).pageScroll,
           },
   };
+}
+
+/**
+ * Coerce an untrusted user layer into `UserSiteSettings`. Stored values may be
+ * corrupt or written by an older version, so keep only fields of the right type
+ * and range; everything else falls through to the defaults. Idempotent.
+ */
+export function sanitizeUserSettings(raw: unknown): UserSiteSettings {
+  if (!isObject(raw) || !isObject(raw.pageScroll)) return {};
+  const { enabled, ratio } = raw.pageScroll;
+  const pageScroll: PageScrollUserConfig = {};
+  if (typeof enabled === 'boolean') pageScroll.enabled = enabled;
+  if (typeof ratio === 'number' && Number.isFinite(ratio)) {
+    pageScroll.ratio = Math.min(PAGE_SCROLL_RATIO.max, Math.max(PAGE_SCROLL_RATIO.min, ratio));
+  }
+  return Object.keys(pageScroll).length ? { pageScroll } : {};
 }
 
 // ── Storage (user layer) ─────────────────────────────────────────────────────
@@ -59,7 +75,7 @@ export function resolveFeatures(
 const key = (site: string) => `local:site:${site}` as const;
 
 export async function loadUserSettings(site: string): Promise<UserSiteSettings> {
-  return (await storage.getItem<UserSiteSettings>(key(site))) ?? {};
+  return sanitizeUserSettings(await storage.getItem(key(site)));
 }
 
 export function saveUserSettings(site: string, settings: UserSiteSettings) {
@@ -72,7 +88,7 @@ export function resetUserSettings(site: string) {
 
 /** Call `cb` whenever the user changes this site's settings. Returns unwatch. */
 export function watchUserSettings(site: string, cb: (settings: UserSiteSettings) => void) {
-  return storage.watch<UserSiteSettings>(key(site), (value) => cb(value ?? {}));
+  return storage.watch<unknown>(key(site), (value) => cb(sanitizeUserSettings(value)));
 }
 
 /**
@@ -85,7 +101,7 @@ export function pruneUserSettings(
 ): UserSiteSettings {
   const defaults = resolveFeatures(site, {});
   const out: Record<string, object> = {};
-  for (const [name, values] of Object.entries(user)) {
+  for (const [name, values] of Object.entries(sanitizeUserSettings(user))) {
     const base = defaults[name as keyof ResolvedFeatures] as Record<string, unknown> | null;
     if (!base || !values) continue;
     const kept = Object.entries(values).filter(([k, v]) => v !== undefined && v !== base[k]);
@@ -96,6 +112,10 @@ export function pruneUserSettings(
 
 export function isCustomised(user: UserSiteSettings): boolean {
   return Object.keys(user).length > 0;
+}
+
+function isObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
 function stripUndefined<T extends object>(obj: T): Partial<T> {
