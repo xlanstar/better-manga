@@ -33,7 +33,8 @@ export type StoredSettingsChange = {
   disabledSites?: ReadonlySet<string>;
 };
 
-const EMPTY: StoredSettings = { global: {}, bySite: {}, disabledSites: new Set() };
+/** No settings stored: what a failed load counts as. */
+export const EMPTY_SETTINGS: StoredSettings = { global: {}, bySite: {}, disabledSites: new Set() };
 
 /**
  * Load the settings for `siteNames`, then keep them up to date: `onSettings`
@@ -80,7 +81,7 @@ export function loadAndWatch(
     else onSettings((settings = mergeStoredSettings(settings, change)));
   });
   void load()
-    .catch(() => EMPTY)
+    .catch(() => EMPTY_SETTINGS)
     .then((loaded) => {
       if (!active) return;
       onSettings((settings = pending.reduce(mergeStoredSettings, loaded)));

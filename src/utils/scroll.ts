@@ -1,4 +1,4 @@
-/** Scroll helpers for site scripts. */
+/** Shared scroll helpers for features. */
 
 /** Keys aimed at these are left to the browser (typing, not scrolling). */
 const EDITABLE_SELECTOR = 'input, textarea, select, [contenteditable]';

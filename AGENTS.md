@@ -19,8 +19,8 @@ Source in `src/` (`@/` alias).
 - A feature is `features/<name>/`, registered in `features/index.ts`,
   `starters.ts` and `controls.ts`.
 - `utils/` imports nothing from `sites/` or `features/`. The popup and options
-  page must not import `sites/fixes.ts` or `features/starters.ts`; the content
-  script must not import `features/controls.ts`.
+  page must not import `features/starters.ts`; the content script must not
+  import `features/controls.ts`.
 - Expect hundreds of sites: nothing may cost per site at load (read storage in
   one call, render site lists lazily), and no two sites may share a host.
 - `components/ui/` is generated coss ui (`bunx shadcn@latest add @coss/<name>`);

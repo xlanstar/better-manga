@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ALL_SITES, pruneUserSettings, type UserSettings } from '@/features/settings';
 import {
+  EMPTY_SETTINGS,
   mergeStoredSettings,
   saveGlobalSettings,
   saveSiteSettings,
@@ -9,8 +10,6 @@ import {
   type StoredSettings,
 } from '@/features/settings-storage';
 import type { Site } from '@/sites';
-
-const EMPTY: StoredSettings = { global: {}, bySite: {}, disabledSites: new Set() };
 
 /**
  * The global layer, the disabled sites and the overrides of `sites`, kept in
@@ -23,9 +22,9 @@ const EMPTY: StoredSettings = { global: {}, bySite: {}, disabledSites: new Set()
 export function useSettings(sites: readonly Site[] | null) {
   const [settings, setSettings] = useState<StoredSettings | null>(null);
   // Latest state, for pruning in event handlers.
-  const latest = useRef<StoredSettings>(EMPTY);
+  const latest = useRef<StoredSettings>(EMPTY_SETTINGS);
   useEffect(() => {
-    latest.current = settings ?? EMPTY;
+    latest.current = settings ?? EMPTY_SETTINGS;
   }, [settings]);
 
   // Compared by names, so callers needn't keep `sites` stable.
@@ -52,7 +51,7 @@ export function useSettings(sites: readonly Site[] | null) {
       const disabledSites = new Set(prev.disabledSites);
       if (disabled) disabledSites.add(site.name);
       else disabledSites.delete(site.name);
-      return { ...prev, disabledSites };
+      return mergeStoredSettings(prev, { disabledSites });
     });
     void setSiteDisabled(site.name, disabled);
   };

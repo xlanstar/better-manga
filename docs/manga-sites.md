@@ -212,5 +212,5 @@ COLAMANGA：
 
 1. 修改 `src/sites/<name>.ts` 的 `matches`（新網站還要在 `src/sites/index.ts` 登記）。
 2. 更新本文件。
-3. 同步 `PRIVACY.md` 的網站清單與日期，以及 `store/chrome-web-store.md` 的主機權限說明。
+3. 同步 `store/chrome-web-store.md` 的主機權限說明（`PRIVACY.md` 只連結本文件，不列網站）。
 4. 依 semver 更新 `package.json` 版本（新網站 → minor）。
