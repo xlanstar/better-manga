@@ -1,22 +1,19 @@
 import { defineSite } from './types';
 
 /**
- * GoDa network, G站 front end. Same operator and content backend as
- * `baozimh`, but a different front end (built assets under `/_chunks/`; the
- * reader adds a chapter drawer, zoom and refresh buttons):
+ * G站漫畫: GoDa network, G站 front end.
  *
- * - No TrafficStars SDK. Ad slots are first-party markup (`.adCode`,
- *   `.adshow`, `.banners`); an inline script hides `.banners, .adshow` when
- *   the `showAds` cookie / localStorage holds an unexpired timestamp (the
- *   publish page's 「免廣告試驗」). That is why it usually shows fewer ads.
- * - An inline script opens a rotating ad URL when a chapter link is clicked
- *   (`.slicarda`, `.chapteritem`, `#nextchaptera`, `#prevchaptera`,
- *   `.exoads`), capped at 20 jumps per 5 minutes. Not handled yet.
- *
- * `godamh.com` serves this same front end; `m.godamh.com` is an unrelated
- * news site, hence no wildcard there. `www.g-mh.org` and `www.godamh.com`
- * only 301 to the apex, so they are not matched.
- * All domains: docs/manga-sites.md.
+ * - Backend: shared with `baozimh`.
+ * - Front end: own build, assets under `/_chunks/`.
+ * - Ads: first-party slots (`.adCode`, `.adshow`, `.banners`), no ad SDK. An
+ *   inline script hides `.banners, .adshow` while the `showAds` cookie /
+ *   localStorage timestamp is unexpired (「免廣告試驗」).
+ * - Not handled: clicking a chapter link (`.slicarda`, `.chapteritem`,
+ *   `#nextchaptera`, `#prevchaptera`, `.exoads`) also opens an ad URL, at most
+ *   20 times per 5 minutes.
+ * - Domains: on `godamh.com` only the apex is matched; `m.godamh.com` is
+ *   another site. `www.` hosts only redirect to the apex, so they're not
+ *   matched. Full list: docs/manga-sites.md.
  */
 export const site = defineSite({
   name: 'g-mh',

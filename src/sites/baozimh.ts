@@ -1,24 +1,18 @@
 import { defineSite } from './types';
 
 /**
- * GoDa network, 包子 front end. Same operator and content backend as `g-mh`
- * (same manga ids, chapter slugs, chapter API `api-get-v3.mgsearcher.com` and
- * image CDN `*.6wm.top`), but a different front end with its own ad stack:
+ * 包子漫畫: GoDa network, 包子 front end.
  *
- * - Built assets under `/_astro/`.
- * - Loads the TrafficStars ad SDK (`cdn.tsyndicate.com`) plus trackers
- *   (`pxltag`, `uuidksinc`) and a `18gallery.com` banner; `g-mh` has none.
- * - An inline script opens a rotating ad URL when a chapter link is clicked
- *   (`.chapteritem`, `#nextchaptera`, `#prevchaptera`). Not handled yet.
- *
- * Main site and reader share hosts: chapters live at `/manga/<slug>/<chapter>`
- * (the works page is `/manga/<slug>`; a match pattern can't tell
- * `/manga/<slug>/`, which the site doesn't link to, from a chapter).
- *
- * `m.baozimh.one` (branded Bun漫畫) serves this same front end; the bare
- * `baozimh.one` is an unrelated news site, hence no wildcard there.
- * `www.baozimh.org` 301s to the apex, covered by the wildcard anyway.
- * All domains: docs/manga-sites.md.
+ * - Backend: shared with `g-mh` (same manga ids; API
+ *   `api-get-v3.mgsearcher.com`, images `*.6wm.top`).
+ * - Front end: own build, assets under `/_astro/`.
+ * - Routes (one host): works `/manga/<slug>`, chapter `/manga/<slug>/<chapter>`.
+ * - Ads: TrafficStars SDK (`cdn.tsyndicate.com`), trackers (`pxltag`,
+ *   `uuidksinc`), `18gallery.com` banner.
+ * - Not handled: clicking a chapter link (`.chapteritem`, `#nextchaptera`,
+ *   `#prevchaptera`) also opens an ad URL.
+ * - Domains: on `baozimh.one` only `m.` is matched; the bare host is another
+ *   site. Full list: docs/manga-sites.md.
  */
 export const site = defineSite({
   name: 'baozimh',
@@ -26,12 +20,9 @@ export const site = defineSite({
   matches: ['*://*.baozimh.org/*', '*://*.bzmh.org/*', '*://m.baozimh.one/*'],
   features: {
     blockAds: {
-      // Class only, no tag — the ad containers are injected by the
-      // page's own scripts and are not always <div>.
-      // Not present in a headless probe on 2026-10-07 (desktop or mobile UA);
-      // likely injected by the ad SDK only for real browsers / some regions.
-      // Re-check on a real browser before relying on or removing these, and
-      // move each to the section it shows up in.
+      // Unverified: not seen in a headless probe (2026-10-07). Check in a real
+      // browser, then move each to the section it appears in. No tag, as the
+      // injected element varies.
       hide: ['.baozi-ad', '.mobadsq'],
     },
   },
@@ -43,8 +34,7 @@ export const site = defineSite({
         '*://m.baozimh.one/manga/*/*',
       ],
       features: {
-        // 「點擊繼續閱讀」之類的按鈕，出現就按一次。Reader only: the class is
-        // generic, so don't click it on the main site's pages.
+        // 「點擊繼續閱讀」. Generic class, also on main-site pages: reader only.
         autoContinue: { selector: '.pure-button' },
       },
     },

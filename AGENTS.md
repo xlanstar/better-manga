@@ -45,6 +45,22 @@ Source in `src/` (`@/` alias).
 - Add permissions only when needed; prefer `activeTab` / optional permissions.
 - No user data leaves the browser without an explicit user action.
 
+## Features
+
+One folder per feature in `src/features/<id>/`. Site-specific features run
+only on sites that configure them; the others run on every site.
+
+- `blockAds` (site-specific): hides ad slots and removes nodes ad scripts
+  depend on. Site: `hide`, `remove`.
+- `skipRedirects` (site-specific): sends links that go through redirect pages
+  straight to their target. Site: `rewriteLink`.
+- `autoContinue` (site-specific): clicks 「點擊繼續閱讀」-style buttons as they
+  appear. Site: `selector`.
+- `pageDistance`: Page Up/Down scrolls a set share of the screen. Site:
+  `container`; user: `ratio`.
+- `smoothScroll`: animates Page Up/Down. Site: `container`; user: `duration`,
+  `holdSpeed`.
+
 ## Design
 
 - Gaps are multiples of 8px: `gap-2`, `gap-4`, `gap-6`, … (likewise

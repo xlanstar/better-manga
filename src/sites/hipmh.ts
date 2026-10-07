@@ -1,27 +1,29 @@
 import { defineSite } from './types';
 
+/**
+ * 嬉皮漫畫: only the reader host is matched, so no `sections`.
+ *
+ * - Main site: `m.hipmh.com`, not matched.
+ * - Reader: `reader.hipmh.top`, chapter `/chapter/<hid>`; `/` redirects to
+ *   the main site. Rendered client-side; link hrefs are set after data loads.
+ * - Backend: API `hipapi1.s3file.top`, images `cover.s3imgs.top`.
+ * - Chapter links: go via `m.hipmh.com/chapter/go?hid=…` →
+ *   `reader.hipmh.top/chapter/go?hid=…` → `/chapter/<hid>`. The cross-site
+ *   hops show the browser toolbar in fullscreen.
+ * - Ads: a deferred inline script reads `#nav-redirect-config` and, on a
+ *   chapter link click, opens the chapter in a new tab and sends this tab to
+ *   an ad. Without that node it does nothing.
+ * - Domains: docs/manga-sites.md.
+ */
 export const site = defineSite({
   name: 'hipmh',
   label: '嬉皮漫畫',
-  // Reader only. The main site `m.hipmh.com` (catalogue, works pages) is not
-  // matched: its chapter redirects are rewritten here instead (see below).
-  // `reader.hipmh.top/` itself 301s to the main site; chapters live at
-  // `/chapter/<hid>`. API / images: `hipapi1.s3file.top`, `cover.s3imgs.top`.
-  // All domains: docs/manga-sites.md.
   matches: ['*://reader.hipmh.top/*'],
   features: {
     blockAds: {
-      // An inline module script reads this node's data-config and hijacks
-      // clicks on chapter / prev / next links: it opens the real page in a new
-      // tab and sends the current tab to an ad. It bails out when the node is
-      // missing, so remove it before that (deferred) script runs.
+      // Must be gone before the deferred ad script runs.
       remove: ['#nav-redirect-config'],
     },
-    // Prev / next (and chapter list) links point at the main site's redirect
-    // page, `https://m.hipmh.com/chapter/go?hid=…`, which bounces back to
-    // `reader.hipmh.top/chapter/go?hid=…` and then to `/chapter/<hid>`. That
-    // chain of cross-site navigations reveals the browser toolbar in
-    // fullscreen. The page sets these hrefs late, after its data loads.
     skipRedirects: { rewriteLink: directChapterUrl },
   },
 });
