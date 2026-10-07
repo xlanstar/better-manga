@@ -43,9 +43,7 @@ export default function App() {
   if (!users) return <div className="w-85" />;
 
   // The site in the current tab goes first and starts open.
-  const ordered = [...sites].sort(
-    (a, b) => Number(b.name === current) - Number(a.name === current),
-  );
+  const ordered = sites.toSorted((a, b) => Number(b.name === current) - Number(a.name === current));
 
   const update = (site: Site, next: UserSiteSettings, persist: boolean) => {
     const pruned = persist ? pruneUserSettings(site.features, next) : next;

@@ -31,20 +31,21 @@ export function run() {
  * browser follows it (the page sets these hrefs late, after its data loads).
  */
 function skipChapterRedirects() {
-  const rewrite = (e: Event) => {
-    const target = e.target;
-    if (!(target instanceof Element)) return;
-    const a = target.closest('a[href]');
-    if (!(a instanceof HTMLAnchorElement)) return;
-    const direct = directChapterUrl(a.href);
-    if (direct) a.href = direct;
-  };
   // Window capture runs before any page listener on document or below.
   const events = ['click', 'auxclick', 'contextmenu'] as const;
   for (const type of events) window.addEventListener(type, rewrite, true);
   onRetire(() => {
     for (const type of events) window.removeEventListener(type, rewrite, true);
   });
+}
+
+function rewrite(e: Event) {
+  const target = e.target;
+  if (!(target instanceof Element)) return;
+  const a = target.closest('a[href]');
+  if (!(a instanceof HTMLAnchorElement)) return;
+  const direct = directChapterUrl(a.href);
+  if (direct) a.href = direct;
 }
 
 /** `…/chapter/go?hid=X` (any host) → `<this origin>…/chapter/X`, else null. */

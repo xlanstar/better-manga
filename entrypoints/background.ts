@@ -11,18 +11,21 @@ export default defineBackground(() => {
 async function reinjectContentScripts() {
   // Read from the manifest so paths and patterns stay in sync with the build.
   // (In `wxt dev` scripts are registered at runtime instead; nothing to do.)
-  for (const cs of browser.runtime.getManifest().content_scripts ?? []) {
-    if (!cs.matches?.length || !cs.js?.length) continue;
-    const tabs = await browser.tabs.query({ url: cs.matches }).catch(() => []);
-    for (const tab of tabs) {
-      if (tab.id == null || tab.discarded) continue;
-      browser.scripting
-        .executeScript({
-          target: { tabId: tab.id, allFrames: !!cs.all_frames },
-          // WXT types this as its known public paths; these come from the manifest.
-          files: cs.js as ScriptPublicPath[],
-        })
-        .catch(() => {}); // tab closed, restricted page, no access — skip
-    }
-  }
+  const scripts = browser.runtime.getManifest().content_scripts ?? [];
+  await Promise.all(
+    scripts.map(async (cs) => {
+      if (!cs.matches?.length || !cs.js?.length) return;
+      const tabs = await browser.tabs.query({ url: cs.matches }).catch(() => []);
+      for (const tab of tabs) {
+        if (tab.id == null || tab.discarded) continue;
+        browser.scripting
+          .executeScript({
+            target: { tabId: tab.id, allFrames: !!cs.all_frames },
+            // WXT types this as its known public paths; these come from the manifest.
+            files: cs.js as ScriptPublicPath[],
+          })
+          .catch(() => {}); // tab closed, restricted page, no access — skip
+      }
+    }),
+  );
 }
