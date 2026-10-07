@@ -1,8 +1,11 @@
 /**
  * Features: implemented once, configured in layers.
  *
- *   feature default  →  site default (`Site.features`)
+ *   feature default  →  site default (`Site.features`, the page's section on top)
  *     →  user, all sites (global)  →  user, this site (override)
+ *
+ * Sections (main site, reader; `Site.sections`) only vary the site default;
+ * the user layers are per site.
  *
  * Later layers override earlier ones; `undefined` falls through. The user
  * layers share one shape (`UserSettings`); a site override only stores what
@@ -39,6 +42,7 @@ import {
   features,
   renamedFeatureIds,
   type FeatureId,
+  type FeatureOptions,
   type FeatureResolvedConfig,
   type FeatureSiteConfig,
   type FeatureUserConfig,
@@ -51,6 +55,16 @@ import {
  * site; a `siteSpecific` feature applies only when it has an entry here.
  */
 export type SiteFeatures = { [K in FeatureId]?: false | FeatureSiteConfig<K> };
+
+/**
+ * A site section's layer (`Site.sections`), merged over `Site.features`.
+ * Adapters only (selectors, URL rules, …), no user option defaults: the user
+ * settings are per site, so the defaults they are pruned against must not
+ * vary between its sections.
+ */
+export type SectionFeatures = {
+  [K in FeatureId]?: false | Omit<FeatureSiteConfig<K>, keyof FeatureOptions<K>>;
+};
 
 /** A user layer (global or per site). Missing fields fall through. */
 export type UserSettings = { [K in FeatureId]?: FeatureUserConfig<K> };

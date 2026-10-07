@@ -1,5 +1,5 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
-import { allMatches, siteFor } from '@/sites';
+import { allMatches, sectionFor, siteFor } from '@/sites';
 import { startFeatures } from '@/features/starters';
 import { siteUrlFor } from '@/utils/site-url';
 import { bindLifecycle } from '@/utils/lifecycle';
@@ -14,8 +14,9 @@ export default defineContentScript({
   matchAboutBlank: true,
   main(ctx) {
     bindLifecycle(ctx);
-    const site = siteFor(siteUrlFor(location, document.referrer));
+    const url = siteUrlFor(location, document.referrer);
+    const site = siteFor(url);
     // Synchronously: some features must beat the page's scripts.
-    if (site) startFeatures(site);
+    if (site) startFeatures(site, sectionFor(site, url));
   },
 });

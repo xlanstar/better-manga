@@ -16,7 +16,7 @@ export type OnLayerChange = (next: UserSettings, persist: boolean) => void;
 
 /**
  * The switch and options of every feature that applies in `scope` (a site's
- * `Site.features`, or `ALL_SITES`), editing one user layer (`layer`) on
+ * layer from `settingsFeatures`, or `ALL_SITES`), editing one user layer (`layer`) on
  * top of the layers `beneath` it (bottom first). Controls show the effective
  * value, and as their default what the layers beneath give.
  */

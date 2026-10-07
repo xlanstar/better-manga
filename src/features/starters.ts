@@ -2,7 +2,7 @@
  * Content-script side of the features, kept out of `index.ts` so the popup
  * doesn't bundle it.
  */
-import type { Site } from '@/sites';
+import { sectionFeatures, type Site, type SiteSection } from '@/sites';
 import { isAlive, lifetimeSignal, retire } from '@/utils/lifecycle';
 import { startAutoContinue } from './auto-continue/start';
 import { startBlockAds } from './block-ads/start';
@@ -28,12 +28,12 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
 };
 
 /**
- * Wire up the features for `site`. They start synchronously (some must beat
- * the page's own scripts) with the site's defaults, then restart with the
- * user settings once storage has loaded and whenever they change, so popup
- * changes apply without a reload (see `runner.ts`). An orphaned instance (see
- * `utils/lifecycle`) stops acting and watching: everything is tied to its
- * lifetime signal.
+ * Wire up the features for `site`, configured for the page's `section`. They
+ * start synchronously (some must beat the page's own scripts) with the site's
+ * defaults, then restart with the user settings once storage has loaded and
+ * whenever they change, so popup changes apply without a reload (see
+ * `runner.ts`). An orphaned instance (see `utils/lifecycle`) stops acting and
+ * watching: everything is tied to its lifetime signal.
  *
  * If the user disabled the site (or a feature), it stops once storage answers;
  * on a disabled site the whole instance retires. So it may act for the first
@@ -43,9 +43,10 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
  * that throws is logged and skipped, and without storage the features keep
  * the site defaults.
  */
-export function startFeatures(site: Site) {
+export function startFeatures(site: Site, section: SiteSection) {
   const lifetime = lifetimeSignal();
-  const defaults = resolveFeatures(site.features);
+  const scope = sectionFeatures(site, section);
+  const defaults = resolveFeatures(scope);
 
   // Generic so TS ties each starter to its own feature's config type.
   const createRunner = <K extends FeatureId>(id: K) => {
@@ -55,7 +56,7 @@ export function startFeatures(site: Site) {
         update(resolved[id]);
       } catch (err) {
         // Never break the host page, or the other features, over one of them.
-        console.debug(`[better-manga] ${site.name} ${id} failed`, err);
+        console.debug(`[better-manga] ${site.name} (${section}) ${id} failed`, err);
       }
     };
   };
@@ -72,7 +73,7 @@ export function startFeatures(site: Site) {
       // Also notices the extension being gone, which aborts `lifetime`.
       if (!isAlive()) return;
       if (stored.disabledSites.has(site.name)) return retire();
-      runAll(resolveFeatures(site.features, stored.global, stored.bySite[site.name]));
+      runAll(resolveFeatures(scope, stored.global, stored.bySite[site.name]));
     });
     lifetime.addEventListener('abort', unsubscribe, { once: true });
   } catch (err) {

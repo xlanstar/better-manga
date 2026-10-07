@@ -6,7 +6,7 @@ import { Frame, FrameHeader, FramePanel } from '@/components/ui/frame';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { isCustomised, pruneUserSettings, type UserSettings } from '@/features/settings';
-import { siteHosts, type Site } from '@/sites';
+import { settingsFeatures, siteHosts, type Site } from '@/sites';
 import { i18n } from '@/utils/i18n';
 import { FeatureList, type OnLayerChange } from './feature-list';
 
@@ -23,7 +23,7 @@ export type SiteSettingsProps = {
 
 /** Whether the site's override changes anything over the global layer. */
 export function isSiteCustomised({ site, override, global }: SiteSettingsProps): boolean {
-  return isCustomised(pruneUserSettings(site.features, override, global));
+  return isCustomised(pruneUserSettings(settingsFeatures(site), override, global));
 }
 
 /** The popup's card for the site in the current tab. */
@@ -110,7 +110,12 @@ function SiteBody(props: SiteSettingsProps) {
   }
   return (
     <div className="flex flex-col gap-4">
-      <FeatureList beneath={[global]} layer={override} onChange={onChange} scope={site.features} />
+      <FeatureList
+        beneath={[global]}
+        layer={override}
+        onChange={onChange}
+        scope={settingsFeatures(site)}
+      />
       {isSiteCustomised(props) && (
         <div className="flex items-center justify-between gap-2 border-t pt-3">
           <span className="text-xs text-muted-foreground">

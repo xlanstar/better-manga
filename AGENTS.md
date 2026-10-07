@@ -16,6 +16,8 @@ Source in `src/` (`@/` alias).
   quirks and notes stay in that file, as config for features (`Site.features`).
 - Site behaviour (ad blocking, auto-clicks, link rewrites, …) is a feature,
   so users can toggle it; one only some sites need is `siteSpecific`.
+- Where a site's main site and reader need different config (selectors, URL
+  rules), put it in `Site.sections`, not a second site or a feature branch.
 - A feature is `features/<name>/`, registered in `features/index.ts`,
   `starters.ts` and `controls.ts`.
 - `utils/` imports nothing from `sites/` or `features/`. The popup and options

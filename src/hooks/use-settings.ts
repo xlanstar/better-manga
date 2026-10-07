@@ -9,7 +9,7 @@ import {
   subscribeStoredSettings,
   type StoredSettings,
 } from '@/features/settings-storage';
-import type { Site } from '@/sites';
+import { settingsFeatures, type Site } from '@/sites';
 
 /**
  * The global layer, the disabled sites and the overrides of `sites`, kept in
@@ -40,7 +40,9 @@ export function useSettings(sites: readonly Site[] | null) {
   };
 
   const updateSite = (site: Site, next: UserSettings, persist: boolean) => {
-    const value = persist ? pruneUserSettings(site.features, next, latest.current.global) : next;
+    const value = persist
+      ? pruneUserSettings(settingsFeatures(site), next, latest.current.global)
+      : next;
     setSettings((prev) => prev && mergeStoredSettings(prev, { bySite: { [site.name]: value } }));
     if (persist) void saveSiteSettings(site.name, value);
   };

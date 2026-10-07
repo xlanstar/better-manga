@@ -1,16 +1,18 @@
 import { MatchPattern } from 'wxt/utils/match-patterns';
-import type { Site } from './types';
+import type { FeatureId } from '@/features';
+import type { SiteFeatures } from '@/features/settings';
+import type { Site, SiteSection } from './types';
 import { site as baozimh } from './baozimh';
 import { site as gmh } from './g-mh';
 import { site as hipmh } from './hipmh';
 
 /**
  * Registry of sites — add a file next to this one, then one line here. Each
- * site's own logic is in its `features` config (see `types.ts`).
+ * site's own logic is in its `features` and `sections` config (see `types.ts`).
  */
 export const sites = [baozimh, gmh, hipmh];
 
-export type { Site } from './types';
+export type { Site, SiteSection } from './types';
 export type SiteName = (typeof sites)[number]['name'];
 
 export const allMatches = sites.flatMap((s) => s.matches);
@@ -24,18 +26,66 @@ const sitePatterns = sites.map((s) => s.matches.map((p) => new MatchPattern(p)))
  * At most one does: sites never share a host (enforced by the registry test).
  */
 export function siteFor(url: string): Site<SiteName> | null {
+  const href = matchableHref(url);
+  if (!href) return null;
+  return sites.find((_, i) => sitePatterns[i]?.some((pattern) => pattern.includes(href))) ?? null;
+}
+
+/**
+ * Which section of `site` `url` is on: the reader when its patterns match,
+ * else the main site. A frame matched by its ancestor's origin only (see
+ * `utils/site-url`) has no path, so it counts as the main site unless the
+ * reader has a host of its own.
+ */
+export function sectionFor(site: Site, url: string): SiteSection {
+  const href = matchableHref(url);
+  const reader = site.sections?.reader?.matches ?? [];
+  return href && reader.some((p) => new MatchPattern(p).includes(href)) ? 'reader' : 'main';
+}
+
+const SECTIONS: readonly SiteSection[] = ['main', 'reader'];
+
+/** The site layer on pages of `section`: `Site.features`, the section's on top. */
+export function sectionFeatures(site: Site, section: SiteSection): SiteFeatures {
+  const merged: Record<string, unknown> = { ...site.features };
+  for (const [id, config] of Object.entries(site.sections?.[section]?.features ?? {})) {
+    const base = merged[id];
+    merged[id] = config && base ? { ...base, ...config } : (config ?? base);
+  }
+  return merged as SiteFeatures;
+}
+
+/**
+ * The site layer the user settings are shown and pruned against, as they
+ * cover every section: each feature as the first section that configures it,
+ * so it is listed if it applies anywhere. Sections set no user options, so
+ * the defaults agree whichever section it comes from.
+ */
+export function settingsFeatures(site: Site): SiteFeatures {
+  if (!site.sections) return site.features ?? {};
+  const layers = SECTIONS.map((section) => sectionFeatures(site, section));
+  const merged: Record<string, unknown> = {};
+  for (const id of new Set(layers.flatMap(Object.keys)) as Set<FeatureId>) {
+    const values = layers.map((layer) => layer[id]);
+    // `undefined` (shared features apply) beats `false` (off) when none is configured.
+    merged[id] = values.find(Boolean) ?? (values.includes(undefined) ? undefined : false);
+  }
+  return merged as SiteFeatures;
+}
+
+/**
+ * `url` as match patterns should see it, `null` if unparsable (the popup
+ * passes any tab URL). Chrome matches `example.com.` (fully-qualified,
+ * trailing dot) like `example.com` and injects there; the library doesn't.
+ * A string, not a URL: `includes()` checks `instanceof Location`, which
+ * doesn't exist in workers.
+ */
+function matchableHref(url: string): string | null {
   try {
     const parsed = new URL(url);
-    // Chrome matches `example.com.` (fully-qualified, trailing dot) like
-    // `example.com` and injects there; the library doesn't.
     parsed.hostname = parsed.hostname.replace(/\.$/, '');
-    // A string, not the URL: `includes()` checks `instanceof Location`, which
-    // doesn't exist in workers.
-    const href = parsed.href;
-    return sites.find((_, i) => sitePatterns[i]?.some((pattern) => pattern.includes(href))) ?? null;
+    return parsed.href;
   } catch {
-    // Unparsable URL (the popup passes any tab URL). `includes()` would also
-    // throw for `ftp://` / `urn:` patterns, should one ever be added.
     return null;
   }
 }

@@ -2,8 +2,12 @@ import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { MatchPattern } from 'wxt/utils/match-patterns';
 import { featureIds } from '@/features';
+import type { SectionFeatures } from '@/features/settings';
 import {
   allMatches,
+  sectionFeatures,
+  sectionFor,
+  settingsFeatures,
   siteHosts,
   siteMatchesQuery,
   siteFor,
@@ -17,6 +21,12 @@ const name = (url: string) => siteFor(url)?.name;
 const covers = (site: Site, url: string) =>
   site.matches.some((pattern) => new MatchPattern(pattern).includes(url));
 const testSite = (...matches: string[]): Site => ({ name: 't', label: 'T', matches });
+/** A site's own layer and its sections' layers. */
+const featureLayers = (site: Site) => [
+  site.features,
+  site.sections?.main?.features,
+  site.sections?.reader?.features,
+];
 
 describe('site registry', () => {
   test('names are unique', () => {
@@ -32,7 +42,20 @@ describe('site registry', () => {
   });
 
   test('every match pattern parses', () => {
-    for (const pattern of allMatches) expect(() => new MatchPattern(pattern)).not.toThrow();
+    const readerMatches = sites.flatMap((s) => s.sections?.reader?.matches ?? []);
+    for (const pattern of [...allMatches, ...readerMatches]) {
+      expect(() => new MatchPattern(pattern)).not.toThrow();
+    }
+  });
+
+  test("a reader's hosts belong to its site", () => {
+    for (const site of sites) {
+      const reader = site.sections?.reader;
+      if (!reader) continue;
+      for (const host of siteHosts({ ...site, matches: reader.matches })) {
+        expect(covers(site, `https://${host}/`)).toBe(true);
+      }
+    }
   });
 
   test('no pattern is listed twice', () => {
@@ -44,14 +67,14 @@ describe('site registry', () => {
   });
 
   test('site feature configs only name known features', () => {
-    for (const site of sites) {
-      for (const id of Object.keys(site.features ?? {})) expect(featureIds).toContain(id as never);
+    for (const layer of sites.flatMap(featureLayers)) {
+      for (const id of Object.keys(layer ?? {})) expect(featureIds).toContain(id as never);
     }
   });
 
   test('site-specific features are configured with something to act on', () => {
-    for (const site of sites) {
-      const { blockAds, autoContinue, skipRedirects } = site.features ?? {};
+    for (const layer of sites.flatMap(featureLayers)) {
+      const { blockAds, autoContinue, skipRedirects } = layer ?? {};
       if (blockAds) expect([...(blockAds.hide ?? []), ...(blockAds.remove ?? [])]).not.toEqual([]);
       if (autoContinue) expect(autoContinue.selector?.trim()).toBeTruthy();
       if (skipRedirects) expect(skipRedirects.rewriteLink).toBeFunction();
@@ -271,5 +294,107 @@ describe('siteMatchesQuery', () => {
     expect(siteMatchesQuery(baozimh!, 'https://m.bzmh.org/manga/abc')).toBe(true);
     expect(siteMatchesQuery(baozimh!, 'www.bzmh.org/x')).toBe(true);
     expect(siteMatchesQuery(baozimh!, 'https://evil.test/?u=bzmh')).toBe(false);
+  });
+});
+
+const rewriteLink = () => null;
+
+describe('sections', () => {
+  const hide = ['.ad'];
+  const site: Site = {
+    ...testSite('*://a.test/*', '*://reader.a.test/*'),
+    features: { blockAds: { hide }, pageDistance: { container: '#c' } },
+    sections: {
+      main: { features: { autoContinue: { selector: '.go' } } },
+      reader: {
+        matches: ['*://reader.a.test/*', '*://a.test/read/*'],
+        features: {
+          blockAds: { remove: ['#x'] },
+          skipRedirects: { rewriteLink },
+          pageDistance: false,
+        },
+      },
+    },
+  };
+
+  describe('sectionFor', () => {
+    test.each([
+      ['https://reader.a.test/chapter/1', 'reader'],
+      ['https://a.test/read/1', 'reader'],
+      ['https://a.test/', 'main'],
+      ['https://a.test/manga/read', 'main'],
+      ['https://reader.a.test./x', 'reader'],
+      ['not a url', 'main'],
+    ])('%s is on the %s', (url, section) => {
+      expect(sectionFor(site, url)).toBe(section as 'main' | 'reader');
+    });
+
+    test('a site without a reader is all main site', () => {
+      expect(sectionFor(testSite('*://a.test/*'), 'https://a.test/read/1')).toBe('main');
+    });
+  });
+
+  describe('sectionFeatures', () => {
+    test("merges the section's configs over the site's, feature by feature", () => {
+      expect(sectionFeatures(site, 'reader')).toEqual({
+        blockAds: { hide, remove: ['#x'] },
+        skipRedirects: { rewriteLink },
+        pageDistance: false,
+      });
+      expect(sectionFeatures(site, 'main')).toEqual({
+        blockAds: { hide },
+        pageDistance: { container: '#c' },
+        autoContinue: { selector: '.go' },
+      });
+    });
+
+    test('a section can configure a feature the site turned off', () => {
+      const s: Site = {
+        ...site,
+        features: { blockAds: false },
+        sections: { main: { features: { blockAds: { hide } } } },
+      };
+      expect(sectionFeatures(s, 'main').blockAds).toEqual({ hide });
+    });
+
+    test('undefined section values keep the site config', () => {
+      const s: Site = { ...site, sections: { main: { features: { blockAds: undefined } } } };
+      expect(sectionFeatures(s, 'main').blockAds).toEqual({ hide });
+    });
+
+    test('without sections, it is the site layer', () => {
+      expect(sectionFeatures(testSite(), 'reader')).toEqual({});
+    });
+
+    test('sections set adapters, not user option defaults', () => {
+      // @ts-expect-error `ratio` is a user option: its default is per site.
+      const features: SectionFeatures = { pageDistance: { ratio: 0.5 } };
+      expect(features).toBeDefined();
+    });
+  });
+
+  describe('settingsFeatures', () => {
+    test('lists a feature any section configures', () => {
+      const layer = settingsFeatures(site);
+      expect(layer.autoContinue).toEqual({ selector: '.go' });
+      expect(layer.skipRedirects).toEqual({ rewriteLink });
+      // On in the main site, off in the reader: still listed.
+      expect(layer.pageDistance).toEqual({ container: '#c' });
+    });
+
+    test('is false only where every section turns it off', () => {
+      const s: Site = {
+        ...site,
+        features: { smoothScroll: false },
+        sections: { reader: { matches: ['*://a.test/r/*'], features: { pageDistance: false } } },
+      };
+      expect(settingsFeatures(s).smoothScroll).toBe(false);
+      expect(settingsFeatures(s).pageDistance).toBeUndefined();
+    });
+
+    test('without sections, it is the site layer', () => {
+      const features = { blockAds: { hide } };
+      expect(settingsFeatures({ ...testSite(), features })).toBe(features);
+    });
   });
 });
