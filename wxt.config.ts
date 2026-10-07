@@ -28,7 +28,9 @@ export default defineConfig({
       const matches = manifest.content_scripts?.flatMap((cs) => cs.matches ?? []) ?? [];
       if (!matches.length) return;
       if (manifest.manifest_version === 3) {
-        manifest.host_permissions = [...new Set([...(manifest.host_permissions ?? []), ...matches])];
+        manifest.host_permissions = [
+          ...new Set([...(manifest.host_permissions ?? []), ...matches]),
+        ];
       } else {
         manifest.permissions = [...new Set([...(manifest.permissions ?? []), ...matches])];
       }

@@ -1,30 +1,23 @@
-"use client";
+'use client';
 
-import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
-import * as React from "react";
+import { Tabs as TabsPrimitive } from '@base-ui/react/tabs';
+import * as React from 'react';
 import {
   type SegmentedControlSize,
   segmentedControlItemLayoutClassName,
   segmentedControlItemSizeClassNames,
-} from "@/lib/segmented-control";
-import { cn } from "@/lib/utils";
+} from '@/lib/segmented-control';
+import { cn } from '@/lib/utils';
 
-type TabsVariant = "default" | "underline";
+type TabsVariant = 'default' | 'underline';
 type TabsSize = SegmentedControlSize;
 
-const TabsListContext: React.Context<TabsSize> =
-  React.createContext<TabsSize>("default");
+const TabsListContext: React.Context<TabsSize> = React.createContext<TabsSize>('default');
 
-export function Tabs({
-  className,
-  ...props
-}: TabsPrimitive.Root.Props): React.ReactElement {
+export function Tabs({ className, ...props }: TabsPrimitive.Root.Props): React.ReactElement {
   return (
     <TabsPrimitive.Root
-      className={cn(
-        "flex flex-col gap-2 data-[orientation=vertical]:flex-row",
-        className,
-      )}
+      className={cn('flex flex-col gap-2 data-[orientation=vertical]:flex-row', className)}
       data-slot="tabs"
       {...props}
     />
@@ -32,8 +25,8 @@ export function Tabs({
 }
 
 export function TabsList({
-  variant = "default",
-  size = "default",
+  variant = 'default',
+  size = 'default',
   className,
   children,
   ...props
@@ -44,26 +37,24 @@ export function TabsList({
   return (
     <TabsPrimitive.List
       className={cn(
-        "relative z-0 flex w-fit items-center justify-center gap-x-0.5 text-muted-foreground",
-        "data-[orientation=vertical]:flex-col",
-        variant === "default"
-          ? "rounded-lg bg-muted p-0.5 text-muted-foreground/72"
-          : "data-[orientation=vertical]:px-1 data-[orientation=horizontal]:py-1 *:data-[slot=tabs-tab]:hover:bg-accent",
+        'relative z-0 flex w-fit items-center justify-center gap-x-0.5 text-muted-foreground',
+        'data-[orientation=vertical]:flex-col',
+        variant === 'default'
+          ? 'rounded-lg bg-muted p-0.5 text-muted-foreground/72'
+          : 'data-[orientation=horizontal]:py-1 data-[orientation=vertical]:px-1 *:data-[slot=tabs-tab]:hover:bg-accent',
         className,
       )}
       data-size={size}
       data-slot="tabs-list"
       {...props}
     >
-      <TabsListContext.Provider value={size}>
-        {children}
-      </TabsListContext.Provider>
+      <TabsListContext.Provider value={size}>{children}</TabsListContext.Provider>
       <TabsPrimitive.Indicator
         className={cn(
-          "absolute bottom-0 left-0 h-(--active-tab-height) w-(--active-tab-width) translate-x-(--active-tab-left) -translate-y-(--active-tab-bottom) transition-[width,translate] duration-200 ease-in-out",
-          variant === "underline"
-            ? "z-10 bg-primary data-[orientation=horizontal]:h-0.5 data-[orientation=vertical]:w-0.5 data-[orientation=vertical]:-translate-x-px data-[orientation=horizontal]:translate-y-px"
-            : "-z-1 rounded-md bg-background shadow-sm/5 dark:bg-input",
+          'absolute bottom-0 left-0 h-(--active-tab-height) w-(--active-tab-width) translate-x-(--active-tab-left) -translate-y-(--active-tab-bottom) transition-[width,translate] duration-200 ease-in-out',
+          variant === 'underline'
+            ? 'z-10 bg-primary data-[orientation=horizontal]:h-0.5 data-[orientation=horizontal]:translate-y-px data-[orientation=vertical]:w-0.5 data-[orientation=vertical]:-translate-x-px'
+            : '-z-1 rounded-md bg-background shadow-sm/5 dark:bg-input',
         )}
         data-slot="tab-indicator"
       />
@@ -84,7 +75,7 @@ export function TabsTab({
   return (
     <TabsPrimitive.Tab
       className={cn(
-        "relative flex shrink-0 grow cursor-pointer items-center justify-center whitespace-nowrap rounded-md border border-transparent font-medium text-base outline-none transition-[color,background-color,box-shadow] hover:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring data-disabled:pointer-events-none data-[orientation=vertical]:w-full data-[orientation=vertical]:justify-start data-active:text-foreground data-disabled:opacity-64 sm:text-sm",
+        'relative flex shrink-0 grow cursor-pointer items-center justify-center rounded-md border border-transparent text-base font-medium whitespace-nowrap transition-[color,background-color,box-shadow] outline-none hover:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring data-active:text-foreground data-disabled:pointer-events-none data-disabled:opacity-64 data-[orientation=vertical]:w-full data-[orientation=vertical]:justify-start sm:text-sm',
         segmentedControlItemLayoutClassName,
         segmentedControlItemSizeClassNames[resolvedSize],
         className,
@@ -96,13 +87,10 @@ export function TabsTab({
   );
 }
 
-export function TabsPanel({
-  className,
-  ...props
-}: TabsPrimitive.Panel.Props): React.ReactElement {
+export function TabsPanel({ className, ...props }: TabsPrimitive.Panel.Props): React.ReactElement {
   return (
     <TabsPrimitive.Panel
-      className={cn("flex-1 outline-none", className)}
+      className={cn('flex-1 outline-none', className)}
       data-slot="tabs-content"
       {...props}
     />

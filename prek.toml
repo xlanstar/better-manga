@@ -1,0 +1,42 @@
+# Git hooks managed by prek (https://prek.j178.dev).
+# Install once per clone: `prek install`. Run manually: `prek run --all-files`.
+#:schema https://www.schemastore.org/prek.json
+
+[[repos]]
+repo = "builtin"
+hooks = [
+  { id = "trailing-whitespace", args = [
+    "--markdown-linebreak-ext=md",
+  ] },
+  { id = "end-of-file-fixer" },
+  { id = "mixed-line-ending", args = [
+    "--fix=lf",
+  ] },
+  { id = "check-merge-conflict" },
+  { id = "check-case-conflict" },
+  { id = "check-json", exclude = '^(tsconfig|\.vscode/.*)\.json$' },
+  { id = "check-toml" },
+  { id = "check-yaml" },
+  { id = "check-added-large-files", args = [
+    "--maxkb=1024",
+  ] },
+  { id = "detect-private-key" },
+]
+
+[[repos]]
+repo = "local"
+hooks = [
+  { id = "oxfmt", name = "oxfmt", language = "system", entry = "bunx oxfmt --no-error-on-unmatched-pattern", types = [
+    "text",
+  ] },
+  { id = "oxlint", name = "oxlint", language = "system", entry = "bunx oxlint --fix --no-error-on-unmatched-pattern", types_or = [
+    "javascript",
+    "jsx",
+    "ts",
+    "tsx",
+  ] },
+  { id = "typecheck", name = "typecheck", language = "system", entry = "bun run compile", pass_filenames = false, types_or = [
+    "ts",
+    "tsx",
+  ] },
+]

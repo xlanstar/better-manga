@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "singleQuote": true,
+  "sortTailwindcss": {
+    "stylesheet": "./entrypoints/popup/style.css",
+    "functions": ["cn", "cva"]
+  },
+  "ignorePatterns": []
+}

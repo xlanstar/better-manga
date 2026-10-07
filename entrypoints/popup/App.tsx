@@ -1,6 +1,11 @@
 import { RotateCcwIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionPanel,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -28,9 +33,7 @@ export default function App() {
   useEffect(() => {
     (async () => {
       // `activeTab` exposes the URL of the tab the popup was opened on.
-      const [tab] = await browser.tabs
-        .query({ active: true, currentWindow: true })
-        .catch(() => []);
+      const [tab] = await browser.tabs.query({ active: true, currentWindow: true }).catch(() => []);
       setCurrent((tab?.url && sitesFor(tab.url)[0]?.name) || null);
       const loaded = await Promise.all(
         sites.map(async (s) => [s.name, await loadUserSettings(s.name).catch(() => ({}))] as const),
@@ -42,21 +45,25 @@ export default function App() {
   if (!users) return <div className="w-85" />;
 
   // The site in the current tab goes first and starts open.
-  const ordered = [...sites].sort((a, b) => Number(b.name === current) - Number(a.name === current));
+  const ordered = [...sites].sort(
+    (a, b) => Number(b.name === current) - Number(a.name === current),
+  );
 
   const update = (site: Site, next: UserSiteSettings, persist: boolean) => {
     const pruned = persist ? pruneUserSettings(site.features, next) : next;
     setUsers((prev) => ({ ...prev, [site.name]: pruned }));
     if (!persist) return;
-    void (isCustomised(pruned) ? saveUserSettings(site.name, pruned) : resetUserSettings(site.name));
+    void (isCustomised(pruned)
+      ? saveUserSettings(site.name, pruned)
+      : resetUserSettings(site.name));
   };
 
   return (
     <div className="flex w-85 flex-col">
       <header className="flex items-center justify-between gap-2 border-b px-4 py-3">
         <div className="flex flex-col">
-          <h1 className="font-semibold text-sm">Better Manga</h1>
-          <p className="text-muted-foreground text-xs">
+          <h1 className="text-sm font-semibold">Better Manga</h1>
+          <p className="text-xs text-muted-foreground">
             {current ? '調整此網站或其他支援網站的設定' : '目前分頁不是支援的網站'}
           </p>
         </div>
@@ -111,7 +118,9 @@ function SiteItem({
               </Badge>
             )}
           </span>
-          <span className="truncate font-normal text-muted-foreground text-xs">{siteHosts(site)}</span>
+          <span className="truncate text-xs font-normal text-muted-foreground">
+            {siteHosts(site)}
+          </span>
         </span>
       </AccordionTrigger>
 
@@ -129,7 +138,12 @@ function SiteItem({
         )}
 
         <div className="flex justify-end">
-          <Button disabled={!customised} onClick={() => onChange({}, true)} size="xs" variant="ghost">
+          <Button
+            disabled={!customised}
+            onClick={() => onChange({}, true)}
+            size="xs"
+            variant="ghost"
+          >
             <RotateCcwIcon />
             還原預設
           </Button>
@@ -158,11 +172,14 @@ function PageScrollControls({
       <Label className="items-start justify-between gap-3">
         <span className="flex flex-col gap-1">
           Page Up / Down 捲動
-          <span className="font-normal text-muted-foreground text-xs">
+          <span className="text-xs font-normal text-muted-foreground">
             每次捲動畫面高度的固定比例，保留重疊方便接續閱讀。
           </span>
         </span>
-        <Switch checked={value.enabled} onCheckedChange={(enabled) => onChange({ enabled }, true)} />
+        <Switch
+          checked={value.enabled}
+          onCheckedChange={(enabled) => onChange({ enabled }, true)}
+        />
       </Label>
 
       <div className="flex flex-col gap-2">
@@ -180,7 +197,7 @@ function PageScrollControls({
           step={PAGE_SCROLL_RATIO.step}
           value={value.ratio}
         />
-        <div className="flex justify-between text-muted-foreground text-xs tabular-nums">
+        <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
           <span>{percent(PAGE_SCROLL_RATIO.min)}</span>
           <span>預設 {percent(defaults.ratio)}</span>
           <span>{percent(PAGE_SCROLL_RATIO.max)}</span>
@@ -194,6 +211,11 @@ const percent = (ratio: number) => `${Math.round(ratio * 100)}%`;
 
 /** `*://*.baozimh.org/*` → `baozimh.org` */
 function siteHosts(site: Site): string {
-  const hosts = site.matches.map((p) => p.replace(/^[^:]+:\/\//, '').replace(/^\*\./, '').replace(/\/.*$/, ''));
+  const hosts = site.matches.map((p) =>
+    p
+      .replace(/^[^:]+:\/\//, '')
+      .replace(/^\*\./, '')
+      .replace(/\/.*$/, ''),
+  );
   return [...new Set(hosts)].join('、');
 }

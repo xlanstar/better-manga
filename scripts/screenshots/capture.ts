@@ -37,11 +37,14 @@ try {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   await page.goto(new URL('layout.html', import.meta.url).href);
-  await page.evaluate(async (src) => {
-    const img = document.getElementById('popup') as HTMLImageElement;
-    img.src = src;
-    await img.decode();
-  }, `data:image/png;base64,${popup.toString('base64')}`);
+  await page.evaluate(
+    async (src) => {
+      const img = document.getElementById('popup') as HTMLImageElement;
+      img.src = src;
+      await img.decode();
+    },
+    `data:image/png;base64,${popup.toString('base64')}`,
+  );
   mkdirSync(outDir, { recursive: true });
   await page.screenshot({ path: out });
   await browser.close();
@@ -66,7 +69,8 @@ async function capturePopup() {
     await page.addInitScript((url) => {
       const tabs = (globalThis as any).chrome.tabs;
       const query = tabs.query.bind(tabs);
-      tabs.query = async (info: { active?: boolean }) => (info?.active ? [{ id: 1, url }] : query(info));
+      tabs.query = async (info: { active?: boolean }) =>
+        info?.active ? [{ id: 1, url }] : query(info);
     }, CURRENT_URL);
     await page.goto(`chrome-extension://${id}/popup.html`);
     await page.waitForSelector('h1');

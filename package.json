@@ -1,8 +1,8 @@
 {
   "name": "better-manga",
-  "description": "Enhances manga reading sites.",
-  "private": true,
   "version": "0.5.0",
+  "private": true,
+  "description": "Enhances manga reading sites.",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -12,6 +12,10 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
     "screenshots": "bun scripts/screenshots/capture.ts",
     "postinstall": "wxt prepare"
   },
@@ -31,6 +35,8 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@wxt-dev/module-react": "^1.1.5",
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0",
     "playwright": "^1.63.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",

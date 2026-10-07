@@ -14,6 +14,11 @@ Add components with `npx shadcn@latest add @coss/<name>`.
 - `bun run dev` / `bun run dev:firefox` — dev with HMR
 - `bun run build` / `bun run zip` — production output in `.output/`
 - `bun run compile` — typecheck (`tsc --noEmit`)
+- `bun run fmt` / `bun run fmt:check` — format with oxfmt (`.oxfmtrc.json`)
+- `bun run lint` / `bun run lint:fix` — lint with oxlint (`.oxlintrc.json`)
+
+Git hooks are managed by [prek](https://prek.j178.dev) via `prek.toml`
+(run `prek install` once per clone; `prek run --all-files` to check everything).
 
 ## Docs
 
@@ -27,7 +32,8 @@ Patch for fixes, minor for new site support or features, major for breaking chan
 
 ## Rules
 
-- Typecheck must pass before anything is called done.
+- Typecheck, `bun run fmt:check`, and `bun run lint` must pass before anything
+  is called done.
 - Add permissions to `wxt.config.ts` only when a feature actually needs them.
   Prefer `activeTab` and optional permissions over broad host permissions.
 - No new dependency for what a few lines of code or a browser API can do.
