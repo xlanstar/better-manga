@@ -40,6 +40,15 @@ Source in `src/` (`@/` alias).
 - Add permissions only when needed; prefer `activeTab` / optional permissions.
 - No user data leaves the browser without an explicit user action.
 
+## Design
+
+- Gaps are multiples of 8px: `gap-2`, `gap-4`, `gap-6`, … (likewise
+  `gap-x-*`, `gap-y-*`, `space-*`, margins between sibling blocks, and
+  plain CSS). `gap-2` inside a group (icon + label, label + badge, a toggle
+  and its options), `gap-4` between groups and between a label and its
+  control. Stacked text lines (title + subtitle) take no gap.
+- `components/ui/` is exempt (generated).
+
 ## Keep in sync
 
 - `package.json` version (semver): patch for fixes, minor for new sites or

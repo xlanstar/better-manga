@@ -85,11 +85,11 @@ function openOptions() {
 function UnsupportedSite() {
   return (
     <Frame>
-      <FramePanel className="flex items-center gap-3 p-4">
+      <FramePanel className="flex items-center gap-2 p-4">
         <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
           <GlobeIcon className="size-4" />
         </span>
-        <span className="flex min-w-0 flex-col gap-0.5">
+        <span className="flex min-w-0 flex-col">
           <span className="text-sm font-medium">{i18n.t('popup.unsupportedSite')}</span>
           <span className="text-xs text-muted-foreground">
             {i18n.t('popup.unsupportedSiteHint')}

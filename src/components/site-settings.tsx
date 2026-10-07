@@ -31,7 +31,7 @@ export function CurrentSiteSettings(props: SiteSettingsProps) {
   const { site, disabled, onDisabledChange } = props;
   return (
     <Frame>
-      <FrameHeader className="flex-row items-center gap-3 px-4 py-3">
+      <FrameHeader className="flex-row items-center gap-4 px-4 py-3">
         <SiteHeading site={site} />
         <Switch
           aria-label={i18n.t('siteSettings.enabled')}
@@ -56,7 +56,7 @@ export function SiteSettingsItem(props: SiteSettingsProps) {
         <SiteHeading customised={isSiteCustomised(props)} disabled={disabled} site={site} />
       </AccordionTrigger>
       <AccordionPanel className="flex flex-col gap-4 px-4 pt-1 text-foreground">
-        <Label className="justify-between gap-3 rounded-lg bg-muted/64 px-3 py-2">
+        <Label className="justify-between gap-4 rounded-lg bg-muted/64 px-3 py-2">
           {i18n.t('siteSettings.enabled')}
           <Switch checked={!disabled} onCheckedChange={(enabled) => onDisabledChange(!enabled)} />
         </Label>
@@ -76,8 +76,8 @@ function SiteHeading({
   disabled?: boolean;
 }) {
   return (
-    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-      <span className="flex items-center gap-1.5 text-sm font-semibold">
+    <span className="flex min-w-0 flex-1 flex-col">
+      <span className="flex items-center gap-2 text-sm font-semibold">
         {site.label}
         {disabled && (
           <Badge size="sm" variant="warning">

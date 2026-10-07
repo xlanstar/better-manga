@@ -77,7 +77,7 @@ function FeatureSettings<K extends FeatureId>({
   const change = (patch: FeatureUserConfig<K>, persist: boolean) =>
     onChange({ ...layer, [id]: { ...layer[id], ...patch } }, persist);
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       <FeatureToggle
         checked={value.enabled}
         description={description()}

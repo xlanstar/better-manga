@@ -30,8 +30,8 @@ export function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-1.5">
-      <div className="flex flex-col gap-0.5 px-1">
+    <section className="flex flex-col gap-2">
+      <div className="flex flex-col px-1">
         <h2 className="text-xs font-medium text-muted-foreground">{title}</h2>
         {description && <p className="text-xs text-muted-foreground/80">{description}</p>}
       </div>

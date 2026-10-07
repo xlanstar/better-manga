@@ -16,7 +16,7 @@ export function FeatureToggle({
   onCheckedChange: (checked: boolean) => void;
 }) {
   return (
-    <Label className="justify-between gap-3">
+    <Label className="justify-between gap-4">
       <span className="flex items-center gap-2">
         {title}
         <Tooltip>
