@@ -18,4 +18,5 @@ export type AutoContinueResolvedConfig = AutoContinueSiteConfig & { enabled: boo
 export const autoContinue: Feature<AutoContinueSiteConfig, AutoContinueResolvedConfig> = {
   defaults: { enabled: true },
   siteSpecific: true,
+  isUsable: ({ selector }) => !!selector?.trim(),
 };

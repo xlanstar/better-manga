@@ -27,9 +27,15 @@ export type Feature<
   /**
    * Only applies to sites that configure it in `Site.features` (it needs their
    * selectors, URL rules, …). The global settings still list it, so the user
-   * can turn it off on every site at once.
+   * can turn it off on every site at once. Such a feature must define
+   * `isUsable`.
    */
   siteSpecific?: boolean;
+  /**
+   * Whether a site config (one layer of it) gives the feature something to
+   * act on, e.g. a selector. Tests check it against every registered site.
+   */
+  isUsable?: (config: SiteConfig) => boolean;
   /** Type carrier only, never set: lets the registry derive per-layer shapes. */
   types?: { site: SiteConfig; options: Options; resolved: ResolvedConfig };
 };

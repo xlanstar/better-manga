@@ -25,7 +25,20 @@ describe('feature registry', () => {
   });
 
   describe.each(featureIds)('%s', (id) => {
-    const { defaults, sanitizeOptions } = features[id];
+    const { defaults, sanitizeOptions, siteSpecific } = features[id];
+    const { isUsable } = features[id] as { isUsable?: (config: object) => boolean };
+
+    if (siteSpecific) {
+      test('is site-specific, so says what makes a site config usable', () => {
+        expect(isUsable).toBeFunction();
+      });
+    }
+
+    if (isUsable) {
+      test('isUsable rejects an empty site config', () => {
+        expect(isUsable({})).toBe(false);
+      });
+    }
 
     test('defaults are a plain object without undefined values', () => {
       expect(Object.getPrototypeOf(defaults)).toBe(Object.prototype);

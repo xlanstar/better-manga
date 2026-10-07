@@ -23,4 +23,5 @@ export type BlockAdsResolvedConfig = BlockAdsSiteConfig & { enabled: boolean };
 export const blockAds: Feature<BlockAdsSiteConfig, BlockAdsResolvedConfig> = {
   defaults: { enabled: true },
   siteSpecific: true,
+  isUsable: ({ hide = [], remove = [] }) => hide.length + remove.length > 0,
 };

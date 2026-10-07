@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { MatchPattern } from 'wxt/utils/match-patterns';
-import { featureIds } from '@/features';
+import { featureIds, features as featureDefs, type FeatureId } from '@/features';
 import type { SectionFeatures } from '@/features/settings';
 import {
   allMatches,
@@ -72,12 +72,12 @@ describe('site registry', () => {
     }
   });
 
-  test('site-specific features are configured with something to act on', () => {
+  test('site feature configs give their feature something to act on', () => {
     for (const layer of sites.flatMap(featureLayers)) {
-      const { blockAds, autoContinue, skipRedirects } = layer ?? {};
-      if (blockAds) expect([...(blockAds.hide ?? []), ...(blockAds.remove ?? [])]).not.toEqual([]);
-      if (autoContinue) expect(autoContinue.selector?.trim()).toBeTruthy();
-      if (skipRedirects) expect(skipRedirects.rewriteLink).toBeFunction();
+      for (const [id, config] of Object.entries(layer ?? {})) {
+        const { isUsable } = featureDefs[id as FeatureId] as { isUsable?: (c: object) => boolean };
+        if (config && isUsable) expect(isUsable(config)).toBe(true);
+      }
     }
   });
 
