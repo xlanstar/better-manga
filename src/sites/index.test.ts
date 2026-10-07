@@ -299,6 +299,26 @@ describe('siteMatchesQuery', () => {
 
 const rewriteLink = () => null;
 
+describe('sectionFor (registered sites)', () => {
+  const baozimh = sites.find((s) => s.name === 'baozimh')!;
+
+  test.each([
+    'https://bzmh.org/manga/hailangdepaomo/29796-041047940-1',
+    'https://m.baozimh.org/manga/abc/1-2-3/',
+    'https://m.baozimh.one/manga/abc/1',
+  ])('包子漫畫 reader: %s', (url) => {
+    expect(sectionFor(baozimh, url)).toBe('reader');
+  });
+
+  test.each([
+    'https://bzmh.org/',
+    'https://bzmh.org/manga/hailangdepaomo',
+    'https://bzmh.org/manga',
+  ])('包子漫畫 main site: %s', (url) => {
+    expect(sectionFor(baozimh, url)).toBe('main');
+  });
+});
+
 describe('sections', () => {
   const hide = ['.ad'];
   const site: Site = {

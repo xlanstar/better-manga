@@ -11,6 +11,10 @@ import { defineSite } from './types';
  * - An inline script opens a rotating ad URL when a chapter link is clicked
  *   (`.chapteritem`, `#nextchaptera`, `#prevchaptera`). Not handled yet.
  *
+ * Main site and reader share hosts: chapters live at `/manga/<slug>/<chapter>`
+ * (the works page is `/manga/<slug>`; a match pattern can't tell
+ * `/manga/<slug>/`, which the site doesn't link to, from a chapter).
+ *
  * `m.baozimh.one` (branded Bun漫畫) serves this same front end; the bare
  * `baozimh.one` is an unrelated news site, hence no wildcard there.
  * `www.baozimh.org` 301s to the apex, covered by the wildcard anyway.
@@ -26,10 +30,23 @@ export const site = defineSite({
       // page's own scripts and are not always <div>.
       // Not present in a headless probe on 2026-10-07 (desktop or mobile UA);
       // likely injected by the ad SDK only for real browsers / some regions.
-      // Re-check on a real browser before relying on or removing these.
+      // Re-check on a real browser before relying on or removing these, and
+      // move each to the section it shows up in.
       hide: ['.baozi-ad', '.mobadsq'],
     },
-    // 「點擊繼續閱讀」之類的按鈕，出現就按一次。
-    autoContinue: { selector: '.pure-button' },
+  },
+  sections: {
+    reader: {
+      matches: [
+        '*://*.baozimh.org/manga/*/*',
+        '*://*.bzmh.org/manga/*/*',
+        '*://m.baozimh.one/manga/*/*',
+      ],
+      features: {
+        // 「點擊繼續閱讀」之類的按鈕，出現就按一次。Reader only: the class is
+        // generic, so don't click it on the main site's pages.
+        autoContinue: { selector: '.pure-button' },
+      },
+    },
   },
 });
