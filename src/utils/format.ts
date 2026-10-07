@@ -6,12 +6,12 @@ export function formatPercent(ratio: number): string {
 }
 
 /**
- * A slider value as a ratio rounded to two decimals. Slider steps are floats
+ * A slider value rounded to two decimals. Slider steps are floats
  * (`0.3 + 0.05 * n`); rounding keeps stored values clean so they compare equal
  * to the defaults. The coss Slider is typed for ranges too; for a range, the
  * first thumb counts, and an empty range gives `fallback`.
  */
-export function sliderToRatio(value: number | readonly number[], fallback: number): number {
+export function sliderValue(value: number | readonly number[], fallback: number): number {
   const raw = typeof value === 'number' ? value : (value[0] ?? fallback);
   return Math.round(raw * 100) / 100;
 }

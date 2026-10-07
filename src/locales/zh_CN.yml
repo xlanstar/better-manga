@@ -56,4 +56,14 @@ pageScroll:
   title: Page Up / Down 滚动
   description: '每次滚动屏幕高度的固定比例，保留重叠方便接续阅读。'
   ratio: '滚动比例'
+
+smoothScroll:
+  title: '平滑滚动'
+  description: 'Page Up / Down 以动画滚动，视线跟得上。连按会累加，按住平稳滑动，松开后缓缓停下。'
+  duration: '动画时长'
+  durationValue: '$1 毫秒'
+  holdSpeed: '按住时的速度'
+  holdSpeedValue: '$1 屏/秒'
+
+optionSlider:
   default: '默认 $1'

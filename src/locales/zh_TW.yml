@@ -57,4 +57,14 @@ pageScroll:
   title: Page Up / Down 捲動
   description: '每次捲動畫面高度的固定比例，保留重疊方便接續閱讀。'
   ratio: '捲動比例'
+
+smoothScroll:
+  title: '平滑捲動'
+  description: 'Page Up / Down 以動畫捲動，視線跟得上。連按會累加，按住平穩滑動，放開後緩緩停下。'
+  duration: '動畫時間'
+  durationValue: '$1 毫秒'
+  holdSpeed: '按住時的速度'
+  holdSpeedValue: '$1 畫面/秒'
+
+optionSlider:
   default: '預設 $1'

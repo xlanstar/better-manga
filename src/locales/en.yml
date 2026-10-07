@@ -57,4 +57,14 @@ pageScroll:
   title: Page Up / Down scrolling
   description: Scrolls a fixed share of the screen height, keeping some overlap so you don't lose your place.
   ratio: Scroll ratio
+
+smoothScroll:
+  title: Smooth Page Up / Down
+  description: Animates Page Up / Down so you can follow along. Presses add up, holding the key glides, letting go eases to a stop.
+  duration: Animation length
+  durationValue: $1 ms
+  holdSpeed: Speed while held
+  holdSpeedValue: $1 screens/s
+
+optionSlider:
   default: Default $1

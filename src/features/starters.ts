@@ -10,6 +10,7 @@ import { featureIds, type FeatureId, type FeatureResolvedConfig } from './index'
 import { startPageScroll } from './page-scroll/start';
 import { createFeatureRunner } from './runner';
 import { startSkipRedirects } from './skip-redirects/start';
+import { startSmoothScroll } from './smooth-scroll/start';
 import { resolveFeatures, type ResolvedFeatures } from './settings';
 import { subscribeStoredSettings } from './settings-storage';
 import type { FeatureStart } from './types';
@@ -23,6 +24,7 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
   skipRedirects: startSkipRedirects,
   autoContinue: startAutoContinue,
   pageScroll: startPageScroll,
+  smoothScroll: startSmoothScroll,
 };
 
 /**

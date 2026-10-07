@@ -2,6 +2,7 @@ import type { Feature } from '../types';
 
 /**
  * Page Up/Down scrolls a fixed ratio of the viewport, leaving overlap.
+ * Whether it animates is `smoothScroll`'s business (see `utils/scroll.ts`).
  *
  * - `index.ts` (this file): definition, registered in `features/index.ts`.
  * - `start.ts`: content-script side, registered in `features/starters.ts`.
@@ -9,7 +10,10 @@ import type { Feature } from '../types';
  *   with the popup title and description.
  */
 
-/** What a site may declare. `container` is an adapter, not a user setting. */
+/**
+ * What a site may declare. `container` is an adapter, not a user setting; set
+ * it on `smoothScroll` too (see there).
+ */
 export type PageScrollSiteConfig = { ratio?: number; container?: string };
 export type PageScrollUserOptions = { ratio?: number };
 export type PageScrollResolvedConfig = { enabled: boolean; ratio: number; container?: string };

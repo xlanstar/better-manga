@@ -5,6 +5,7 @@ import { AppHeader, Section } from '@/components/page-layout';
 import { CurrentSiteSettings } from '@/components/site-settings';
 import { Button } from '@/components/ui/button';
 import { Frame, FramePanel } from '@/components/ui/frame';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCurrentTab } from '@/hooks/use-current-tab';
 import { useLocalePreference } from '@/hooks/use-locale';
 import { useSettings } from '@/hooks/use-settings';
@@ -31,7 +32,14 @@ export default function App() {
   };
 
   return (
-    <div className="flex w-85 flex-col">
+    // Browsers cap popups at 600px tall and scroll the page past that, with a
+    // native scrollbar that takes width where scrollbars always show: the
+    // content reflows (sliders shift under the pointer, the height changes
+    // again, the scrollbar toggles) and the popup jitters. So the page never
+    // overflows: the popup scrolls in a ScrollArea, at most 600px tall (its
+    // viewport, which can't take a percentage of a max-height), with an
+    // overlay scrollbar that takes no width. The header sticks.
+    <ScrollArea className="w-85 [&>[data-slot=scroll-area-viewport]]:max-h-150">
       <AppHeader
         actions={
           <Button
@@ -44,7 +52,7 @@ export default function App() {
             <SettingsIcon />
           </Button>
         }
-        className="flex items-center gap-2 py-3 ps-4 pe-3"
+        className="sticky top-0 z-10 flex items-center gap-2 bg-background py-3 ps-4 pe-3"
       />
 
       <main className="flex flex-col gap-4 px-3 pb-3">
@@ -75,7 +83,7 @@ export default function App() {
           )}
         </Section>
       </main>
-    </div>
+    </ScrollArea>
   );
 }
 

@@ -2,6 +2,7 @@ import { autoContinue } from './auto-continue';
 import { blockAds } from './block-ads';
 import { pageScroll } from './page-scroll';
 import { skipRedirects } from './skip-redirects';
+import { smoothScroll } from './smooth-scroll';
 
 /**
  * Registry of feature definitions — add a folder next to this one, then one
@@ -10,7 +11,7 @@ import { skipRedirects } from './skip-redirects';
  * stored user settings, so never rename one. The order here is the order in
  * the popup / options page.
  */
-export const features = { blockAds, skipRedirects, autoContinue, pageScroll };
+export const features = { blockAds, skipRedirects, autoContinue, pageScroll, smoothScroll };
 
 export type FeatureId = keyof typeof features;
 export const featureIds = Object.keys(features) as FeatureId[];

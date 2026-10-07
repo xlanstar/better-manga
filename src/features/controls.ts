@@ -6,6 +6,7 @@ import type { ComponentType } from 'react';
 import { i18n } from '@/utils/i18n';
 import type { FeatureId, FeatureOptions, FeatureResolvedConfig } from './index';
 import { PageScrollOptions } from './page-scroll/controls';
+import { SmoothScrollOptions } from './smooth-scroll/controls';
 import type { FeatureOptionsProps } from './types';
 
 /** Props of feature `K`'s options controls. */
@@ -43,5 +44,10 @@ export const featureControls: {
     title: () => i18n.t('pageScroll.title'),
     description: () => i18n.t('pageScroll.description'),
     Options: PageScrollOptions,
+  },
+  smoothScroll: {
+    title: () => i18n.t('smoothScroll.title'),
+    description: () => i18n.t('smoothScroll.description'),
+    Options: SmoothScrollOptions,
   },
 };
