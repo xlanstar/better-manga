@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { pruneUserSettings, type UserSettings } from '@/features/settings';
+import { ALL_SITES, pruneUserSettings, type UserSettings } from '@/features/settings';
 import {
   mergeStoredSettings,
   saveGlobalSettings,
@@ -35,7 +35,7 @@ export function useSettings(sites: readonly Site[] | null) {
   }, [names]);
 
   const updateGlobal = (next: UserSettings, persist: boolean) => {
-    const value = persist ? pruneUserSettings(undefined, next) : next;
+    const value = persist ? pruneUserSettings(ALL_SITES, next) : next;
     setSettings((prev) => prev && mergeStoredSettings(prev, { global: value }));
     if (persist) void saveGlobalSettings(value);
   };

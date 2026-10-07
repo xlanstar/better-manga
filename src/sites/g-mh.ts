@@ -22,5 +22,4 @@ export const site = defineSite({
   name: 'g-mh',
   label: 'G站漫畫',
   matches: ['*://m.g-mh.org/*', '*://g-mh.org/*', '*://godamh.com/*'],
-  features: {},
 });

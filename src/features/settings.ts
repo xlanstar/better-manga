@@ -7,6 +7,8 @@
  * Later layers override earlier ones; `undefined` falls through. The user
  * layers share one shape (`UserSettings`); a site override only stores what
  * differs from the layers below, so everything else follows the global ones.
+ * The global settings themselves are resolved for `ALL_SITES`, which has no
+ * site layer.
  *
  * A feature applies to every site unless the site sets it to `false`; a
  * `siteSpecific` one (ad blocking, …) only to sites that configure it.
@@ -57,24 +59,30 @@ export type ResolvedFeatures = { [K in FeatureId]: FeatureResolvedConfig<K> | nu
 
 // ── Layering ─────────────────────────────────────────────────────────────────
 
+/**
+ * No particular site: the global settings. Every feature is available there
+ * with its defaults, site-specific ones too (so the user can turn them off
+ * everywhere).
+ */
+export const ALL_SITES = Symbol('all sites');
+
+/**
+ * What settings are resolved for: one site, by its layer (`Site.features`,
+ * `undefined` for a site without config), or `ALL_SITES`.
+ */
+export type SiteScope = SiteFeatures | undefined | typeof ALL_SITES;
+
 /** User layers, bottom first (global, then the site override). */
 type UserLayers = readonly (UserSettings | null | undefined)[];
 
-/**
- * Effective settings for a site (`siteFeatures`, i.e. `Site.features`) under
- * the user layers. `undefined` = no particular site (the global settings):
- * every feature is available there, with its defaults.
- */
-export function resolveFeatures(
-  siteFeatures: SiteFeatures | undefined,
-  ...userLayers: UserLayers
-): ResolvedFeatures {
+/** Effective settings for `scope` under the user layers. */
+export function resolveFeatures(scope: SiteScope, ...userLayers: UserLayers): ResolvedFeatures {
+  const allSites = scope === ALL_SITES;
   const users = userLayers.map(sanitizeUserSettings);
   const resolved: Record<string, object | null> = {};
   for (const id of featureIds) {
-    const site = siteFeatures?.[id];
-    const unavailable =
-      site === false || (siteFeatures !== undefined && features[id].siteSpecific && !site);
+    const site = allSites ? undefined : scope?.[id];
+    const unavailable = site === false || (!allSites && features[id].siteSpecific && !site);
     resolved[id] = unavailable
       ? null
       : Object.assign(
@@ -104,16 +112,16 @@ export function sanitizeUserSettings(raw: unknown): UserSettings {
 
 /**
  * Drop values of the top user layer equal to what the layers below
- * (`beneath`, bottom first) already give for this site, so a stored setting
+ * (`beneath`, bottom first) already give for `scope`, so a stored setting
  * always means "differs from what it would inherit". Returns `{}` when nothing
  * differs.
  */
 export function pruneUserSettings(
-  siteFeatures: SiteFeatures | undefined,
+  scope: SiteScope,
   userSettings: UserSettings,
   ...beneath: UserLayers
 ): UserSettings {
-  const defaults = resolveFeatures(siteFeatures, ...beneath);
+  const defaults = resolveFeatures(scope, ...beneath);
   const pruned: Record<string, object> = {};
   for (const [id, config] of Object.entries(sanitizeUserSettings(userSettings))) {
     const base = defaults[id as FeatureId] as Record<string, unknown> | null;

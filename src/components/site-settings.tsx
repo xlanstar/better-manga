@@ -110,12 +110,7 @@ function SiteBody(props: SiteSettingsProps) {
   }
   return (
     <div className="flex flex-col gap-4">
-      <FeatureList
-        beneath={[global]}
-        layer={override}
-        onChange={onChange}
-        siteFeatures={site.features}
-      />
+      <FeatureList beneath={[global]} layer={override} onChange={onChange} scope={site.features} />
       {isSiteCustomised(props) && (
         <div className="flex items-center justify-between gap-2 border-t pt-3">
           <span className="text-xs text-muted-foreground">

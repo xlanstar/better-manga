@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { isDeepStrictEqual } from 'node:util';
 import { featureIds, features } from './index';
 import {
+  ALL_SITES,
   isCustomised,
   pruneUserSettings,
   resolveFeatures,
@@ -9,6 +10,7 @@ import {
   sanitizeUserSettings,
   type ResolvedFeatures,
   type SiteFeatures,
+  type SiteScope,
   type UserSettings,
 } from './settings';
 
@@ -26,6 +28,10 @@ const SITE_DEFAULTS = Object.fromEntries(
 
 /** Untrusted values, as `storage` may hand them back. */
 const asUser = (v: unknown) => v as UserSettings;
+
+/** A scope as a test name. */
+const scopeLabel = (s: SiteScope) =>
+  s === ALL_SITES ? 'ALL_SITES' : (JSON.stringify(s) ?? 'undefined');
 
 describe('sanitizeUserSettings', () => {
   test.each([
@@ -161,14 +167,17 @@ describe('sanitizeUserSettings', () => {
 });
 
 describe('resolveFeatures', () => {
-  test('no site and no user layer gives the global defaults', () => {
-    expect(resolveFeatures(undefined)).toEqual(ALL_DEFAULTS);
-    expect(resolveFeatures(undefined, undefined)).toEqual(ALL_DEFAULTS);
-    expect(resolveFeatures(undefined, null)).toEqual(ALL_DEFAULTS);
+  test('all sites and no user layer gives the global defaults', () => {
+    expect(resolveFeatures(ALL_SITES)).toEqual(ALL_DEFAULTS);
+    expect(resolveFeatures(ALL_SITES, undefined)).toEqual(ALL_DEFAULTS);
+    expect(resolveFeatures(ALL_SITES, null)).toEqual(ALL_DEFAULTS);
   });
 
   test('a site without config gets the defaults, minus site-specific features', () => {
     expect(resolveFeatures({}, {})).toEqual(SITE_DEFAULTS);
+    // `Site.features` left out: the same as `{}`, not all sites.
+    expect(resolveFeatures(undefined)).toEqual(SITE_DEFAULTS);
+    expect(resolveFeatures(undefined, {}, null)).toEqual(SITE_DEFAULTS);
     expect(SITE_DEFAULTS.blockAds).toBeNull();
     expect(SITE_DEFAULTS.pageScroll).toEqual(DEFAULTS);
   });
@@ -189,8 +198,8 @@ describe('resolveFeatures', () => {
       expect(resolveFeatures({ blockAds: false }, {}).blockAds).toBeNull();
     });
 
-    test('apply in the global settings (no site), so they can be turned off', () => {
-      expect(resolveFeatures(undefined, { blockAds: { enabled: false } }).blockAds).toEqual({
+    test('apply for all sites (the global settings), so they can be turned off', () => {
+      expect(resolveFeatures(ALL_SITES, { blockAds: { enabled: false } }).blockAds).toEqual({
         enabled: false,
       });
     });
@@ -207,14 +216,15 @@ describe('resolveFeatures', () => {
 
     test('a user value for a site without them is pruned', () => {
       expect(pruneUserSettings({}, { blockAds: { enabled: false } })).toEqual({});
-      expect(pruneUserSettings(undefined, { blockAds: { enabled: false } })).toEqual({
+      expect(pruneUserSettings(undefined, { blockAds: { enabled: false } })).toEqual({});
+      expect(pruneUserSettings(ALL_SITES, { blockAds: { enabled: false } })).toEqual({
         blockAds: { enabled: false },
       });
     });
   });
 
   test('has an entry for every feature', () => {
-    expect(Object.keys(resolveFeatures(undefined, undefined))).toEqual(Object.keys(features));
+    expect(Object.keys(resolveFeatures(ALL_SITES, undefined))).toEqual(Object.keys(features));
   });
 
   test('site layer overrides the defaults', () => {
@@ -267,15 +277,15 @@ describe('resolveFeatures', () => {
 
   test('user layer is sanitized first', () => {
     expect(
-      resolveFeatures(undefined, asUser({ pageScroll: { ratio: 99, enabled: 'off' } })).pageScroll,
+      resolveFeatures(ALL_SITES, asUser({ pageScroll: { ratio: 99, enabled: 'off' } })).pageScroll,
     ).toEqual({ enabled: true, ratio: 1 });
-    expect(resolveFeatures(undefined, asUser({ pageScroll: { ratio: Number.NaN } }))).toEqual(
+    expect(resolveFeatures(ALL_SITES, asUser({ pageScroll: { ratio: Number.NaN } }))).toEqual(
       ALL_DEFAULTS,
     );
   });
 
   test('a user cannot set a site adapter', () => {
-    const resolved = resolveFeatures(undefined, asUser({ pageScroll: { container: 'body' } }));
+    const resolved = resolveFeatures(ALL_SITES, asUser({ pageScroll: { container: 'body' } }));
     expect(resolved.pageScroll).toEqual(DEFAULTS);
     expect(resolved.pageScroll && 'container' in resolved.pageScroll).toBe(false);
   });
@@ -285,7 +295,7 @@ describe('resolveFeatures', () => {
     ['array', []],
     ['number', 3],
   ])('garbage user layer (%s) falls back to defaults', (_, user) => {
-    expect(resolveFeatures(undefined, asUser(user))).toEqual(ALL_DEFAULTS);
+    expect(resolveFeatures(ALL_SITES, asUser(user))).toEqual(ALL_DEFAULTS);
   });
 
   test('does not mutate the defaults, the site or the user layer', () => {
@@ -299,31 +309,31 @@ describe('resolveFeatures', () => {
   });
 
   test('mutating a result does not leak into later results', () => {
-    const first = resolveFeatures(undefined, undefined);
+    const first = resolveFeatures(ALL_SITES, undefined);
     first.pageScroll!.ratio = 0.1;
     first.pageScroll!.enabled = false;
     first.blockAds!.enabled = false;
-    expect(resolveFeatures(undefined, undefined)).toEqual(ALL_DEFAULTS);
+    expect(resolveFeatures(ALL_SITES, undefined)).toEqual(ALL_DEFAULTS);
   });
 });
 
 describe('pruneUserSettings', () => {
   test('empty user layer stays empty', () => {
-    expect(pruneUserSettings(undefined, {})).toEqual({});
+    expect(pruneUserSettings(ALL_SITES, {})).toEqual({});
   });
 
   test('drops values equal to the global defaults', () => {
-    expect(pruneUserSettings(undefined, { pageScroll: { enabled: true, ratio: 0.7 } })).toEqual({});
+    expect(pruneUserSettings(ALL_SITES, { pageScroll: { enabled: true, ratio: 0.7 } })).toEqual({});
   });
 
   test('keeps values that differ from the defaults', () => {
-    expect(pruneUserSettings(undefined, { pageScroll: { enabled: false, ratio: 0.5 } })).toEqual({
+    expect(pruneUserSettings(ALL_SITES, { pageScroll: { enabled: false, ratio: 0.5 } })).toEqual({
       pageScroll: { enabled: false, ratio: 0.5 },
     });
   });
 
   test('keeps only the differing fields of a feature', () => {
-    expect(pruneUserSettings(undefined, { pageScroll: { enabled: true, ratio: 0.5 } })).toEqual({
+    expect(pruneUserSettings(ALL_SITES, { pageScroll: { enabled: true, ratio: 0.5 } })).toEqual({
       pageScroll: { ratio: 0.5 },
     });
   });
@@ -346,10 +356,10 @@ describe('pruneUserSettings', () => {
 
   test('sanitizes first: invalid fields are dropped', () => {
     expect(
-      pruneUserSettings(undefined, asUser({ pageScroll: { enabled: 'x', ratio: 0.4 } })),
+      pruneUserSettings(ALL_SITES, asUser({ pageScroll: { enabled: 'x', ratio: 0.4 } })),
     ).toEqual({ pageScroll: { ratio: 0.4 } });
-    expect(pruneUserSettings(undefined, asUser({ other: { a: 1 } }))).toEqual({});
-    expect(pruneUserSettings(undefined, asUser(null))).toEqual({});
+    expect(pruneUserSettings(ALL_SITES, asUser({ other: { a: 1 } }))).toEqual({});
+    expect(pruneUserSettings(ALL_SITES, asUser(null))).toEqual({});
   });
 
   test('sanitizes first: a value clamped onto the default is pruned', () => {
@@ -358,12 +368,12 @@ describe('pruneUserSettings', () => {
   });
 
   test('drops undefined fields', () => {
-    expect(pruneUserSettings(undefined, { pageScroll: { ratio: undefined } })).toEqual({});
+    expect(pruneUserSettings(ALL_SITES, { pageScroll: { ratio: undefined } })).toEqual({});
   });
 
   test('does not mutate its input', () => {
     const user: UserSettings = { pageScroll: { enabled: true, ratio: 0.5 } };
-    pruneUserSettings(undefined, user);
+    pruneUserSettings(ALL_SITES, user);
     expect(user).toEqual({ pageScroll: { enabled: true, ratio: 0.5 } });
   });
 
@@ -384,7 +394,8 @@ describe('pruneUserSettings', () => {
   // The invariant the popup relies on: pruning never changes behaviour, and a
   // pruned layer is empty exactly when it behaves like the defaults.
   describe('preserves the effective settings', () => {
-    const sites: (SiteFeatures | undefined)[] = [
+    const scopes: SiteScope[] = [
+      ALL_SITES,
       undefined,
       {},
       { pageScroll: { ratio: 0.5 } },
@@ -398,20 +409,17 @@ describe('pruneUserSettings', () => {
       }
     }
 
-    test.each(sites.map((s) => [JSON.stringify(s) ?? 'undefined', s] as const))(
-      'site %s',
-      (_, site) => {
-        const defaults = resolveFeatures(site, {});
-        for (const raw of users) {
-          const user = asUser(raw);
-          const pruned = pruneUserSettings(site, user);
-          expect(resolveFeatures(site, pruned)).toEqual(resolveFeatures(site, user));
-          expect(isCustomised(pruned)).toBe(
-            !isDeepStrictEqual(resolveFeatures(site, user), defaults),
-          );
-        }
-      },
-    );
+    test.each(scopes.map((s) => [scopeLabel(s), s] as const))('scope %s', (_, scope) => {
+      const defaults = resolveFeatures(scope, {});
+      for (const raw of users) {
+        const user = asUser(raw);
+        const pruned = pruneUserSettings(scope, user);
+        expect(resolveFeatures(scope, pruned)).toEqual(resolveFeatures(scope, user));
+        expect(isCustomised(pruned)).toBe(
+          !isDeepStrictEqual(resolveFeatures(scope, user), defaults),
+        );
+      }
+    });
   });
 });
 
@@ -452,7 +460,7 @@ describe('global and site user layers', () => {
 
   test('every layer is sanitized', () => {
     expect(
-      resolveFeatures(undefined, asUser({ pageScroll: { ratio: 9 } }), asUser('x')).pageScroll,
+      resolveFeatures(ALL_SITES, asUser({ pageScroll: { ratio: 9 } }), asUser('x')).pageScroll,
     ).toEqual({ enabled: true, ratio: 1 });
   });
 

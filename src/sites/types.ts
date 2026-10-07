@@ -9,15 +9,15 @@ import type { SiteFeatures } from '@/features/settings';
  * - `features`: site defaults / adapters, keyed by feature id (layering in
  *   `features/settings.ts`). Shared reading features apply unless set to
  *   `false`; site-specific ones (ad blocking, auto-continue, …) only when
- *   configured here, with this site's selectors and URL rules. `{}` = only
- *   the shared features, with the global defaults.
+ *   configured here, with this site's selectors and URL rules. Leave it out
+ *   for only the shared features, with the global defaults.
  */
 export type Site<Name extends string = string> = {
   name: Name;
   /** Human-readable name, shown in the popup. */
   label: string;
   matches: string[];
-  features: SiteFeatures;
+  features?: SiteFeatures;
 };
 
 /**

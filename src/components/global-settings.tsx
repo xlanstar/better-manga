@@ -1,6 +1,6 @@
 import { RotateCcwIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { isCustomised, type UserSettings } from '@/features/settings';
+import { ALL_SITES, isCustomised, type UserSettings } from '@/features/settings';
 import { i18n } from '@/utils/i18n';
 import { FeatureList, type OnLayerChange } from './feature-list';
 
@@ -14,7 +14,7 @@ export function GlobalSettings({
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <FeatureList layer={global} onChange={onChange} />
+      <FeatureList layer={global} onChange={onChange} scope={ALL_SITES} />
       {isCustomised(global) && (
         <div className="flex justify-end">
           <Button onClick={() => onChange({}, true)} size="xs" variant="ghost">
