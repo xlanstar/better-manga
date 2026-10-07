@@ -17,7 +17,8 @@ Add components with `npx shadcn@latest add @coss/<name>`.
 
 ## Docs
 
-- `docs/manga-sites.md` — all manga site URLs; update it whenever a site's `matches` change.
+- `docs/manga-sites.md` — manga sites and domains only; update it whenever a site's `matches` change.
+  Site technical details go in comments in `entrypoints/content/sites/<name>.ts`.
 
 ## Versioning
 

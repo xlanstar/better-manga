@@ -5,6 +5,11 @@ import type { Site } from './types';
 export default {
   name: 'hipmh',
   label: '嬉皮漫畫',
+  // Reader only. The main site `m.hipmh.com` (catalogue, works pages) is not
+  // matched: its chapter redirects are rewritten here instead (see below).
+  // `reader.hipmh.top/` itself 301s to the main site; chapters live at
+  // `/chapter/<hid>`. API / images: `hipapi1.s3file.top`, `cover.s3imgs.top`.
+  // All domains: docs/manga-sites.md.
   matches: ['*://reader.hipmh.top/*'],
   run() {
     // An inline module script reads this node's data-config and hijacks clicks

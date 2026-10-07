@@ -1,8 +1,8 @@
 # 漫畫網站網址
 
 追蹤已支援、候選與相關的漫畫網站網址（含同一站的所有網域）。
-`matches` 的唯一來源是 `entrypoints/content/sites/<name>.ts`，這份文件只做追蹤與說明；
-兩者不一致時以程式碼為準，並回頭修正本文件。
+只記錄網站與網域；技術細節（前端差異、廣告、選擇器、為什麼某些網域不涵蓋）寫在
+`entrypoints/content/sites/<name>.ts` 的註解裡。`matches` 以程式碼為準，不一致時回頭修正本文件。
 
 最後查證：2026-10-07。狀態是從開發機用 `curl` 開首頁的結果，會因地區與網路而不同。
 
@@ -22,59 +22,52 @@
 
 ### GoDa 漫畫網（site files: `baozimh`、`g-mh`）
 
-同一個營運者、同一套模板：同樣的「收藏永久發布頁」、同一個發布頁、同一個圖片 CDN（`*.6wm.top`）。
-keiyoushi 把它們歸成同一個圖源「GoDa漫画」。`baozimh.ts` 和 `g-mh.ts` 其實是針對同一個網站。
+同一個營運者，分成兩個前端，各自一個 site file。
 
-閱讀站網域：
+包子漫畫（`baozimh`）：
 
-- `baozimh.org`：包子漫畫；ok；matched（`*.baozimh.org`）
-- `m.baozimh.org`：包子漫畫；ok；matched
+- `baozimh.org`、`m.baozimh.org`：ok；matched
 - `www.baozimh.org`：→ `baozimh.org`；matched
-- `bzmh.org`、`www.bzmh.org`、`m.bzmh.org`：包子漫畫；ok；matched（`*.bzmh.org`）
-- `g-mh.org`、`m.g-mh.org`：G社漫畫；ok；matched
-- `www.g-mh.org`：→ `g-mh.org`；unmatched（只是轉址）
-- `godamh.com`：G站漫畫；ok；unmatched
+- `bzmh.org`、`www.bzmh.org`、`m.bzmh.org`：ok；matched
+- `m.baozimh.one`（Bun漫畫）：ok；matched
+
+G站漫畫（`g-mh`）：
+
+- `g-mh.org`、`m.g-mh.org`（G社漫畫）：ok；matched
+- `godamh.com`：ok；matched
+- `www.g-mh.org`：→ `g-mh.org`；unmatched
 - `www.godamh.com`：→ `godamh.com`；unmatched
-- `m.baozimh.one`：Bun漫畫；ok；unmatched
 
 相關網域：
 
-- 發布頁：`n.telltome.net`（G站漫畫發布頁）、`des.telltome.net`（免廣告說明）
-- 同營運者，但不是同一個閱讀站：
-  - `18mh.org`：18漫畫，R18，同模板
-  - `manhuascans.org`：英文版，同模板
+- 發布頁：`n.telltome.net`、`des.telltome.net`（免廣告說明）
+- 同營運者的其他網站：
+  - `18mh.org`：18漫畫（R18）
+  - `manhuascans.org`：英文版
   - `m.godamh.com`：G社資訊（新聞站）
   - `baozimh.one`：Bun社（新聞站）
 
-注意：`g-mh.ts` 的 `label` 是「韓漫窩」，但網站現在的標題是「G社漫畫」。
-
 ### 嬉皮漫畫（site file: `hipmh`）
 
-- `reader.hipmh.top`：閱讀器（`/chapter/<hid>`），首頁 → `m.hipmh.com`；matched
-- `m.hipmh.com`：主站（目錄、作品頁）；ok；unmatched
-- `hipmh.com`：嬉皮社入口與公告；ok；unmatched
+- `reader.hipmh.top`：閱讀器；matched
+- `m.hipmh.com`：主站；ok；unmatched
+- `hipmh.com`：嬉皮社入口；ok；unmatched
 - `m.xipmh.com`：HippaMark 書籤庫；ok；unmatched
-- API、圖片：`hipapi1.s3file.top`、`cover.s3imgs.top`
 
-說明：
-
-- 章節連結會經過 `m.hipmh.com/chapter/go?hid=…` 跳轉；`hipmh.ts` 會把連結改寫成直接連到
-  `reader.hipmh.top/chapter/<hid>`，所以不需要在主站執行。
-- 不要和「嗨皮漫畫」（`happymh.com`，已關站）混淆。
+不要和「嗨皮漫畫」（`happymh.com`，已關站）混淆。
 
 ## 同名但不同站：包子漫畫（baozimh.com 系）
 
-這是原本的包子漫畫，和上面的 GoDa「包子漫畫」是不同網站（路徑是 `/comic/…`，模板也不同）。**目前未支援。**
+原本的包子漫畫，和 GoDa 的「包子漫畫」是不同網站。**目前未支援。**
 
 - `www.baozimh.com`、`cn.baozimh.com`、`tw.baozimh.com`：cf
-- `appcn.baozimh.com`、`appgb.baozimh.com`：app 版頁面（`/baozimhapp`）；cf
+- `appcn.baozimh.com`、`appgb.baozimh.com`：cf
 - `www.webmota.com`、`cn.webmota.com`、`tw.webmota.com`：ok（只實測 `www`）
 - `www.kukuc.co`、`cn.kukuc.co`、`tw.kukuc.co`：ok（只實測 `www`）
 - `www.twmanga.com`、`cn.twmanga.com`、`tw.twmanga.com`：ok（只實測 `www`）
 - `www.dinnerku.com`、`cn.dinnerku.com`、`tw.dinnerku.com`：ok（只實測 `www`）
 - `www.twbzmg.com`：ok
-- `baozimh.vip`：cf；只在搜尋結果出現過，頁尾是「BAOZIMH 包子漫畫」
-- 靜態資源：`static-tw.baozimh.com`
+- `baozimh.vip`：cf；只在搜尋結果出現過
 
 ## 其他中文漫畫站（候選）
 
@@ -104,7 +97,7 @@ keiyoushi 把它們歸成同一個圖源「GoDa漫画」。`baozimh.ts` 和 `g-m
 - `manhua.zaimanhua.com`、`www.zaimanhua.com`、`m.zaimanhua.com`：ok
 - 動漫之家舊網域 `www.dmzj.com`、`manhua.dmzj.com`、`www.idmzj.com`：dead
 
-動漫屋系（同一套系統）：
+動漫屋系：
 
 - `www.dm5.com`、`www.dm5.cn`：ok
 - `m.dm5.com`、`tel.dm5.com`、`en.dm5.com`、`cnc.dm5.com`：unverified
@@ -112,7 +105,7 @@ keiyoushi 把它們歸成同一個圖源「GoDa漫画」。`baozimh.ts` 和 `g-m
 - `m.1kkk.com`：unverified
 - `www.manhuaren.com`（漫畫人）：ok
 
-Mangabz 系（同一套模板）：
+Mangabz 系：
 
 - `mangabz.com`、`www.xmanhua.com`、`www.yymanhua.com`：ok
 
@@ -124,7 +117,7 @@ Komiic：
 
 - `www.8comic.com`：ok
 - `www.comicabc.com`、`www.comicbus.com`：→ `www.8comic.com`
-- 閱讀頁網域：`articles.onemoreplace.tw`、`8.twobili.com`、`a.twobili.com`
+- `articles.onemoreplace.tw`、`8.twobili.com`、`a.twobili.com`：閱讀頁
 
 COLAMANGA：
 
@@ -186,7 +179,7 @@ COLAMANGA：
   - 目前的鏡像：`www.wn001.cfd`、`www.wn002.cfd`
   - 舊鏡像：`wn06`、`wn07`、`wn10` 的 `.cfd`、`.shop`
   - 發布頁：`wnacg01.link`
-- 18漫畫：`18mh.org`（GoDa 同一網）
+- 18漫畫：`18mh.org`（GoDa 同一個營運者）
 - NoyAcg：`noy1.top`、`noymanga.com`
 - hanime1：`hanime1.me`、`hanimeone.me`
 - 肉漫屋：`rouman5.com`、`roum29.xyz`
