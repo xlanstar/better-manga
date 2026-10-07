@@ -9,7 +9,7 @@ generates the manifest — never hand-write `manifest.json`.
 
 Popup UI uses Tailwind CSS v4 and [coss ui](https://coss.com/ui) (Base UI
 components in `components/ui/`, theme in `entrypoints/popup/style.css`).
-Add components with `npx shadcn@latest add @coss/<name>`.
+Add components with `bunx shadcn@latest add @coss/<name>`.
 
 - `bun run dev` / `bun run dev:firefox` — dev with HMR
 - `bun run build` / `bun run zip` — production output in `.output/`
