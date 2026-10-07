@@ -2,7 +2,7 @@
  * Content-script side of the features, kept out of `index.ts` so the popup
  * doesn't bundle it.
  */
-import { sectionFeatures, type Site, type SiteSection } from '@/sites';
+import { sectionFeatures, settingsFeatures, type Site, type SiteSection } from '@/sites';
 import { isAlive, lifetimeSignal, retire } from '@/utils/lifecycle';
 import { startAutoContinue } from './auto-continue/start';
 import { startBlockAds } from './block-ads/start';
@@ -12,7 +12,7 @@ import { createFeatureRunner } from './runner';
 import { startSkipRedirects } from './skip-redirects/start';
 import { startSmoothScroll } from './smooth-scroll/start';
 import { resolveFeatures, type ResolvedFeatures } from './settings';
-import { subscribeStoredSettings } from './settings-storage';
+import { subscribeStoredSettings, type StoredSettings } from './settings-storage';
 import type { FeatureStart } from './types';
 
 /**
@@ -35,6 +35,10 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
  * `runner.ts`). An orphaned instance (see `utils/lifecycle`) stops acting and
  * watching: everything is tied to its lifetime signal.
  *
+ * Returns `setSection`, for when the page moves to another section without a
+ * load (client-side navigation): the features restart with that section's
+ * config, under the latest user settings.
+ *
  * If the user disabled the site (or a feature), it stops once storage answers;
  * on a disabled site the whole instance retires. So it may act for the first
  * few milliseconds of a page load.
@@ -43,10 +47,9 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
  * that throws is logged and skipped, and without storage the features keep
  * the site defaults.
  */
-export function startFeatures(site: Site, section: SiteSection) {
+export function startFeatures(site: Site, section: SiteSection): (section: SiteSection) => void {
   const lifetime = lifetimeSignal();
-  const scope = sectionFeatures(site, section);
-  const defaults = resolveFeatures(scope);
+  let stored: StoredSettings | null = null;
 
   // Generic so TS ties each starter to its own feature's config type.
   const createRunner = <K extends FeatureId>(id: K) => {
@@ -60,24 +63,37 @@ export function startFeatures(site: Site, section: SiteSection) {
       }
     };
   };
-  // `null` = the feature doesn't fit this site; don't install it at all.
-  const runners = featureIds.filter((id) => defaults[id]).map(createRunner);
-  const runAll = (resolved: ResolvedFeatures) => {
+  // `null` = the feature fits no section of this site; don't install it at all.
+  const available = resolveFeatures(settingsFeatures(site));
+  const runners = featureIds.filter((id) => available[id]).map(createRunner);
+  const runAll = () => {
+    const resolved = resolveFeatures(
+      sectionFeatures(site, section),
+      stored?.global,
+      stored?.bySite[site.name],
+    );
     for (const run of runners) run(resolved);
   };
-  runAll(defaults);
+  runAll();
 
-  if (!isAlive()) return;
+  const setSection = (next: SiteSection) => {
+    if (next === section || !isAlive()) return;
+    section = next;
+    runAll();
+  };
+  if (!isAlive()) return setSection;
   try {
-    const unsubscribe = subscribeStoredSettings([site.name], (stored) => {
+    const unsubscribe = subscribeStoredSettings([site.name], (settings) => {
       // Also notices the extension being gone, which aborts `lifetime`.
       if (!isAlive()) return;
-      if (stored.disabledSites.has(site.name)) return retire();
-      runAll(resolveFeatures(scope, stored.global, stored.bySite[site.name]));
+      if (settings.disabledSites.has(site.name)) return retire();
+      stored = settings;
+      runAll();
     });
     lifetime.addEventListener('abort', unsubscribe, { once: true });
   } catch (err) {
     // `browser.storage` can be missing or throw synchronously.
     console.debug(`[better-manga] ${site.name} settings unavailable`, err);
   }
+  return setSection;
 }

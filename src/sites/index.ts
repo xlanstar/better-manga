@@ -43,6 +43,17 @@ export function sectionFor(site: Site, url: string): SiteSection {
   return href && reader.some((p) => new MatchPattern(p).includes(href)) ? 'reader' : 'main';
 }
 
+/**
+ * Whether a frame must follow its URL to keep its section current, as
+ * client-side navigation can move a page between the main site and the
+ * reader without a load. Only on a site with a reader, and only for the top
+ * frame's own http(s) URL: other frames may be matched by their ancestor's
+ * origin, which has no path (see `utils/site-url`).
+ */
+export function followsSections(site: Site, protocol: string, isTopFrame: boolean): boolean {
+  return isTopFrame && /^https?:$/.test(protocol) && Boolean(site.sections?.reader);
+}
+
 const SECTIONS: readonly SiteSection[] = ['main', 'reader'];
 
 /** The site layer on pages of `section`: `Site.features`, the section's on top. */

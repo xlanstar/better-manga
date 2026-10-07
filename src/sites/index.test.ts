@@ -5,6 +5,7 @@ import { featureIds, features as featureDefs, type FeatureId } from '@/features'
 import type { SectionFeatures } from '@/features/settings';
 import {
   allMatches,
+  followsSections,
   sectionFeatures,
   sectionFor,
   settingsFeatures,
@@ -351,6 +352,24 @@ describe('sections', () => {
 
     test('a site without a reader is all main site', () => {
       expect(sectionFor(testSite('*://a.test/*'), 'https://a.test/read/1')).toBe('main');
+    });
+  });
+
+  describe('followsSections', () => {
+    test('follows the top frame of a site with a reader', () => {
+      expect(followsSections(site, 'https:', true)).toBe(true);
+      expect(followsSections(site, 'http:', true)).toBe(true);
+    });
+
+    test.each([
+      ['a subframe', 'https:', false],
+      ['a top frame without an http(s) URL', 'about:', true],
+    ] as const)('not %s', (_, protocol, isTop) => {
+      expect(followsSections(site, protocol, isTop)).toBe(false);
+    });
+
+    test('not a site without a reader', () => {
+      expect(followsSections(testSite('*://a.test/*'), 'https:', true)).toBe(false);
     });
   });
 

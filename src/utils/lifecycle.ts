@@ -33,6 +33,14 @@ export function lifetimeSignal(): AbortSignal {
 }
 
 /**
+ * Call `onUrl` with the page's new URL whenever it changes without a load
+ * (History API), until this instance is retired. Nothing when unbound.
+ */
+export function onLocationChange(onUrl: (url: URL) => void) {
+  ctx?.addEventListener(window, 'wxt:locationchange', (event) => onUrl(event.newUrl));
+}
+
+/**
  * Stand this instance down now, as if a newer one took over:
  * `lifetimeSignal()` aborts and `isAlive()` turns false. Used when the user
  * disables the site; turning it back on takes a reload.

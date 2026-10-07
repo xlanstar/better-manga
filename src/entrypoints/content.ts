@@ -1,8 +1,8 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
-import { allMatches, sectionFor, siteFor } from '@/sites';
+import { allMatches, followsSections, sectionFor, siteFor } from '@/sites';
 import { startFeatures } from '@/features/starters';
 import { siteUrlFor } from '@/utils/site-url';
-import { bindLifecycle } from '@/utils/lifecycle';
+import { bindLifecycle, onLocationChange } from '@/utils/lifecycle';
 
 export default defineContentScript({
   matches: allMatches,
@@ -16,7 +16,11 @@ export default defineContentScript({
     bindLifecycle(ctx);
     const url = siteUrlFor(location, document.referrer);
     const site = siteFor(url);
+    if (!site) return;
     // Synchronously: some features must beat the page's scripts.
-    if (site) startFeatures(site, sectionFor(site, url));
+    const setSection = startFeatures(site, sectionFor(site, url));
+    if (followsSections(site, location.protocol, window === window.top)) {
+      onLocationChange((next) => setSection(sectionFor(site, siteUrlFor(next, ''))));
+    }
   },
 });
