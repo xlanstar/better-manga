@@ -39,4 +39,8 @@ hooks = [
     "ts",
     "tsx",
   ] },
+  { id = "test", name = "test", language = "system", entry = "bun test", pass_filenames = false, types_or = [
+    "ts",
+    "tsx",
+  ] },
 ]

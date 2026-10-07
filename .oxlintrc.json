@@ -15,5 +15,5 @@
     "browser": true,
     "webextensions": true
   },
-  "ignorePatterns": ["components/ui/**"]
+  "ignorePatterns": ["src/components/ui/**"]
 }

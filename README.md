@@ -46,6 +46,12 @@ bun run screenshots
 
 ## Checks
 
+Run the unit tests (`*.test.ts`, next to the source):
+
+```sh
+bun run test
+```
+
 Run all Git hook checks on every file:
 
 ```sh

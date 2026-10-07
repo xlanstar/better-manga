@@ -3,11 +3,14 @@
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
-    // Mirrors WXT's `@` alias relative to the project root. The shadcn CLI
-    // resolves aliases from here; without this it writes files to `../`.
+    // Only the `bun:test` module, for the unit tests (`*.test.ts`); the full
+    // Bun types would leak runtime globals into the extension code.
+    "types": ["bun-types/test"],
+    // Mirrors WXT's `@` alias (`srcDir`) relative to the project root. The
+    // shadcn CLI resolves aliases from here; without this it writes files to `../`.
     "paths": {
-      "@": ["."],
-      "@/*": ["./*"]
+      "@": ["./src"],
+      "@/*": ["./src/*"]
     }
   }
 }

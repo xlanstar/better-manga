@@ -1,50 +1,40 @@
 # better-manga
 
-A browser extension (Chrome MV3 + Firefox) that enhances manga reading sites.
+Browser extension (Chrome MV3 + Firefox): WXT + React + TypeScript, bun.
+Source in `src/` (`@/` alias).
 
-## Stack
+## Done means
 
-WXT + React 19 + TypeScript, bun. Entrypoints live in `entrypoints/`; WXT
-generates the manifest — never hand-write `manifest.json`.
+`prek run --all-files` passes.
 
-Popup UI uses Tailwind CSS v4 and [coss ui](https://coss.com/ui) (Base UI
-components in `components/ui/`, theme in `entrypoints/popup/style.css`).
-Add components with `bunx shadcn@latest add @coss/<name>`.
+## Code
 
-- `bun run dev` / `bun run dev:firefox` — dev with HMR
-- `bun run build` / `bun run zip` — production output in `.output/`
-- `bun run compile` — typecheck (`tsc --noEmit`)
-- `bun run fmt` / `bun run fmt:check` — format with oxfmt (`.oxfmtrc.json`)
-- `bun run lint` / `bun run lint:fix` — lint with oxlint (`.oxlintrc.json`)
-
-Git hooks are managed by [prek](https://prek.j178.dev) via `prek.toml`
-(run `prek install` once per clone; `prek run --all-files` to check everything).
-
-## Docs
-
-- `docs/manga-sites.md` — manga sites and domains only; update it whenever a site's `matches` change.
-  Site technical details go in comments in `sites/<name>.ts`.
-
-## Versioning
-
-Follow semver in `package.json` — that version becomes the extension version.
-Patch for fixes, minor for new site support or features, major for breaking changes.
-
-## Rules
-
-- Typecheck, `bun run fmt:check`, and `bun run lint` must pass before anything
-  is called done.
-- Add permissions to `wxt.config.ts` only when a feature actually needs them.
-  Prefer `activeTab` and optional permissions over broad host permissions.
-- No new dependency for what a few lines of code or a browser API can do.
-- Content scripts run on third-party pages: never assume DOM structure exists,
-  guard every query, and fail silently rather than break the host page.
-- Site-specific selectors and quirks belong in one place, not scattered across
-  content scripts.
+- Never hand-write `manifest.json`; WXT generates it.
+- `src/entrypoints/` holds entry files only; logic goes in `sites/`, `features/`,
+  `components/`, `hooks/` or `utils/`.
+- A site is `sites/<name>.ts`, registered in `sites/index.ts` and `sites/fixes.ts`.
+  Its selectors, quirks and notes stay in that file.
+- A feature is `features/<name>/`, registered in `features/index.ts`,
+  `starters.ts` and `controls.ts`.
+- `utils/` imports nothing from `sites/` or `features/`. The popup must not
+  import `sites/fixes.ts` or `features/starters.ts`; the content script must not
+  import `features/controls.ts`.
+- `components/ui/` is generated coss ui (`bunx shadcn@latest add @coss/<name>`);
+  don't hand-edit.
+- Merge class names with `cn` from `'cn'`.
+- Pure logic gets a `*.test.ts` next to it; pass browser values (`location`, …)
+  in as arguments.
+- Content scripts: guard every DOM query and fail silently.
 - Store state with `browser.storage`, not `localStorage`.
+- No new dependency for what a few lines or a browser API can do.
+- Add permissions only when needed; prefer `activeTab` / optional permissions.
 - No user data leaves the browser without an explicit user action.
-- Keep `PRIVACY.md` in sync with what the extension stores, sends, and runs on
-  (sites, permissions, data); update its date when you change it.
-- Keep `store/` (Chrome Web Store listing, git-ignored) in sync with features,
-  supported sites, permissions, and UI. Regenerate screenshots with
-  `bun run screenshots` (details in `scripts/screenshots/capture.ts`).
+
+## Keep in sync
+
+- `package.json` version (semver): patch for fixes, minor for new sites or
+  features, major for breaking changes.
+- `docs/manga-sites.md`: sites and domains only; update when `matches` change.
+- `PRIVACY.md`: stored data, permissions and sites; update its date.
+- `store/` (git-ignored): store listing; regenerate screenshots with
+  `bun run screenshots`.

@@ -3,6 +3,8 @@ import tailwindcss from '@tailwindcss/vite';
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
+  // Extension source; `public/` stays at the root.
+  srcDir: 'src',
   modules: ['@wxt-dev/module-react'],
   dev: {
     server: {
