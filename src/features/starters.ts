@@ -10,13 +10,8 @@ import { featureIds, type FeatureId, type FeatureResolvedConfig } from './index'
 import { startPageScroll } from './page-scroll/start';
 import { createFeatureRunner } from './runner';
 import { startSkipRedirects } from './skip-redirects/start';
-import { resolveFeatures, type ResolvedFeatures, type UserSettings } from './settings';
-import {
-  loadStoredSettings,
-  watchStoredSettings,
-  type StoredSettings,
-  type StoredSettingsChange,
-} from './settings-storage';
+import { resolveFeatures, type ResolvedFeatures } from './settings';
+import { subscribeStoredSettings } from './settings-storage';
 import type { FeatureStart } from './types';
 
 /**
@@ -65,38 +60,12 @@ export function startFeatures(site: Site) {
   };
   runAll(defaults);
 
-  let global: UserSettings = {};
-  let override: UserSettings = {};
-  const apply = (change: StoredSettingsChange) => {
-    if (change.disabledSites?.has(site.name)) return retire();
-    if (change.global) global = change.global;
-    if (change.bySite && site.name in change.bySite) override = change.bySite[site.name] ?? {};
-    runAll(resolveFeatures(site.features, global, override));
-  };
-
   if (!isAlive()) return;
-  // Watch before loading so a change made while the load is in flight isn't
-  // lost. A watched value is always newer than the load result, so the
-  // (possibly slow) load must not overwrite what has arrived since.
-  const watchedKeys = new Set<keyof StoredSettingsChange>();
-  try {
-    const unwatch = watchStoredSettings([site.name], (change) => {
-      for (const key of Object.keys(change)) watchedKeys.add(key as keyof StoredSettingsChange);
-      apply(change);
-    });
-    lifetime.addEventListener('abort', unwatch, { once: true });
-  } catch {
-    // storage unavailable — the load below falls back to defaults
-  }
-  loadStoredSettings([site.name])
-    .catch((): StoredSettings => ({ global: {}, bySite: {}, disabledSites: new Set() }))
-    .then((stored) => {
-      if (!isAlive()) return;
-      const fresh: StoredSettingsChange = {};
-      if (!watchedKeys.has('global')) fresh.global = stored.global;
-      if (!watchedKeys.has('bySite'))
-        fresh.bySite = { [site.name]: stored.bySite[site.name] ?? {} };
-      if (!watchedKeys.has('disabledSites')) fresh.disabledSites = stored.disabledSites;
-      apply(fresh);
-    });
+  const unsubscribe = subscribeStoredSettings([site.name], (stored) => {
+    // Also notices the extension being gone, which aborts `lifetime`.
+    if (!isAlive()) return;
+    if (stored.disabledSites.has(site.name)) return retire();
+    runAll(resolveFeatures(site.features, stored.global, stored.bySite[site.name]));
+  });
+  lifetime.addEventListener('abort', unsubscribe, { once: true });
 }

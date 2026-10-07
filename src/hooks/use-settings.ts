@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { pruneUserSettings, type UserSettings } from '@/features/settings';
 import {
-  loadStoredSettings,
+  mergeStoredSettings,
   saveGlobalSettings,
   saveSiteSettings,
   setSiteDisabled,
-  watchStoredSettings,
+  subscribeStoredSettings,
   type StoredSettings,
-  type StoredSettingsChange,
 } from '@/features/settings-storage';
 import { sites, type Site } from '@/sites';
 
@@ -29,34 +28,19 @@ export function useSettings() {
   }, [settings]);
 
   useEffect(() => {
-    let cancelled = false;
-    const pending: StoredSettingsChange[] = [];
-    let loaded = false;
-    const unwatch = watchStoredSettings(null, (change) => {
-      if (!loaded) pending.push(change);
-      else setSettings((prev) => prev && merge(prev, change));
-    });
-    void loadStoredSettings(sites.map((s) => s.name))
-      .catch(() => EMPTY)
-      .then((stored) => {
-        loaded = true;
-        if (!cancelled) setSettings(pending.reduce(merge, stored));
-      });
-    return () => {
-      cancelled = true;
-      unwatch();
-    };
+    const names = sites.map((s) => s.name);
+    return subscribeStoredSettings(names, setSettings);
   }, []);
 
   const updateGlobal = (next: UserSettings, persist: boolean) => {
     const value = persist ? pruneUserSettings(undefined, next) : next;
-    setSettings((prev) => prev && { ...prev, global: value });
+    setSettings((prev) => prev && mergeStoredSettings(prev, { global: value }));
     if (persist) void saveGlobalSettings(value);
   };
 
   const updateSite = (site: Site, next: UserSettings, persist: boolean) => {
     const value = persist ? pruneUserSettings(site.features, next, latest.current.global) : next;
-    setSettings((prev) => prev && merge(prev, { bySite: { [site.name]: value } }));
+    setSettings((prev) => prev && mergeStoredSettings(prev, { bySite: { [site.name]: value } }));
     if (persist) void saveSiteSettings(site.name, value);
   };
 
@@ -72,17 +56,4 @@ export function useSettings() {
   };
 
   return { settings, updateGlobal, updateSite, setDisabled };
-}
-
-function merge(prev: StoredSettings, change: StoredSettingsChange): StoredSettings {
-  const bySite = change.bySite ? { ...prev.bySite } : prev.bySite;
-  for (const [name, value] of Object.entries(change.bySite ?? {})) {
-    if (Object.keys(value).length) bySite[name] = value;
-    else delete bySite[name];
-  }
-  return {
-    global: change.global ?? prev.global,
-    bySite,
-    disabledSites: change.disabledSites ?? prev.disabledSites,
-  };
 }
