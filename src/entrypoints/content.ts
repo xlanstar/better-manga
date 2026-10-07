@@ -1,3 +1,4 @@
+import { defineContentScript } from 'wxt/utils/define-content-script';
 import { allMatches, siteFor } from '@/sites';
 import { startFeatures } from '@/features/starters';
 import { siteUrlFor } from '@/utils/site-url';

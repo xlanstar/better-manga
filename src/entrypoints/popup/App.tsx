@@ -1,5 +1,6 @@
 import { GlobeIcon, RotateCwIcon, SettingsIcon } from 'lucide-react';
 import { useState } from 'react';
+import { browser } from 'wxt/browser';
 import { AppHeader, Section } from '@/components/page-layout';
 import { CurrentSiteSettings } from '@/components/site-settings';
 import { Button } from '@/components/ui/button';

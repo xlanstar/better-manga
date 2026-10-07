@@ -9,13 +9,8 @@ import {
   MenuTrigger,
 } from '@/components/ui/menu';
 import { useLocalePreference } from '@/hooks/use-locale';
-import {
-  i18n,
-  LOCALE_NAMES,
-  LOCALES,
-  parseLocalePreference,
-  setLocalePreference,
-} from '@/utils/i18n';
+import { i18n, setLocalePreference } from '@/utils/i18n';
+import { LOCALE_NAMES, LOCALES, parseLocalePreference } from '@/utils/messages';
 
 /** Icon button that picks the UI language (or follows the browser's). */
 export function LanguageMenu() {

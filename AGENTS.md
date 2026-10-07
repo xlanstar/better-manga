@@ -25,6 +25,9 @@ Source in `src/` (`@/` alias).
   one call, render site lists lazily), and no two sites may share a host.
 - `components/ui/` is generated coss ui (`bunx shadcn@latest add @coss/<name>`);
   don't hand-edit.
+- Auto-imports are off (`imports: false`): import everything explicitly,
+  WXT APIs from their real paths (`wxt/browser`, `wxt/utils/storage`,
+  `wxt/utils/define-*`), not `#imports`, so `bun test` can resolve them.
 - Merge class names with `cn` from `'cn'`.
 - Icons come from `lucide-react`.
 - UI text goes in `src/locales/<locale>.yml` (`en` is the default and

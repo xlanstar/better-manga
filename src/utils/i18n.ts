@@ -6,20 +6,14 @@
  *
  * Use `i18n.t` from here, not from `#i18n`.
  */
+import { browser } from 'wxt/browser';
+import { storage } from 'wxt/utils/storage';
 import { i18n as browserI18n } from '#i18n';
 import {
   LOCALES,
   lookupMessage,
   parseLocalePreference,
   type Catalog,
-  type LocalePreference,
-} from './messages';
-
-export {
-  LOCALE_NAMES,
-  LOCALES,
-  parseLocalePreference,
-  type Locale,
   type LocalePreference,
 } from './messages';
 

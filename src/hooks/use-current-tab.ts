@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { browser } from 'wxt/browser';
 import { siteFor, type Site } from '@/sites';
 
 export type CurrentTab = {

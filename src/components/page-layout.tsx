@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { browser } from 'wxt/browser';
 import logo from '@/assets/logo.svg';
 import { Badge } from '@/components/ui/badge';
 import { i18n } from '@/utils/i18n';

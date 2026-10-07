@@ -5,6 +5,8 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   // Extension source; `public/` stays at the root.
   srcDir: 'src',
+  // Explicit imports only: no name clashes, and imports show real dependencies.
+  imports: false,
   // i18n: messages in `src/locales/<locale>.yml`, read with `i18n.t` from `@/utils/i18n`.
   modules: ['@wxt-dev/module-react', '@wxt-dev/i18n/module'],
   dev: {

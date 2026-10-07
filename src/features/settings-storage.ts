@@ -9,6 +9,8 @@
  * readers load (and watch) only the sites they need, in one `getItems` call
  * and one listener (`subscribeStoredSettings`).
  */
+import { browser } from 'wxt/browser';
+import { storage } from 'wxt/utils/storage';
 import { sanitizeSiteNames, sanitizeUserSettings, type UserSettings } from './settings';
 
 // Keys as `browser.storage.onChanged` reports them; `storage` takes them

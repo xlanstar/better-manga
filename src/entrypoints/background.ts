@@ -1,3 +1,7 @@
+import { browser } from 'wxt/browser';
+import type { ScriptPublicPath } from 'wxt/utils/inject-script';
+import { defineBackground } from 'wxt/utils/define-background';
+
 export default defineBackground(() => {
   // Content scripts only start on page load, and after an update/reload the
   // instance in already-open tabs is orphaned (no storage events), so popup
