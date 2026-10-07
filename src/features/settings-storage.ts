@@ -141,7 +141,8 @@ async function loadStoredSettings(siteNames: readonly string[]): Promise<StoredS
     local(DISABLED_KEY),
     ...siteNames.map((name) => local(siteKey(name))),
   ]);
-  const value = (key: string) => items.find((item) => item.key === local(key))?.value;
+  const values = new Map(items.map((item) => [item.key, item.value]));
+  const value = (key: string) => values.get(local(key));
   const bySite: Record<string, UserSettings> = {};
   for (const name of siteNames) {
     const settings = sanitizeUserSettings(value(siteKey(name)));
