@@ -1,3 +1,4 @@
+import { i18n } from '#i18n';
 import { RotateCcwIcon } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion';
@@ -43,17 +44,17 @@ export function SiteSettings({
             {site.label}
             {isCurrent && (
               <Badge size="sm" variant="info">
-                目前頁面
+                {i18n.t('siteSettings.current')}
               </Badge>
             )}
             {customised && (
               <Badge size="sm" variant="secondary">
-                已自訂
+                {i18n.t('siteSettings.customised')}
               </Badge>
             )}
           </span>
           <span className="truncate text-xs font-normal text-muted-foreground">
-            {siteHosts(site).join('、')}
+            {siteHosts(site).join(i18n.t('siteSettings.hostSeparator'))}
           </span>
         </span>
       </AccordionTrigger>
@@ -71,7 +72,7 @@ export function SiteSettings({
             />
           ))
         ) : (
-          <p className="text-muted-foreground">此網站沒有可調整的設定，網站修正會自動套用。</p>
+          <p className="text-muted-foreground">{i18n.t('siteSettings.noSettings')}</p>
         )}
 
         <div className="flex justify-end">
@@ -82,7 +83,7 @@ export function SiteSettings({
             variant="ghost"
           >
             <RotateCcwIcon />
-            還原預設
+            {i18n.t('siteSettings.reset')}
           </Button>
         </div>
       </AccordionPanel>

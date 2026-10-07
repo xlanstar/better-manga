@@ -1,0 +1,20 @@
+lang: zh-Hans
+extName: Better Manga
+extDescription: 让漫画网站读起来更顺手。
+
+popup:
+  currentSiteHint: 调整此网站或其他支持网站的设置
+  unsupportedSite: 当前标签页不是支持的网站
+
+siteSettings:
+  current: 当前页面
+  customised: 已自定义
+  noSettings: 此网站没有可调整的设置，网站修正会自动应用。
+  reset: 恢复默认
+  hostSeparator: 、
+
+pageScroll:
+  title: Page Up / Down 滚动
+  description: 每次滚动屏幕高度的固定比例，保留重叠方便接续阅读。
+  ratio: 滚动比例
+  default: 默认 $1

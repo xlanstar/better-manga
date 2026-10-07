@@ -5,7 +5,8 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   // Extension source; `public/` stays at the root.
   srcDir: 'src',
-  modules: ['@wxt-dev/module-react'],
+  // i18n: messages in `src/locales/<locale>.yml`, read with `i18n.t` from `#i18n`.
+  modules: ['@wxt-dev/module-react', '@wxt-dev/i18n/module'],
   dev: {
     server: {
       port: 3737,
@@ -15,8 +16,9 @@ export default defineConfig({
     plugins: [tailwindcss()],
   }),
   manifest: {
-    name: 'Better Manga',
-    description: 'Enhances manga reading sites.',
+    default_locale: 'en',
+    name: '__MSG_extName__',
+    description: '__MSG_extDescription__',
     // storage: per-site user settings. activeTab: popup reads the current tab's URL.
     // scripting: re-inject content scripts into open tabs after install/update.
     permissions: ['storage', 'activeTab', 'scripting'],

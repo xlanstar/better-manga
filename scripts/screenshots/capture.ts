@@ -3,8 +3,10 @@
  *
  *   bun run screenshots          (first time: bunx playwright install chromium)
  *
- * 1. Builds the extension and loads .output/chrome-mv3 into Playwright's
- *    Chromium (branded Chrome no longer honours --load-extension).
+ * 1. Builds the extension and loads a copy of .output/chrome-mv3 into
+ *    Playwright's Chromium (branded Chrome no longer honours --load-extension).
+ *    The copy keeps only the `LOCALE` messages, so the popup matches
+ *    layout.html's copy whatever the OS language (`--lang` is ignored on macOS).
  * 2. Opens popup.html in a tab with `chrome.tabs.query` stubbed to return a
  *    supported-site URL, so the popup renders as if opened on that site.
  *    No third-party page is loaded, so no copyrighted manga ends up in it.
@@ -13,7 +15,7 @@
  * Edit layout.html for the copy; keep it in sync with the store listing.
  */
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,9 +23,11 @@ import { chromium } from 'playwright';
 
 /** URL the popup believes it was opened on. Must match a site in the registry. */
 const CURRENT_URL = 'https://reader.hipmh.top/chapter/1';
+/** Popup language, matching layout.html. */
+const LOCALE = 'zh_TW';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
-const ext = join(root, '.output/chrome-mv3');
+const built = join(root, '.output/chrome-mv3');
 const outDir = join(root, 'store/screenshots');
 const out = join(outDir, '1-popup.png');
 
@@ -31,8 +35,11 @@ if (spawnSync('bun', ['run', 'build'], { cwd: root, stdio: 'inherit' }).status !
   process.exit(1);
 }
 
-const profile = mkdtempSync(join(tmpdir(), 'better-manga-shot-'));
+const tmp = mkdtempSync(join(tmpdir(), 'better-manga-shot-'));
+const profile = join(tmp, 'profile');
+const ext = join(tmp, 'extension');
 try {
+  pinLocale();
   const popup = await capturePopup();
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
@@ -50,7 +57,18 @@ try {
   await browser.close();
   console.log(`✔ ${out}`);
 } finally {
-  rmSync(profile, { recursive: true, force: true });
+  rmSync(tmp, { recursive: true, force: true });
+}
+
+/** Copy the build with `LOCALE` as its only (hence default) locale. */
+function pinLocale() {
+  cpSync(built, ext, { recursive: true });
+  const locales = join(ext, '_locales');
+  rmSync(locales, { recursive: true });
+  cpSync(join(built, '_locales', LOCALE), join(locales, LOCALE), { recursive: true });
+  const manifestPath = join(ext, 'manifest.json');
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  writeFileSync(manifestPath, JSON.stringify({ ...manifest, default_locale: LOCALE }));
 }
 
 async function capturePopup() {

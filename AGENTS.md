@@ -22,6 +22,9 @@ Source in `src/` (`@/` alias).
 - `components/ui/` is generated coss ui (`bunx shadcn@latest add @coss/<name>`);
   don't hand-edit.
 - Merge class names with `cn` from `'cn'`.
+- UI text goes in `src/locales/<locale>.yml` (`en` is the default and
+  fallback; keep `zh_TW` and `zh_CN` in sync) and is read with `i18n.t` from
+  `'#i18n'`. Site labels are brand names and stay in the site file.
 - Pure logic gets a `*.test.ts` next to it; pass browser values (`location`, …)
   in as arguments.
 - Content scripts: guard every DOM query and fail silently.

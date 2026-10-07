@@ -1,7 +1,10 @@
+import { i18n } from '#i18n';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import './style.css';
+
+document.documentElement.lang = i18n.t('lang');
 
 // coss ui uses a `.dark` class; follow the system color scheme.
 const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');

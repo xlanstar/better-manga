@@ -1,3 +1,4 @@
+import { i18n } from '#i18n';
 import { Accordion } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { sites } from '@/sites';
@@ -19,9 +20,9 @@ export default function App() {
     <div className="flex w-85 flex-col">
       <header className="flex items-center justify-between gap-2 border-b px-4 py-3">
         <div className="flex flex-col">
-          <h1 className="text-sm font-semibold">Better Manga</h1>
+          <h1 className="text-sm font-semibold">{i18n.t('extName')}</h1>
           <p className="text-xs text-muted-foreground">
-            {currentSiteName ? '調整此網站或其他支援網站的設定' : '目前分頁不是支援的網站'}
+            {currentSiteName ? i18n.t('popup.currentSiteHint') : i18n.t('popup.unsupportedSite')}
           </p>
         </div>
         <Badge variant="outline">v{browser.runtime.getManifest().version}</Badge>

@@ -1,0 +1,21 @@
+# BCP 47 tag for the popup's <html lang>.
+lang: zh-Hant
+extName: Better Manga
+extDescription: 讓漫畫網站讀起來更順手。
+
+popup:
+  currentSiteHint: 調整此網站或其他支援網站的設定
+  unsupportedSite: 目前分頁不是支援的網站
+
+siteSettings:
+  current: 目前頁面
+  customised: 已自訂
+  noSettings: 此網站沒有可調整的設定，網站修正會自動套用。
+  reset: 還原預設
+  hostSeparator: 、
+
+pageScroll:
+  title: Page Up / Down 捲動
+  description: 每次捲動畫面高度的固定比例，保留重疊方便接續閱讀。
+  ratio: 捲動比例
+  default: 預設 $1

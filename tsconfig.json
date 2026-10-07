@@ -8,9 +8,11 @@
     "types": ["bun-types/test"],
     // Mirrors WXT's `@` alias (`srcDir`) relative to the project root. The
     // shadcn CLI resolves aliases from here; without this it writes files to `../`.
+    // `paths` replaces WXT's instead of merging, so re-add `#i18n` too.
     "paths": {
       "@": ["./src"],
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "#i18n": ["./.wxt/i18n/index.ts"]
     }
   }
 }

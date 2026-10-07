@@ -1,0 +1,21 @@
+# Default locale (also the fallback). Keys: see `zh_TW.yml`.
+lang: en
+extName: Better Manga
+extDescription: Enhances manga reading sites.
+
+popup:
+  currentSiteHint: Adjust settings for this site or other supported sites
+  unsupportedSite: The current tab is not a supported site
+
+siteSettings:
+  current: Current page
+  customised: Customised
+  noSettings: This site has no adjustable settings; site fixes apply automatically.
+  reset: Reset to defaults
+  hostSeparator: ', '
+
+pageScroll:
+  title: Page Up / Down scrolling
+  description: Scrolls a fixed share of the screen height, keeping some overlap so you don't lose your place.
+  ratio: Scroll ratio
+  default: Default $1
