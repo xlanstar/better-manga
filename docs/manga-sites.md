@@ -20,9 +20,9 @@
 
 ## 已支援
 
-### GoDa 漫畫網（site files: `baozimh`、`g-mh`）
+### GoDa 漫畫網（site files: `baozimh`、`g-mh`、`18mh`）
 
-同一個營運者，分成兩個前端，各自一個 site file。
+同一個營運者，分成多個前端，各自一個 site file。
 
 包子漫畫（`baozimh`）：
 
@@ -38,11 +38,14 @@ G站漫畫（`g-mh`）：
 - `www.g-mh.org`：→ `g-mh.org`；unmatched
 - `www.godamh.com`：→ `godamh.com`；unmatched
 
+18漫畫（`18mh`，R18）：
+
+- `18mh.org`：cf；matched（含所有子網域，未實測）
+
 相關網域：
 
 - 發布頁：`n.telltome.net`、`des.telltome.net`（免廣告說明）
 - 同營運者的其他網站：
-  - `18mh.org`：18漫畫（R18）
   - `manhuascans.org`：英文版
   - `m.godamh.com`：G社資訊（新聞站）
   - `baozimh.one`：Bun社（新聞站）
@@ -179,7 +182,7 @@ COLAMANGA：
   - 目前的鏡像：`www.wn001.cfd`、`www.wn002.cfd`
   - 舊鏡像：`wn06`、`wn07`、`wn10` 的 `.cfd`、`.shop`
   - 發布頁：`wnacg01.link`
-- 18漫畫：`18mh.org`（GoDa 同一個營運者）
+- 18漫畫：`18mh.org`（已支援，見 GoDa 漫畫網）
 - NoyAcg：`noy1.top`、`noymanga.com`
 - hanime1：`hanime1.me`、`hanimeone.me`
 - 肉漫屋：`rouman5.com`、`roum29.xyz`
@@ -213,4 +216,5 @@ COLAMANGA：
 1. 修改 `src/sites/<name>.ts` 的 `matches`（新網站還要在 `src/sites/index.ts` 登記）。
 2. 更新本文件。
 3. 同步 `store/chrome-web-store.md` 的主機權限說明（`PRIVACY.md` 只連結本文件，不列網站）。
+   R18 網站不寫進任何上架資料（商店說明、截圖、`scripts/screenshots/`）。
 4. 依 semver 更新 `package.json` 版本（新網站 → minor）。

@@ -138,6 +138,7 @@ describe('siteFor', () => {
         'http://godamh.com/',
       ],
     ],
+    ['18mh', ['https://18mh.org/', 'https://m.18mh.org/manga/abc', 'http://www.18mh.org/']],
     ['hipmh', ['https://reader.hipmh.top/', 'https://reader.hipmh.top/chapter/123']],
   ])('%s', (siteName, urls) => {
     test.each(urls)('matches %s', (url) => {
@@ -232,6 +233,7 @@ describe('siteHosts', () => {
     expect(Object.fromEntries(sites.map((s) => [s.name, siteHosts(s)]))).toEqual({
       baozimh: ['baozimh.org', 'bzmh.org', 'm.baozimh.one'],
       'g-mh': ['m.g-mh.org', 'g-mh.org', 'godamh.com'],
+      '18mh': ['18mh.org'],
       hipmh: ['reader.hipmh.top'],
     });
   });

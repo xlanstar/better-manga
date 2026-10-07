@@ -2,6 +2,7 @@ import { MatchPattern } from 'wxt/utils/match-patterns';
 import type { FeatureId } from '@/features';
 import type { SiteFeatures } from '@/features/settings';
 import type { Site, SiteSection } from './types';
+import { site as mh18 } from './18mh';
 import { site as baozimh } from './baozimh';
 import { site as gmh } from './g-mh';
 import { site as hipmh } from './hipmh';
@@ -10,7 +11,7 @@ import { site as hipmh } from './hipmh';
  * Registry of sites — add a file next to this one, then one line here. Each
  * site's own logic is in its `features` and `sections` config (see `types.ts`).
  */
-export const sites = [baozimh, gmh, hipmh];
+export const sites = [baozimh, gmh, mh18, hipmh];
 
 export type { Site, SiteSection } from './types';
 export type SiteName = (typeof sites)[number]['name'];

@@ -79,3 +79,8 @@ only on sites that configure them; the others run on every site.
   `docs/manga-sites.md`); update its date.
 - `store/` (git-ignored): store listing; regenerate screenshots with
   `bun run screenshots`.
+- Site lists: adding or changing a site or its features, update every list
+  (`rg` an existing site's label and hosts): `docs/manga-sites.md`,
+  `store/chrome-web-store.md` (description, host permissions),
+  `scripts/screenshots/layout.html`.
+- Store material (`store/`, `scripts/screenshots/`) never names R18 sites.
