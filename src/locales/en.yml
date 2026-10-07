@@ -8,7 +8,6 @@ popup:
   unsupportedSite: The current tab is not a supported site
   unsupportedSiteHint: Browse every supported site in the settings.
   openOptions: Settings
-  manageSites: Manage all $1 sites
   reloadHint: Reload the page to fully apply
   reload: Reload
 

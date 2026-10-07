@@ -8,7 +8,6 @@ popup:
   unsupportedSite: '目前分頁不是支援的網站'
   unsupportedSiteHint: '在設定頁瀏覽所有支援的網站。'
   openOptions: '設定'
-  manageSites: '管理全部 $1 個網站'
   reloadHint: '重新載入頁面後完整生效'
   reload: '重新載入'
 

@@ -1,34 +1,23 @@
-import { ChevronRightIcon, GlobeIcon, RotateCwIcon, SettingsIcon } from 'lucide-react';
+import { GlobeIcon, RotateCwIcon, SettingsIcon } from 'lucide-react';
 import { useState } from 'react';
-import { GlobalSettings } from '@/components/global-settings';
 import { AppHeader, Section } from '@/components/page-layout';
 import { CurrentSiteSettings } from '@/components/site-settings';
-import {
-  Accordion,
-  AccordionItem,
-  AccordionPanel,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Frame, FramePanel } from '@/components/ui/frame';
 import { useCurrentTab } from '@/hooks/use-current-tab';
 import { useLocalePreference } from '@/hooks/use-locale';
 import { useSettings } from '@/hooks/use-settings';
-import { isCustomised } from '@/features/settings';
-import { sites } from '@/sites';
 import { i18n } from '@/utils/i18n';
 
 /**
- * Quick settings: the site in the current tab, and the global layer. Managing
- * every site happens on the options page, so this stays short however many
- * sites there are.
+ * Quick settings for the site in the current tab only. The global layer and
+ * every other site live on the options page (the header's settings button), so
+ * this stays short however many sites there are.
  */
 export default function App() {
   const tab = useCurrentTab();
-  // Only what the popup shows: the global layer and the tab's site.
-  const { settings, updateGlobal, updateSite, setDisabled } = useSettings(
-    tab && (tab.site ? [tab.site] : []),
-  );
+  // Only what the popup shows: the tab's site (merged over the global layer).
+  const { settings, updateSite, setDisabled } = useSettings(tab && (tab.site ? [tab.site] : []));
   // Re-render all text when the language changes.
   useLocalePreference();
   // Turning a site on (or off) only fully applies after a reload.
@@ -84,36 +73,6 @@ export default function App() {
             </div>
           )}
         </Section>
-
-        <Accordion
-          className="rounded-xl border bg-background"
-          // Nothing else to show on an unsupported page, so start open there.
-          defaultValue={site ? [] : ['global']}
-        >
-          <AccordionItem value="global">
-            <AccordionTrigger className="items-center px-4 py-3 hover:bg-accent/50">
-              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="text-sm font-semibold">
-                  {i18n.t('globalSettings.title')}
-                  {isCustomised(settings.global) && (
-                    <span className="ms-1.5 inline-block size-1.5 rounded-full bg-info align-middle" />
-                  )}
-                </span>
-                <span className="text-xs font-normal text-muted-foreground">
-                  {i18n.t('globalSettings.description')}
-                </span>
-              </span>
-            </AccordionTrigger>
-            <AccordionPanel className="px-4 pt-1 text-foreground">
-              <GlobalSettings global={settings.global} onChange={updateGlobal} />
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
-
-        <Button className="justify-between" onClick={openOptions} variant="outline">
-          {i18n.t('popup.manageSites', [sites.length])}
-          <ChevronRightIcon />
-        </Button>
       </main>
     </div>
   );
