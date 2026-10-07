@@ -26,6 +26,7 @@ Source in `src/` (`@/` alias).
 - `components/ui/` is generated coss ui (`bunx shadcn@latest add @coss/<name>`);
   don't hand-edit.
 - Merge class names with `cn` from `'cn'`.
+- Icons come from `lucide-react`.
 - UI text goes in `src/locales/<locale>.yml` (`en` is the default and
   fallback; keep `zh_TW` and `zh_CN` in sync, and `LOCALES` in
   `utils/messages.ts`) and is read with `i18n.t` from `@/utils/i18n` (not
