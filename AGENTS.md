@@ -35,4 +35,5 @@ Patch for fixes, minor for new site support or features, major for breaking chan
 - Keep `PRIVACY.md` in sync with what the extension stores, sends, and runs on
   (sites, permissions, data); update its date when you change it.
 - Keep `store/` (Chrome Web Store listing, git-ignored) in sync with features,
-  supported sites, permissions, and UI (re-take screenshots when the popup changes).
+  supported sites, permissions, and UI. Regenerate screenshots with
+  `bun run screenshots` (details in `scripts/screenshots/capture.ts`).
