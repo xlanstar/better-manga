@@ -3,12 +3,42 @@
 import { isAlive, onRetire } from './lifecycle';
 
 /**
- * Hide every element matching `selectors` — the ones already in the page, the
- * ones inserted later, and the ones that only gain a matching class later.
- * Returns the observer so a caller can stop watching.
+ * Hide every element matching `selectors`, now and later, with a stylesheet:
+ * no work per mutation, and matches never render.
  */
-export function keepHidden(...selectors: string[]): MutationObserver | undefined {
-  return onEachMatch(selectors.join(','), hideElement);
+export function keepHidden(...selectors: string[]): void {
+  const style = document.createElement('style');
+  style.setAttribute('data-better-manga', 'keep-hidden');
+  // One rule per selector, so an invalid one only drops itself. `textContent`
+  // (not a text node) keeps Firefox from applying the page's CSP.
+  style.textContent = selectors.map((s) => `${s} { display: none !important; }`).join('\n');
+
+  // Child of <html> (no <head> at document_start). Some pages drop it or
+  // replace <html>; re-attach. childList only, so reader DOM churn is free.
+  const attach = () => {
+    const root = document.documentElement;
+    if (!root || style.isConnected) return;
+    root.append(style);
+    observer.disconnect();
+    observer.observe(document, { childList: true });
+    observer.observe(root, { childList: true });
+    // Blocked by a page CSP after all: fall back to inline styles.
+    if (!style.sheet) {
+      stop();
+      onEachMatch(selectors.join(','), hideElement);
+    }
+  };
+  const observer = new MutationObserver(() => {
+    if (isAlive()) attach();
+  });
+  const stop = () => {
+    observer.disconnect(); // first, or it would re-attach the style
+    style.remove();
+  };
+  onRetire(stop);
+  // In case there's no <html> yet.
+  observer.observe(document, { childList: true });
+  attach();
 }
 
 /**

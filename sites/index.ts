@@ -1,3 +1,4 @@
+import { MatchPattern } from 'wxt/utils/match-patterns';
 import type { Site } from './types';
 import { site as baozimh } from './baozimh';
 import { site as gmh } from './g-mh';
@@ -15,9 +16,25 @@ export type SiteName = (typeof sites)[number]['name'];
 
 export const allMatches = sites.flatMap((s) => s.matches);
 
-/** Sites whose match patterns cover `url`. */
+// Parsed once; an invalid pattern throws here, i.e. already at build time
+// (WXT evaluates the content script's `matches`).
+const patterns = sites.map((s) => s.matches.map((p) => new MatchPattern(p)));
+
+/** Sites whose match patterns cover `url`; none for anything unparsable. */
 export function sitesFor(url: string): typeof sites {
-  return sites.filter((s) => s.matches.some((p) => matchPattern(p).test(url)));
+  try {
+    const u = new URL(url);
+    // Chrome matches `example.com.` (fully-qualified, trailing dot) like
+    // `example.com` and injects there; the library doesn't.
+    u.hostname = u.hostname.replace(/\.$/, '');
+    // A string, not the URL: `includes()` checks `instanceof Location`, which
+    // doesn't exist in workers.
+    return sites.filter((_, i) => patterns[i]?.some((p) => p.includes(u.href)));
+  } catch {
+    // Unparsable URL (the popup passes any tab URL). `includes()` would also
+    // throw for `ftp://` / `urn:` patterns, should one ever be added.
+    return [];
+  }
 }
 
 /** `*://*.baozimh.org/*` → `baozimh.org`, for display. */
@@ -29,21 +46,4 @@ export function siteHosts(site: Site): string {
       .replace(/\/.*$/, ''),
   );
   return [...new Set(hosts)].join('、');
-}
-
-// Enough of the match-pattern grammar for our own patterns.
-// Swap in `browser.runtime.getManifest()` parsing only if patterns get exotic.
-function matchPattern(pattern: string): RegExp {
-  const [scheme = '*', rest = ''] = pattern.split('://');
-  const slash = rest.indexOf('/');
-  const host = slash === -1 ? rest : rest.slice(0, slash);
-  const path = slash === -1 ? '/*' : rest.slice(slash);
-  const esc = (s: string) => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
-  // `*.example.com` also matches the bare `example.com`, per the spec.
-  const hostRe = host.startsWith('*.')
-    ? `(?:[^/]+\\.)?${esc(host.slice(2))}`
-    : esc(host).replace(/\*/g, '[^/]*');
-  return new RegExp(
-    `^${scheme === '*' ? 'https?' : esc(scheme)}://${hostRe}${esc(path).replace(/\*/g, '.*')}$`,
-  );
 }
