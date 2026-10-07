@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { sitesFor, type Site } from '@/sites';
+import { siteFor, type Site } from '@/sites';
 
 export type CurrentTab = {
   id: number | undefined;
@@ -18,7 +18,7 @@ export function useCurrentTab() {
       .catch(() => [])
       .then(([active]) => {
         if (cancelled) return;
-        setTab({ id: active?.id, site: (active?.url && sitesFor(active.url)[0]) || null });
+        setTab({ id: active?.id, site: active?.url ? siteFor(active.url) : null });
       });
     return () => {
       cancelled = true;

@@ -6,14 +6,16 @@ import {
   allMatches,
   siteHosts,
   siteMatchesQuery,
+  siteFor,
   sites,
-  sitesFor,
   type Site,
   type SiteName,
 } from './index';
 import { defineSite } from './types';
 
-const names = (url: string) => sitesFor(url).map((s) => s.name);
+const name = (url: string) => siteFor(url)?.name;
+const covers = (site: Site, url: string) =>
+  site.matches.some((pattern) => new MatchPattern(pattern).includes(url));
 const testSite = (...matches: string[]): Site => ({ name: 't', label: 'T', matches });
 
 describe('site registry', () => {
@@ -57,11 +59,14 @@ describe('site registry', () => {
   });
 
   // The content script treats a page as one site (disabling it retires the
-  // whole instance), so no two sites may claim the same host.
+  // whole instance) and `siteFor` returns the first match, so no two sites
+  // may claim the same host. Checked against every site's patterns, not
+  // `siteFor`, which would hide a later site's overlap.
   test('no host belongs to two sites', () => {
     for (const site of sites) {
       for (const host of siteHosts(site)) {
-        expect(sitesFor(`https://${host}/`).map((s) => s.name)).toEqual([site.name]);
+        const url = `https://${host}/`;
+        expect(sites.filter((s) => covers(s, url)).map((s) => s.name)).toEqual([site.name]);
       }
     }
   });
@@ -87,7 +92,7 @@ describe('defineSite', () => {
   });
 });
 
-describe('sitesFor', () => {
+describe('siteFor', () => {
   describe.each([
     [
       'baozimh',
@@ -113,9 +118,9 @@ describe('sitesFor', () => {
       ],
     ],
     ['hipmh', ['https://reader.hipmh.top/', 'https://reader.hipmh.top/chapter/123']],
-  ])('%s', (name, urls) => {
+  ])('%s', (siteName, urls) => {
     test.each(urls)('matches %s', (url) => {
-      expect(names(url)).toEqual([name as SiteName]);
+      expect(name(url)).toBe(siteName as SiteName);
     });
   });
 
@@ -140,7 +145,7 @@ describe('sitesFor', () => {
     'https://evil.test/g-mh.org/',
     'https://example.com/',
   ])('does not match %s', (url) => {
-    expect(sitesFor(url)).toEqual([]);
+    expect(siteFor(url)).toBeNull();
   });
 
   test.each([
@@ -155,7 +160,7 @@ describe('sitesFor', () => {
     'javascript:alert(1)',
     'blob:https://g-mh.org/uuid',
   ])('does not match non-http URL %s', (url) => {
-    expect(sitesFor(url)).toEqual([]);
+    expect(siteFor(url)).toBeNull();
   });
 
   test.each([
@@ -167,42 +172,37 @@ describe('sitesFor', () => {
     'not a url',
     'https://',
     'http://[',
-  ])('gives [] for unparsable %p', (url) => {
-    expect(sitesFor(url)).toEqual([]);
+  ])('gives null for unparsable %p', (url) => {
+    expect(siteFor(url)).toBeNull();
   });
 
   test('ignores case in scheme and host', () => {
-    expect(names('HTTPS://G-MH.ORG/Manga')).toEqual(['g-mh']);
-    expect(names('https://M.BaoZiMH.org/')).toEqual(['baozimh']);
+    expect(name('HTTPS://G-MH.ORG/Manga')).toBe('g-mh');
+    expect(name('https://M.BaoZiMH.org/')).toBe('baozimh');
   });
 
   test('ignores port, credentials, query and hash', () => {
-    expect(names('https://g-mh.org:8443/x')).toEqual(['g-mh']);
-    expect(names('https://user:pw@g-mh.org/')).toEqual(['g-mh']);
-    expect(names('https://g-mh.org/a?b=c#d')).toEqual(['g-mh']);
+    expect(name('https://g-mh.org:8443/x')).toBe('g-mh');
+    expect(name('https://user:pw@g-mh.org/')).toBe('g-mh');
+    expect(name('https://g-mh.org/a?b=c#d')).toBe('g-mh');
   });
 
   test('matches a URL without a path', () => {
-    expect(names('https://g-mh.org')).toEqual(['g-mh']);
+    expect(name('https://g-mh.org')).toBe('g-mh');
   });
 
   test('matches a fully-qualified host with a trailing dot, like Chrome', () => {
-    expect(names('https://g-mh.org./')).toEqual(['g-mh']);
-    expect(names('https://m.baozimh.org./manga')).toEqual(['baozimh']);
-    expect(names('https://reader.hipmh.top./chapter/1')).toEqual(['hipmh']);
+    expect(name('https://g-mh.org./')).toBe('g-mh');
+    expect(name('https://m.baozimh.org./manga')).toBe('baozimh');
+    expect(name('https://reader.hipmh.top./chapter/1')).toBe('hipmh');
   });
 
   test('strips only one trailing dot', () => {
-    expect(sitesFor('https://g-mh.org../')).toEqual([]);
+    expect(siteFor('https://g-mh.org../')).toBeNull();
   });
 
-  test('returns the registered site objects themselves', () => {
-    const [site] = sitesFor('https://g-mh.org/');
-    expect(sites).toContain(site!);
-  });
-
-  test('returns a new array each call', () => {
-    expect(sitesFor('https://g-mh.org/')).not.toBe(sitesFor('https://g-mh.org/'));
+  test('returns the registered site object itself', () => {
+    expect(sites).toContain(siteFor('https://g-mh.org/')!);
   });
 });
 

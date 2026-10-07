@@ -19,8 +19,11 @@ export const allMatches = sites.flatMap((s) => s.matches);
 // (WXT evaluates the content script's `matches`).
 const sitePatterns = sites.map((s) => s.matches.map((p) => new MatchPattern(p)));
 
-/** Sites whose match patterns cover `url`; none for anything unparsable. */
-export function sitesFor(url: string): typeof sites {
+/**
+ * The site whose match patterns cover `url`; `null` for anything unparsable.
+ * At most one does: sites never share a host (enforced by the registry test).
+ */
+export function siteFor(url: string): Site<SiteName> | null {
   try {
     const parsed = new URL(url);
     // Chrome matches `example.com.` (fully-qualified, trailing dot) like
@@ -29,11 +32,11 @@ export function sitesFor(url: string): typeof sites {
     // A string, not the URL: `includes()` checks `instanceof Location`, which
     // doesn't exist in workers.
     const href = parsed.href;
-    return sites.filter((_, i) => sitePatterns[i]?.some((pattern) => pattern.includes(href)));
+    return sites.find((_, i) => sitePatterns[i]?.some((pattern) => pattern.includes(href))) ?? null;
   } catch {
     // Unparsable URL (the popup passes any tab URL). `includes()` would also
     // throw for `ftp://` / `urn:` patterns, should one ever be added.
-    return [];
+    return null;
   }
 }
 
@@ -61,5 +64,5 @@ export function siteMatchesQuery(site: Site, query: string): boolean {
   if (haystack.some((s) => s.includes(q))) return true;
   if (!q.includes('.')) return false;
   const url = /^[a-z][a-z\d+.-]*:\/\//.test(q) ? q : `https://${q}`;
-  return sitesFor(url).some((s) => s.name === site.name);
+  return siteFor(url)?.name === site.name;
 }

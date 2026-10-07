@@ -36,6 +36,10 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
  * If the user disabled the site (or a feature), it stops once storage answers;
  * on a disabled site the whole instance retires. So it may act for the first
  * few milliseconds of a page load.
+ *
+ * Never throws, so the content script needs no guard of its own: a feature
+ * that throws is logged and skipped, and without storage the features keep
+ * the site defaults.
  */
 export function startFeatures(site: Site) {
   const lifetime = lifetimeSignal();
@@ -61,11 +65,16 @@ export function startFeatures(site: Site) {
   runAll(defaults);
 
   if (!isAlive()) return;
-  const unsubscribe = subscribeStoredSettings([site.name], (stored) => {
-    // Also notices the extension being gone, which aborts `lifetime`.
-    if (!isAlive()) return;
-    if (stored.disabledSites.has(site.name)) return retire();
-    runAll(resolveFeatures(site.features, stored.global, stored.bySite[site.name]));
-  });
-  lifetime.addEventListener('abort', unsubscribe, { once: true });
+  try {
+    const unsubscribe = subscribeStoredSettings([site.name], (stored) => {
+      // Also notices the extension being gone, which aborts `lifetime`.
+      if (!isAlive()) return;
+      if (stored.disabledSites.has(site.name)) return retire();
+      runAll(resolveFeatures(site.features, stored.global, stored.bySite[site.name]));
+    });
+    lifetime.addEventListener('abort', unsubscribe, { once: true });
+  } catch (err) {
+    // `browser.storage` can be missing or throw synchronously.
+    console.debug(`[better-manga] ${site.name} settings unavailable`, err);
+  }
 }
