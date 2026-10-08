@@ -42,6 +42,9 @@ Source in `src/` (`@/` alias).
 - Content scripts: guard every DOM query and fail silently.
 - Store state with `browser.storage`, not `localStorage`.
 - No new dependency for what a few lines or a browser API can do.
+- Oldest supported browsers: Chrome 119, Firefox 128 (`MIN_*_VERSION` in
+  `wxt.config.ts`, with the API that sets each). Anything newer needs a
+  feature check, or a raised minimum noted there.
 - Add permissions only when needed; prefer `activeTab` / optional permissions.
 - No user data leaves the browser without an explicit user action.
 
