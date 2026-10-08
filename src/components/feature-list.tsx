@@ -1,5 +1,5 @@
 import { featureIds, type FeatureId, type FeatureUserConfig } from '@/features';
-import { featureControls } from '@/features/controls';
+import { featureControls, featureGroups } from '@/features/controls';
 import {
   resolveFeatures,
   type ResolvedFeatures,
@@ -16,7 +16,8 @@ export type OnLayerChange = (next: UserSettings, persist: boolean) => void;
 
 /**
  * The switch and options of every feature that applies in `scope` (a site's
- * layer from `settingsFeatures`, or `ALL_SITES`), editing one user layer (`layer`) on
+ * layer from `settingsFeatures`, or `ALL_SITES`), grouped under headings,
+ * editing one user layer (`layer`) on
  * top of the layers `beneath` it (bottom first). Controls show the effective
  * value, and as their default what the layers beneath give.
  */
@@ -41,17 +42,30 @@ export function FeatureList({
     return <p className="text-xs text-muted-foreground">{i18n.t('siteSettings.noSettings')}</p>;
   }
   return (
-    <div className="flex flex-col gap-4 divide-y *:not-last:pb-4">
-      {available.map((id) => (
-        <FeatureSettings
-          defaults={defaults}
-          id={id}
-          key={id}
-          layer={layer}
-          onChange={onChange}
-          resolved={resolved}
-        />
-      ))}
+    <div className="flex flex-col gap-6">
+      {featureGroups.map((group) => {
+        const ids = available.filter((id) => featureControls[id].group === group);
+        if (!ids.length) return null;
+        return (
+          <section className="flex flex-col gap-2" key={group}>
+            <h3 className="text-xs font-medium text-muted-foreground">
+              {i18n.t(`featureGroups.${group}`)}
+            </h3>
+            <div className="flex flex-col gap-4 divide-y *:not-last:pb-4">
+              {ids.map((id) => (
+                <FeatureSettings
+                  defaults={defaults}
+                  id={id}
+                  key={id}
+                  layer={layer}
+                  onChange={onChange}
+                  resolved={resolved}
+                />
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }

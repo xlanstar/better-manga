@@ -40,37 +40,42 @@ options:
   noResultsHint: '试试其他关键字，或直接粘贴漫画页面的网址。'
   showMore: '显示更多（还有 $1 个）'
 
+featureGroups:
+  distractions: '广告与干扰'
+  loading: '加载'
+  reading: '阅读'
+
 blockAds:
   title: '屏蔽广告'
-  description: '隐藏广告位，并阻止点击时跳转到广告的脚本。'
+  description: '隐藏广告，点击时也不会被带到广告页。'
 
 skipRedirects:
-  title: '章节直达'
-  description: '直接打开章节，不经过跳转页，全屏阅读不会被打断。'
+  title: '跳过跳转页'
+  description: '点章节直接打开，不经过跳转页，全屏不会被打断。'
 
 autoContinue:
-  title: '自动继续阅读'
-  description: '“点击继续阅读”之类的按钮一出现就自动点击。'
+  title: '自动点“继续阅读”'
+  description: '“点击继续阅读”这类按钮一出现就自动帮你点。'
 
 fastLoad:
-  title: '加速加载'
-  description: '让漫画图片更快出现。只有预加载下一话会多用流量；开启省流量模式时不预加载。'
+  title: '加快图片加载'
+  description: '让漫画图片更快出现。只有预加载下一话会多用流量，省流量模式下不预加载。'
   connect: '提前连接'
-  connectDescription: '页面一打开就先连上图片服务器。'
+  connectDescription: '一打开页面就先连上图片服务器。'
   preloadImages: '预加载本话'
-  preloadImagesDescription: '同时下载多张图片，而不是一张接一张。'
-  parallel: '同时下载数'
+  preloadImagesDescription: '一次下载多张图片，不用一张张等。'
+  parallel: '同时下载'
   parallelValue: '$1 张'
   preloadNext: '预加载下一话'
-  preloadNextDescription: '本话加载完后在后台准备下一话，点下一话就能立刻看。'
+  preloadNextDescription: '本话加载完后在后台先加载好下一话，点了马上打开。'
 
 reloadBrokenImages:
-  title: '重试加载失败的图片'
-  description: '漫画图片加载失败时自动重试几次；网络恢复连接后会再试一次。'
+  title: '自动重试破图'
+  description: '图片加载失败时自动重试几次，网络恢复后再试一次。'
 
 readingHistory:
   title: '阅读记录'
-  description: '记住每部作品最后读到的章节和位置，再次打开时带你回到那里。只保存在这个浏览器里。'
+  description: '记住每部作品读到哪一话、哪个位置，再打开时直接接着看。只保存在这个浏览器。'
   continue: '继续阅读'
   entryDetail: '$1 · $2 · $3'
   listDescription: '读过的作品，最近读的在前。只保存在这个浏览器里。'
@@ -84,13 +89,13 @@ readingHistory:
   cancel: '取消'
 
 pageDistance:
-  title: Page Up / Down 滚动距离
-  description: '每次滚动屏幕高度的固定比例，保留重叠方便接续阅读。'
-  ratio: '滚动比例'
+  title: '翻页距离'
+  description: '设置 Page Up / Down 每次滚动多少，留一点重叠才不会看漏。'
+  ratio: '每次滚动'
 
 smoothScroll:
-  title: '平滑滚动'
-  description: 'Page Up / Down 以动画滚动，视线跟得上。连按会累加，按住平稳滑动，松开后缓缓停下。'
+  title: '平滑翻页'
+  description: '让 Page Up / Down 平滑滚动，视线跟得上；按住可连续滚动。'
   duration: '动画时长'
   durationValue: '$1 毫秒'
   holdSpeed: '按住时的速度'

@@ -41,37 +41,42 @@ options:
   noResultsHint: '試試其他關鍵字，或直接貼上漫畫頁面的網址。'
   showMore: '顯示更多（還有 $1 個）'
 
+featureGroups:
+  distractions: '廣告與干擾'
+  loading: '載入'
+  reading: '閱讀'
+
 blockAds:
   title: '阻擋廣告'
-  description: '隱藏廣告版位，並阻止點擊時跳轉到廣告的腳本。'
+  description: '隱藏廣告，點擊時也不會被帶到廣告頁。'
 
 skipRedirects:
-  title: '章節直達'
-  description: '直接開啟章節，不經過轉址頁，全螢幕閱讀不會被打斷。'
+  title: '跳過轉址頁'
+  description: '點章節直接開啟，不經過轉址頁，全螢幕不會被中斷。'
 
 autoContinue:
-  title: '自動繼續閱讀'
-  description: '「點擊繼續閱讀」之類的按鈕一出現就自動點擊。'
+  title: '自動點「繼續閱讀」'
+  description: '「點擊繼續閱讀」這類按鈕一出現就自動幫你點。'
 
 fastLoad:
-  title: '加速載入'
-  description: '讓漫畫圖片更快出現。只有預先載入下一話會多用流量；開啟省流量模式時不預先載入。'
+  title: '加快圖片載入'
+  description: '讓漫畫圖片更快出現。只有預載下一話會多用流量，省流量模式下不預載。'
   connect: '提早連線'
-  connectDescription: '頁面一開啟就先連上圖片伺服器。'
-  preloadImages: '預先載入本話'
-  preloadImagesDescription: '同時下載多張圖片，而不是一張接一張。'
-  parallel: '同時下載數'
+  connectDescription: '一打開頁面就先連上圖片伺服器。'
+  preloadImages: '預載本話'
+  preloadImagesDescription: '一次下載多張圖片，不用一張張等。'
+  parallel: '同時下載'
   parallelValue: '$1 張'
-  preloadNext: '預先載入下一話'
-  preloadNextDescription: '本話載完後在背景準備下一話，點下一話就能立刻看。'
+  preloadNext: '預載下一話'
+  preloadNextDescription: '本話載完後在背景先載好下一話，點了馬上開。'
 
 reloadBrokenImages:
-  title: '重試載入失敗的圖片'
-  description: '漫畫圖片載入失敗時自動重試幾次；網路恢復連線後會再試一次。'
+  title: '自動重試破圖'
+  description: '圖片載入失敗時自動重試幾次，網路恢復後再試一次。'
 
 readingHistory:
   title: '閱讀紀錄'
-  description: '記住每部作品最後讀到的章節和位置，再次開啟時帶你回到那裡。只存在這個瀏覽器裡。'
+  description: '記住每部作品讀到哪一話、哪個位置，再打開時直接接著看。只存在這個瀏覽器。'
   continue: '繼續閱讀'
   entryDetail: '$1 · $2 · $3'
   listDescription: '讀過的作品，最近讀的在前。只存在這個瀏覽器裡。'
@@ -85,13 +90,13 @@ readingHistory:
   cancel: '取消'
 
 pageDistance:
-  title: Page Up / Down 捲動距離
-  description: '每次捲動畫面高度的固定比例，保留重疊方便接續閱讀。'
-  ratio: '捲動比例'
+  title: '翻頁距離'
+  description: '設定 Page Up / Down 每次捲動多少，留一點重疊才不會看漏。'
+  ratio: '每次捲動'
 
 smoothScroll:
-  title: '平滑捲動'
-  description: 'Page Up / Down 以動畫捲動，視線跟得上。連按會累加，按住平穩滑動，放開後緩緩停下。'
+  title: '平滑翻頁'
+  description: '讓 Page Up / Down 平滑捲動，視線跟得上；按住可連續捲動。'
   duration: '動畫時間'
   durationValue: '$1 毫秒'
   holdSpeed: '按住時的速度'

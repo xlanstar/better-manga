@@ -41,37 +41,42 @@ options:
   noResultsHint: Try another keyword, or paste the URL of a manga page.
   showMore: Show more ($1 left)
 
+featureGroups:
+  distractions: Ads & distractions
+  loading: Loading
+  reading: Reading
+
 blockAds:
   title: Block ads
-  description: Hides ad slots and stops scripts that send you to ads when you click.
+  description: Hides ads and stops clicks from taking you to ad pages.
 
 skipRedirects:
-  title: Direct chapter links
-  description: Opens chapters directly instead of via redirect pages, so fullscreen isn't interrupted.
+  title: Skip redirect pages
+  description: Opens chapters directly, so a redirect page can't break fullscreen.
 
 autoContinue:
-  title: Auto-continue
-  description: Clicks buttons like “Click to continue reading” as soon as they appear.
+  title: Auto-click “Continue”
+  description: Clicks buttons like “Click to continue reading” for you as soon as they appear.
 
 fastLoad:
-  title: Faster loading
-  description: Gets chapter images on screen sooner. Only the next chapter costs extra data, and nothing is preloaded under Data Saver.
+  title: Load images faster
+  description: Shows chapter images sooner. Only preloading the next chapter uses extra data, and Data Saver turns preloading off.
   connect: Connect early
-  connectDescription: Connects to the image servers as the page opens.
+  connectDescription: Connects to the image servers as soon as the page opens.
   preloadImages: Preload this chapter
-  preloadImagesDescription: Downloads its images several at a time, not one by one.
-  parallel: Downloads at a time
-  parallelValue: $1 at a time
-  preloadNext: Preload the next chapter
-  preloadNextDescription: Fetches it in the background once this one is in, so it opens at once.
+  preloadImagesDescription: Downloads several images at once instead of one by one.
+  parallel: Downloads at once
+  parallelValue: $1 at once
+  preloadNext: Preload next chapter
+  preloadNextDescription: Loads it in the background, so it opens instantly.
 
 reloadBrokenImages:
   title: Retry broken images
-  description: Retries chapter images that fail to load a few times, and again once you're back online.
+  description: Reloads images that fail to load, and again once you're back online.
 
 readingHistory:
   title: Reading history
-  description: Remembers the chapter you last read of each work and where you were in it, and takes you back there when you reopen it. Kept only in this browser.
+  description: Remembers where you stopped in each series and takes you back there. Stays in this browser.
   continue: Continue reading
   entryDetail: $1 · $2 · $3
   listDescription: The works you've read, latest first. Kept only in this browser.
@@ -85,13 +90,13 @@ readingHistory:
   cancel: Cancel
 
 pageDistance:
-  title: Page Up / Down distance
-  description: Scrolls a fixed share of the screen height, keeping some overlap so you don't lose your place.
-  ratio: Scroll ratio
+  title: Page scroll distance
+  description: How far Page Up / Down scrolls. A little overlap keeps your place.
+  ratio: Scroll by
 
 smoothScroll:
-  title: Smooth Page Up / Down
-  description: Animates Page Up / Down so you can follow along. Presses add up, holding the key glides, letting go eases to a stop.
+  title: Smooth page scrolling
+  description: Page Up / Down scrolls smoothly so your eyes can follow. Hold the key to keep scrolling.
   duration: Animation length
   durationValue: $1 ms
   holdSpeed: Speed while held
