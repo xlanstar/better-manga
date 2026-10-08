@@ -11,7 +11,8 @@ import type { Feature } from '../types';
  * - `start.ts`: content-script side (records and restores), registered in
  *   `features/starters.ts`.
  * - `history.ts`, `storage.ts`: the stored history, shared with the popup
- *   and options page (`components/reading-history.tsx`).
+ *   and options page (`components/reading-history.tsx`) and written by the
+ *   background (`entrypoints/background.ts`).
  * - Popup title and description: in `features/controls.ts`.
  */
 

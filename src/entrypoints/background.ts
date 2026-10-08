@@ -1,8 +1,11 @@
 import { browser } from 'wxt/browser';
 import type { ScriptPublicPath } from 'wxt/utils/inject-script';
 import { defineBackground } from 'wxt/utils/define-background';
+import { startHistoryWriter } from '@/features/reading-history/storage';
 
 export default defineBackground(() => {
+  startHistoryWriter();
+
   // Content scripts only start on page load, and after an update/reload the
   // instance in already-open tabs is orphaned (no storage events), so popup
   // settings would not apply until the user refreshes. Inject a fresh instance

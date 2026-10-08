@@ -2,7 +2,9 @@ import { describe, expect, test } from 'bun:test';
 import {
   CHAPTER_START,
   MAX_HISTORY_ENTRIES,
+  sanitizeChange,
   sanitizeHistory,
+  withChange,
   withEntry,
   withoutEntry,
   workKey,
@@ -63,6 +65,54 @@ describe('withoutEntry', () => {
   test("drops the entry's work only", () => {
     const other = entry({ workId: '/manga/b' });
     expect(withoutEntry([entry(), other], entry({ chapterTitle: 'x' }))).toEqual([other]);
+  });
+});
+
+describe('withChange', () => {
+  const other = entry({ workId: '/manga/b' });
+
+  test('saves an entry', () => {
+    const next = entry({ updatedAt: 2000 });
+    expect(withChange([other], { type: 'saveHistoryEntry', entry: next })).toEqual([next, other]);
+  });
+
+  test('removes an entry', () => {
+    expect(withChange([entry(), other], { type: 'removeHistoryEntry', entry: entry() })).toEqual([
+      other,
+    ]);
+  });
+
+  test('clears the history', () => {
+    expect(withChange([entry(), other], { type: 'clearHistory' })).toEqual([]);
+  });
+});
+
+describe('sanitizeChange', () => {
+  test.each(['saveHistoryEntry', 'removeHistoryEntry'] as const)('keeps a valid %s', (type) => {
+    expect(sanitizeChange({ type, entry: entry() })).toEqual({ type, entry: entry() });
+  });
+
+  test('keeps a clear, dropping other fields', () => {
+    expect(sanitizeChange({ type: 'clearHistory', entry: entry() })).toEqual({
+      type: 'clearHistory',
+    });
+  });
+
+  test('sanitizes the entry', () => {
+    const change = sanitizeChange({ type: 'saveHistoryEntry', entry: { ...entry(), extra: 1 } });
+    expect(change).toEqual({ type: 'saveHistoryEntry', entry: entry() });
+  });
+
+  test.each([
+    undefined,
+    null,
+    'clearHistory',
+    {},
+    { type: 'other', entry: entry() },
+    { type: 'saveHistoryEntry' },
+    { type: 'removeHistoryEntry', entry: { ...entry(), url: 'javascript:alert(1)' } },
+  ])('%p → null', (raw) => {
+    expect(sanitizeChange(raw)).toBeNull();
   });
 });
 

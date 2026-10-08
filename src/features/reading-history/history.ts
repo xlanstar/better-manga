@@ -54,6 +54,43 @@ export function withoutEntry(
 }
 
 /**
+ * A change to the history, as pages send it to the background, its only
+ * writer (see `storage.ts`).
+ */
+export type HistoryChange =
+  | { type: 'saveHistoryEntry'; entry: HistoryEntry }
+  | { type: 'removeHistoryEntry'; entry: HistoryEntry }
+  | { type: 'clearHistory' };
+
+/** `history` after `change`. */
+export function withChange(
+  history: readonly HistoryEntry[],
+  change: HistoryChange,
+): HistoryEntry[] {
+  switch (change.type) {
+    case 'saveHistoryEntry':
+      return withEntry(history, change.entry);
+    case 'removeHistoryEntry':
+      return withoutEntry(history, change.entry);
+    case 'clearHistory':
+      return [];
+  }
+}
+
+/**
+ * Coerce an untrusted message: the change it asks for, or null if it isn't
+ * one (another message, a bad entry).
+ */
+export function sanitizeChange(raw: unknown): HistoryChange | null {
+  if (typeof raw !== 'object' || raw === null) return null;
+  const { type, entry } = raw as Record<string, unknown>;
+  if (type === 'clearHistory') return { type };
+  if (type !== 'saveHistoryEntry' && type !== 'removeHistoryEntry') return null;
+  const valid = sanitizeEntry(entry);
+  return valid && { type, entry: valid };
+}
+
+/**
  * Coerce an untrusted stored history: valid entries only, one per work (the
  * newest), newest first, capped. Idempotent.
  */
