@@ -64,6 +64,10 @@ fastLoad:
   preloadNext: '预加载下一话'
   preloadNextDescription: '本话加载完后在后台准备下一话，点下一话就能立刻看。'
 
+reloadBrokenImages:
+  title: '重试加载失败的图片'
+  description: '漫画图片加载失败时自动重试几次；网络恢复连接后会再试一次。'
+
 pageDistance:
   title: Page Up / Down 滚动距离
   description: '每次滚动屏幕高度的固定比例，保留重叠方便接续阅读。'

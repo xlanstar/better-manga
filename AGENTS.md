@@ -64,6 +64,9 @@ only on sites that configure them; the others run on every site.
   hosts early), `preloadImages` with `parallel` (download the chapter's
   images several at a time), `preloadNext` (preload the next chapter in a
   hidden frame).
+- `reloadBrokenImages` (site-specific): retries chapter images that fail to
+  load, a few times with a growing wait, and again when the browser comes
+  back online. Site: `images`.
 - `pageDistance`: Page Up/Down scrolls a set share of the screen. Site:
   `container`; user: `ratio`.
 - `smoothScroll`: animates Page Up/Down. Site: `container`; user: `duration`,

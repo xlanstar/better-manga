@@ -65,6 +65,10 @@ fastLoad:
   preloadNext: Preload the next chapter
   preloadNextDescription: Fetches it in the background once this one is in, so it opens at once.
 
+reloadBrokenImages:
+  title: Retry broken images
+  description: Retries chapter images that fail to load a few times, and again once you're back online.
+
 pageDistance:
   title: Page Up / Down distance
   description: Scrolls a fixed share of the screen height, keeping some overlap so you don't lose your place.

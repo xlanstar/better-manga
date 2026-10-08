@@ -1,7 +1,6 @@
+import { isRealImage, realImageUrl, type ChapterImages } from '@/utils/chapter-images';
 import { onEachMatch } from '@/utils/dom';
-import type { ChapterImages } from './index';
 import { createLoadQueue } from './queue';
-import { httpUrl } from './urls';
 
 /**
  * Download the chapter's images into the cache, `parallel` at a time in page
@@ -16,12 +15,11 @@ export function preloadImages(
 ): Promise<void> {
   const queue = createLoadQueue(parallel, loadImage);
   signal.addEventListener('abort', queue.stop, { once: true });
-  const urlOf = (img: Element) => httpUrl(img.getAttribute(images.src), document.baseURI);
-  afterFirstImage(images.selector, urlOf, signal, () =>
+  afterFirstImage(images, signal, () =>
     onEachMatch(
       images.selector,
       (img) => {
-        const url = urlOf(img);
+        const url = realImageUrl(img, images);
         if (url) queue.add(url);
       },
       signal,
@@ -31,28 +29,19 @@ export function preloadImages(
 }
 
 /**
- * Call `fn` once the page has loaded (or failed) one of the images matching
- * `selector` from its real URL (swapped in, or its own `src` if it has none
- * to swap: not lazy-loaded); right away if it already has.
+ * Call `fn` once the page has loaded (or failed) one of the chapter's images
+ * from its real URL (see `isRealImage`); right away if it already has.
  */
-function afterFirstImage(
-  selector: string,
-  urlOf: (img: Element) => string | null,
-  signal: AbortSignal,
-  fn: () => void,
-) {
-  const isReal = (el: EventTarget | null): el is HTMLImageElement => {
-    if (!(el instanceof HTMLImageElement) || !el.matches(selector)) return false;
-    const url = urlOf(el);
-    return url === null || el.src === url;
-  };
-  const loaded = [...document.querySelectorAll(selector)].some((el) => isReal(el) && el.complete);
+function afterFirstImage(images: ChapterImages, signal: AbortSignal, fn: () => void) {
+  const loaded = [...document.querySelectorAll(images.selector)].some(
+    (el) => isRealImage(el, images) && el.complete,
+  );
   if (loaded) return fn();
 
   const done = new AbortController();
   const listen = { capture: true, signal: AbortSignal.any([signal, done.signal]) };
   const onSettle = (event: Event) => {
-    if (!isReal(event.target)) return;
+    if (!isRealImage(event.target, images)) return;
     done.abort();
     fn();
   };

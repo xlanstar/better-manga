@@ -1,3 +1,4 @@
+import type { ChapterImages } from '@/utils/chapter-images';
 import type { Feature } from '../types';
 
 /**
@@ -23,14 +24,6 @@ import type { Feature } from '../types';
  * - `controls.tsx`: the three options, registered in `features/controls.ts`
  *   with the popup title and description.
  */
-
-/** The chapter's page images, as the page lazy-loads them. */
-export type ChapterImages = {
-  /** Every page image, loaded or not (e.g. `#chapcontent img[data-src]`). */
-  selector: string;
-  /** The attribute holding an image's real URL until the page loads it. */
-  src: string;
-};
 
 export type NextChapterConfig = {
   /** The link to the next chapter. Only a same-origin target is fetched. */

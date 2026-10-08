@@ -1,4 +1,11 @@
+import type { ChapterImages } from '@/utils/chapter-images';
 import { defineSite } from './types';
+
+/**
+ * The chapter's page images. Not `#chapcontent img`: an ad banner sits in
+ * there too.
+ */
+const images: ChapterImages = { selector: '#chapcontent > div > img', src: 'data-src' };
 
 /**
  * 18漫畫: GoDa network (same operator as `baozimh` and `g-mh`), R18.
@@ -32,13 +39,13 @@ export const site = defineSite({
       features: {
         fastLoad: {
           origins: ['https://s3-nl-01.mangabuddy.in'],
-          // Not `#chapcontent img`: an ad banner sits in there too.
-          images: { selector: '#chapcontent > div > img', src: 'data-src' },
+          images,
           nextChapter: {
             link: '#nextChapterLink[href*="/manga/"]',
             keepStorage: ['ChapterHistory'],
           },
         },
+        reloadBrokenImages: { images },
       },
     },
   },

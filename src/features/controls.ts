@@ -46,6 +46,10 @@ export const featureControls: {
     description: () => i18n.t('fastLoad.description'),
     Options: FastLoadOptions,
   },
+  reloadBrokenImages: {
+    title: () => i18n.t('reloadBrokenImages.title'),
+    description: () => i18n.t('reloadBrokenImages.description'),
+  },
   pageDistance: {
     title: () => i18n.t('pageDistance.title'),
     description: () => i18n.t('pageDistance.description'),

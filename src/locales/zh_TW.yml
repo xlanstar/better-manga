@@ -65,6 +65,10 @@ fastLoad:
   preloadNext: '預先載入下一話'
   preloadNextDescription: '本話載完後在背景準備下一話，點下一話就能立刻看。'
 
+reloadBrokenImages:
+  title: '重試載入失敗的圖片'
+  description: '漫畫圖片載入失敗時自動重試幾次；網路恢復連線後會再試一次。'
+
 pageDistance:
   title: Page Up / Down 捲動距離
   description: '每次捲動畫面高度的固定比例，保留重疊方便接續閱讀。'

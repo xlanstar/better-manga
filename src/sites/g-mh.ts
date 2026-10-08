@@ -1,4 +1,8 @@
+import type { ChapterImages } from '@/utils/chapter-images';
 import { defineSite } from './types';
+
+/** The chapter's page images. */
+const images: ChapterImages = { selector: '#chapcontent img[data-src]', src: 'data-src' };
 
 /**
  * G站漫畫: GoDa network, G站 front end.
@@ -33,12 +37,13 @@ export const site = defineSite({
       features: {
         fastLoad: {
           origins: ['https://c-nd2-1.6wm.top', 'https://c-nd3-1.6wm.top'],
-          images: { selector: '#chapcontent img[data-src]', src: 'data-src' },
+          images,
           nextChapter: {
             link: '#nextChapterLink[href*="/manga/"]',
             keepStorage: ['ChapterHistory'],
           },
         },
+        reloadBrokenImages: { images },
       },
     },
   },

@@ -1,4 +1,8 @@
+import type { ChapterImages } from '@/utils/chapter-images';
 import { defineSite } from './types';
+
+/** The chapter's page images. */
+const images: ChapterImages = { selector: '#chapcontent img[data-src]', src: 'data-src' };
 
 /**
  * 嬉皮漫畫: only the reader host is matched, so no `sections`.
@@ -27,13 +31,14 @@ export const site = defineSite({
     skipRedirects: { rewriteLink: directChapterUrl },
     fastLoad: {
       origins: ['https://hip-tx-1.s3imgs.top'],
-      images: { selector: '#chapcontent img[data-src]', src: 'data-src' },
+      images,
       nextChapter: {
         link: '#nextChapterLink',
         rewrite: directChapterUrl,
         keepStorage: ['ReadingHistory'],
       },
     },
+    reloadBrokenImages: { images },
   },
 });
 

@@ -2,6 +2,7 @@ import { autoContinue } from './auto-continue';
 import { blockAds } from './block-ads';
 import { fastLoad } from './fast-load';
 import { pageDistance } from './page-distance';
+import { reloadBrokenImages } from './reload-broken-images';
 import { skipRedirects } from './skip-redirects';
 import { smoothScroll } from './smooth-scroll';
 
@@ -18,6 +19,7 @@ export const features = {
   skipRedirects,
   autoContinue,
   fastLoad,
+  reloadBrokenImages,
   pageDistance,
   smoothScroll,
 };

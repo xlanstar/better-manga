@@ -1,4 +1,8 @@
+import type { ChapterImages } from '@/utils/chapter-images';
 import { defineSite } from './types';
+
+/** The chapter's page images. */
+const images: ChapterImages = { selector: '#chapcontent img[data-src]', src: 'data-src' };
 
 /**
  * 包子漫畫: GoDa network, 包子 front end.
@@ -10,7 +14,9 @@ import { defineSite } from './types';
  * - Reader: fetches the chapter's image list from the API, then loads the
  *   images one at a time, each after the last (`#chapcontent img[data-src]`,
  *   hosts `c-nd2-1` / `c-nd3-1` by the chapter's line). Records the chapter
- *   in `localStorage.ChapterHistory` as it opens.
+ *   in `localStorage.ChapterHistory` as it opens. A failed image turns into
+ *   a 「加载失败，点击重试」 (click to retry) placeholder, and stops the chain
+ *   until it loads.
  * - Ads: TrafficStars SDK (`cdn.tsyndicate.com`), trackers (`pxltag`,
  *   `uuidksinc`), `18gallery.com` banner.
  * - Not handled: clicking a chapter link (`.chapteritem`, `#nextchaptera`,
@@ -42,13 +48,14 @@ export const site = defineSite({
         },
         fastLoad: {
           origins: ['https://c-nd2-1.6wm.top', 'https://c-nd3-1.6wm.top'],
-          images: { selector: '#chapcontent img[data-src]', src: 'data-src' },
+          images,
           // On the last chapter it points to the chapter list instead.
           nextChapter: {
             link: '#nextChapterLink[href*="/manga/"]',
             keepStorage: ['ChapterHistory'],
           },
         },
+        reloadBrokenImages: { images },
       },
     },
   },

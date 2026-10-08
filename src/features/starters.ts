@@ -9,6 +9,7 @@ import { startBlockAds } from './block-ads/start';
 import { startFastLoad } from './fast-load/start';
 import { featureIds, type FeatureId, type FeatureResolvedConfig } from './index';
 import { startPageDistance } from './page-distance/start';
+import { startReloadBrokenImages } from './reload-broken-images/start';
 import { createFeatureRunner } from './runner';
 import { startSkipRedirects } from './skip-redirects/start';
 import { startSmoothScroll } from './smooth-scroll/start';
@@ -25,6 +26,7 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
   skipRedirects: startSkipRedirects,
   autoContinue: startAutoContinue,
   fastLoad: startFastLoad,
+  reloadBrokenImages: startReloadBrokenImages,
   pageDistance: startPageDistance,
   smoothScroll: startSmoothScroll,
 };
