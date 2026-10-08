@@ -5,7 +5,8 @@ import { defineSite } from './types';
 const images: ChapterImages = { selector: '#chapcontent img[data-src]', src: 'data-src' };
 
 /**
- * 包子漫畫: GoDa network, 包子 front end.
+ * 包子漫畫: GoDa network, 包子 front end. Not the original 包子漫畫
+ * (`baozimh-com`); the labels tell the two apart by domain.
  *
  * - Backend: shared with `g-mh` (same manga ids; API
  *   `api-get-v3.mgsearcher.com`, images `*.6wm.top`).
@@ -28,7 +29,7 @@ const images: ChapterImages = { selector: '#chapcontent img[data-src]', src: 'da
  */
 export const site = defineSite({
   name: 'baozimh',
-  label: '包子漫畫',
+  label: '包子漫畫（baozimh.org）',
   matches: ['*://*.baozimh.org/*', '*://*.bzmh.org/*', '*://m.baozimh.one/*'],
   sections: {
     reader: {

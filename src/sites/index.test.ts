@@ -79,12 +79,13 @@ describe('site registry', () => {
   // The content script treats a page as one site (disabling it retires the
   // whole instance) and `siteFor` returns the first match, so no two sites
   // may claim the same host. Checked against every site's patterns, not
-  // `siteFor`, which would hide a later site's overlap.
+  // `siteFor`, which would hide a later site's overlap. A site may match
+  // only some paths of a host (8comic's reader), so its own `/` may not be.
   test('no host belongs to two sites', () => {
     for (const site of sites) {
       for (const host of siteHosts(site)) {
-        const url = `https://${host}/`;
-        expect(sites.filter((s) => covers(s, url)).map((s) => s.name)).toEqual([site.name]);
+        const others = sites.filter((s) => s !== site && covers(s, `https://${host}/`));
+        expect(others.map((s) => s.name)).toEqual([]);
       }
     }
   });
@@ -137,6 +138,55 @@ describe('siteFor', () => {
     ],
     ['18mh', ['https://18mh.org/', 'https://m.18mh.org/manga/abc', 'http://www.18mh.org/']],
     ['hipmh', ['https://reader.hipmh.top/', 'https://reader.hipmh.top/chapter/123']],
+    [
+      'baozimh-com',
+      [
+        'https://www.baozimh.com/',
+        'https://cn.webmota.com/comic/x',
+        'https://www.twbzmg.com/comic/chapter/yiquanchaoren-one/0_400.html',
+      ],
+    ],
+    ['copymanga', ['https://www.mangacopy.com/comic/baoye', 'https://copy4000.com/']],
+    ['relamanhua', ['https://www.manga2026.xyz/comic/x', 'https://m.2024manga.com/']],
+    ['manhuagui', ['https://www.manhuagui.com/comic/32602/', 'https://m.manhuagui.com/']],
+    ['zaimanhua', ['https://zaimanhua.com/', 'https://m.zaimanhua.com/pages/comic/page?x=1']],
+    ['dm5', ['https://www.dm5.com/m491499/', 'https://tel.dm5.com/', 'https://www.dm5.cn/']],
+    ['1kkk', ['https://www.1kkk.com/ch1-491499/', 'https://m.1kkk.com/']],
+    ['manhuaren', ['https://www.manhuaren.com/m491499/', 'https://manhuaren.com/']],
+    ['mangabz', ['https://mangabz.com/m8759/']],
+    ['xmanhua', ['https://www.xmanhua.com/m8759/']],
+    ['yymanhua', ['https://yymanhua.com/54yy/']],
+    ['komiic', ['https://komiic.com/comic/533', 'https://www.komiic.cc/']],
+    [
+      '8comic',
+      [
+        'https://www.8comic.com/html/102.html',
+        'https://articles.onemoreplace.tw/online/new-102.html?ch=700',
+      ],
+    ],
+    ['colamanga', ['https://www.yoyomanga.com/manga-pk25498/']],
+    ['manwa', ['https://manwa.me/', 'https://www.manwarj.cc/book/1']],
+    ['favcomic', ['https://www.favcomic.com/comic/chapter/1', 'https://m.favcomic.com/']],
+    ['dogemanga', ['https://dogemanga.com/p/4jbpFwz9']],
+    ['guazimanhua', ['https://www.guazimanhua.com/chapter.php?id=1602643']],
+    ['liumanhua', ['https://www.liumanhua.com/219430/36808.html', 'https://m.liumanhua.com/']],
+    ['mycomic', ['https://mycomic.com/chapters/810206']],
+    ['vomicmh', ['https://www.vomicmh.com/', 'https://vomicmh.com/']],
+    ['ykmh', ['https://www.ykmh.net/manhua/haibianzhiye/202619.html', 'https://m.ykmh.net/']],
+    ['mhua5', ['https://www.mhua5.com/index.php/chapter/1871600', 'https://mhua5.com/']],
+    ['miaoqumh', ['https://www.miaoqumh.org/233587/146728.html', 'https://m.miaoqumh.org/']],
+    ['wmh1234', ['https://m.wmh1234.com/', 'https://reader.hqread.cc/r/NTUwNDkt']],
+    ['mh160mh', ['https://www.mh160mh.com/kanmanhua/x/1.html', 'https://m.mh160mh.com/']],
+    ['92mh', ['https://www.92mh.com/']],
+    ['cmanhua', ['https://cmanhua.com/ReadComic?id=69d4da0bf111574e5c5e567b']],
+    ['bilimanga', ['https://www.bilimanga.net/read/1/2.html']],
+    ['gfmh', ['https://gfmh.app/376509/112565.html', 'https://www.gfmh.app/']],
+    ['manben', ['https://www.manben.com/m497346/']],
+    ['18comic', ['https://18comic.ink/photo/1438783', 'https://18comic.vip/']],
+    ['wnacg', ['https://www.wnacg.com/photos-slide-aid-394133.html', 'https://www.wn002.cfd/']],
+    ['noyacg', ['https://noymanga.com/', 'https://www.noymanga.com/']],
+    ['hanime1', ['https://hanime1.me/', 'https://hanimeone.me/comic/159839/1']],
+    ['roumanwu', ['https://rouman5.com/books/x/3', 'https://roum29.xyz/']],
   ])('%s', (siteName, urls) => {
     test.each(urls)('matches %s', (url) => {
       expect(name(url)).toBe(siteName as SiteName);
@@ -152,8 +202,29 @@ describe('siteFor', () => {
     'https://m.hipmh.com/chapter/go?hid=1',
     'https://hipmh.top/',
     'https://hipmh.com/',
-    // The original baozimh.com network is a different site.
-    'https://www.baozimh.com/',
+    // Other sites, services or redirect-only hosts of supported domains.
+    'https://www.mhgui.com/',
+    'https://cf.mhgui.com/',
+    'https://i.zaimanhua.com/',
+    'https://www.komiic.com/',
+    'https://articles.onemoreplace.tw/',
+    'https://onemoreplace.tw/',
+    'https://m.dm5.cn/',
+    'https://yoyomanga.com/',
+    'https://www.colamanga.com/',
+    'https://mwmissing11.cc/',
+    'https://www.dogemanga.com/',
+    'https://www.cmanhua.com/',
+    'https://guazimanhua.com/',
+    'https://hqread.cc/',
+    'https://mh160mh.com/',
+    'https://www.bilicomic.net/',
+    'https://2025copy.com/',
+    'https://relamanhua.org/',
+    'https://18comic.org/',
+    'https://noy1.top/',
+    'https://umami.noymanga.com/',
+    'https://www.hanime1.me/',
     // Lookalikes.
     'https://evilbaozimh.org/',
     'https://baozimh.org.evil.test/',
@@ -221,18 +292,20 @@ describe('siteFor', () => {
   });
 
   test('returns the registered site object itself', () => {
-    expect(sites).toContain(siteFor('https://g-mh.org/')!);
+    expect(sites as Site[]).toContain(siteFor('https://g-mh.org/')!);
   });
 });
 
 describe('siteHosts', () => {
-  test('registered sites', () => {
-    expect(Object.fromEntries(sites.map((s) => [s.name, siteHosts(s)]))).toEqual({
-      baozimh: ['baozimh.org', 'bzmh.org', 'm.baozimh.one'],
-      'g-mh': ['m.g-mh.org', 'g-mh.org', 'godamh.com'],
-      '18mh': ['18mh.org'],
-      hipmh: ['reader.hipmh.top'],
-    });
+  test.each([
+    ['baozimh', ['baozimh.org', 'bzmh.org', 'm.baozimh.one']],
+    ['g-mh', ['m.g-mh.org', 'g-mh.org', 'godamh.com']],
+    ['18mh', ['18mh.org']],
+    ['hipmh', ['reader.hipmh.top']],
+    ['8comic', ['www.8comic.com', 'articles.onemoreplace.tw']],
+    ['relamanhua', ['manga2024.com', '2024manga.com', 'manga2025.com', 'manga2026.xyz']],
+  ])('registered site %s', (siteName, hosts) => {
+    expect(siteHosts(sites.find((s) => s.name === siteName)!)).toEqual(hosts);
   });
 
   test.each([
@@ -272,6 +345,44 @@ describe('siteHosts', () => {
 });
 
 const rewriteLink = () => null;
+
+describe.each([
+  [
+    'baozimh-com',
+    ['https://tw.twmanga.com/comic/chapter/x/0_1.html'],
+    ['https://tw.twmanga.com/comic/x'],
+  ],
+  [
+    'copymanga',
+    ['https://www.mangacopy.com/comic/baoye/chapter/10d06a94'],
+    ['https://www.mangacopy.com/comic/baoye'],
+  ],
+  [
+    'relamanhua',
+    ['https://www.manga2026.xyz/comic/x/chapter/765e73fe'],
+    ['https://www.manga2026.xyz/comic/x'],
+  ],
+  [
+    'manhuagui',
+    ['https://tw.manhuagui.com/comic/32602/441494.html'],
+    ['https://tw.manhuagui.com/comic/32602/'],
+  ],
+  [
+    'zaimanhua',
+    [
+      'https://manhua.zaimanhua.com/view/x/64645/128172',
+      'https://m.zaimanhua.com/pages/comic/page?comic_id=64645&chapter_id=128172',
+    ],
+    ['https://manhua.zaimanhua.com/details/64645', 'https://www.zaimanhua.com/info/x.html'],
+  ],
+  ['dogemanga', ['https://dogemanga.com/p/4jbpFwz9'], ['https://dogemanga.com/m/gt9rgUMw']],
+  ['mycomic', ['https://mycomic.com/cn/chapters/810206'], ['https://mycomic.com/comics/6591']],
+  ['cmanhua', ['https://cmanhua.com/ReadComic?id=69d4'], ['https://cmanhua.com/comic/fangsi']],
+])('sectionFor %s', (siteName, readerUrls, mainUrls) => {
+  const site = sites.find((s) => s.name === siteName)!;
+  test.each(readerUrls)('reader: %s', (url) => expect(sectionFor(site, url)).toBe('reader'));
+  test.each(mainUrls)('main site: %s', (url) => expect(sectionFor(site, url)).toBe('main'));
+});
 
 describe('sectionFor (registered sites)', () => {
   const baozimh = sites.find((s) => s.name === 'baozimh')!;

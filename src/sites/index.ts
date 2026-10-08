@@ -1,15 +1,92 @@
 import { MatchPattern } from 'wxt/utils/match-patterns';
 import type { Site, SiteSection } from './types';
+import { site as comic18 } from './18comic';
 import { site as mh18 } from './18mh';
+import { site as kkk1 } from './1kkk';
+import { site as comic8 } from './8comic';
+import { site as mh92 } from './92mh';
 import { site as baozimh } from './baozimh';
+import { site as baozimhCom } from './baozimh-com';
+import { site as bilimanga } from './bilimanga';
+import { site as cmanhua } from './cmanhua';
+import { site as colamanga } from './colamanga';
+import { site as copymanga } from './copymanga';
+import { site as dm5 } from './dm5';
+import { site as dogemanga } from './dogemanga';
+import { site as favcomic } from './favcomic';
 import { site as gmh } from './g-mh';
+import { site as gfmh } from './gfmh';
+import { site as guazimanhua } from './guazimanhua';
+import { site as hanime1 } from './hanime1';
 import { site as hipmh } from './hipmh';
+import { site as komiic } from './komiic';
+import { site as liumanhua } from './liumanhua';
+import { site as manben } from './manben';
+import { site as mangabz } from './mangabz';
+import { site as manhuagui } from './manhuagui';
+import { site as manhuaren } from './manhuaren';
+import { site as manwa } from './manwa';
+import { site as mh160mh } from './mh160mh';
+import { site as mhua5 } from './mhua5';
+import { site as miaoqumh } from './miaoqumh';
+import { site as mycomic } from './mycomic';
+import { site as noyacg } from './noyacg';
+import { site as relamanhua } from './relamanhua';
+import { site as roumanwu } from './roumanwu';
+import { site as vomicmh } from './vomicmh';
+import { site as wmh1234 } from './wmh1234';
+import { site as wnacg } from './wnacg';
+import { site as xmanhua } from './xmanhua';
+import { site as ykmh } from './ykmh';
+import { site as yymanhua } from './yymanhua';
+import { site as zaimanhua } from './zaimanhua';
 
 /**
  * Registry of sites — add a file next to this one, then one line here. Each
  * site's own logic is in its `features` and `sections` config (see `types.ts`).
  */
-export const sites = [baozimh, gmh, mh18, hipmh];
+export const sites = [
+  baozimh,
+  gmh,
+  mh18,
+  hipmh,
+  baozimhCom,
+  copymanga,
+  relamanhua,
+  manhuagui,
+  zaimanhua,
+  dm5,
+  kkk1,
+  manhuaren,
+  mangabz,
+  xmanhua,
+  yymanhua,
+  komiic,
+  comic8,
+  colamanga,
+  manwa,
+  favcomic,
+  dogemanga,
+  guazimanhua,
+  liumanhua,
+  mycomic,
+  vomicmh,
+  ykmh,
+  mhua5,
+  miaoqumh,
+  wmh1234,
+  mh160mh,
+  mh92,
+  cmanhua,
+  bilimanga,
+  gfmh,
+  manben,
+  comic18,
+  wnacg,
+  noyacg,
+  hanime1,
+  roumanwu,
+];
 
 export type { Site, SiteSection } from './types';
 export type SiteName = (typeof sites)[number]['name'];
