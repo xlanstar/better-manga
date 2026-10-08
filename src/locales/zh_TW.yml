@@ -53,6 +53,18 @@ autoContinue:
   title: '自動繼續閱讀'
   description: '「點擊繼續閱讀」之類的按鈕一出現就自動點擊。'
 
+fastLoad:
+  title: '加速載入'
+  description: '讓漫畫圖片更快出現。只有預先載入下一話會多用流量；開啟省流量模式時不預先載入。'
+  connect: '提早連線'
+  connectDescription: '頁面一開啟就先連上圖片伺服器。'
+  preloadImages: '預先載入本話'
+  preloadImagesDescription: '同時下載多張圖片，而不是一張接一張。'
+  parallel: '同時下載數'
+  parallelValue: '$1 張'
+  preloadNext: '預先載入下一話'
+  preloadNextDescription: '本話載完後在背景準備下一話，點下一話就能立刻看。'
+
 pageDistance:
   title: Page Up / Down 捲動距離
   description: '每次捲動畫面高度的固定比例，保留重疊方便接續閱讀。'

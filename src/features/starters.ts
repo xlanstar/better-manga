@@ -6,6 +6,7 @@ import { sectionFeatures, settingsFeatures, type Site, type SiteSection } from '
 import { isAlive, lifetimeSignal, retire } from '@/utils/lifecycle';
 import { startAutoContinue } from './auto-continue/start';
 import { startBlockAds } from './block-ads/start';
+import { startFastLoad } from './fast-load/start';
 import { featureIds, type FeatureId, type FeatureResolvedConfig } from './index';
 import { startPageDistance } from './page-distance/start';
 import { createFeatureRunner } from './runner';
@@ -23,6 +24,7 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
   blockAds: startBlockAds,
   skipRedirects: startSkipRedirects,
   autoContinue: startAutoContinue,
+  fastLoad: startFastLoad,
   pageDistance: startPageDistance,
   smoothScroll: startSmoothScroll,
 };

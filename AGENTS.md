@@ -56,6 +56,11 @@ only on sites that configure them; the others run on every site.
   straight to their target. Site: `rewriteLink`.
 - `autoContinue` (site-specific): clicks 「點擊繼續閱讀」-style buttons as they
   appear. Site: `selector`.
+- `fastLoad` (site-specific): gets chapter images on screen sooner. Site:
+  `origins`, `images`, `nextChapter`; user: `connect` (connect to the image
+  hosts early), `preloadImages` with `parallel` (download the chapter's
+  images several at a time), `preloadNext` (preload the next chapter in a
+  hidden frame).
 - `pageDistance`: Page Up/Down scrolls a set share of the screen. Site:
   `container`; user: `ratio`.
 - `smoothScroll`: animates Page Up/Down. Site: `container`; user: `duration`,

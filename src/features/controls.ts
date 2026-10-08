@@ -4,6 +4,7 @@
  */
 import type { ComponentType } from 'react';
 import { i18n } from '@/utils/i18n';
+import { FastLoadOptions } from './fast-load/controls';
 import type { FeatureId, FeatureOptions, FeatureResolvedConfig } from './index';
 import { PageDistanceOptions } from './page-distance/controls';
 import { SmoothScrollOptions } from './smooth-scroll/controls';
@@ -39,6 +40,11 @@ export const featureControls: {
   autoContinue: {
     title: () => i18n.t('autoContinue.title'),
     description: () => i18n.t('autoContinue.description'),
+  },
+  fastLoad: {
+    title: () => i18n.t('fastLoad.title'),
+    description: () => i18n.t('fastLoad.description'),
+    Options: FastLoadOptions,
   },
   pageDistance: {
     title: () => i18n.t('pageDistance.title'),

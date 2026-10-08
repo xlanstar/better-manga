@@ -66,7 +66,11 @@ export function keepRemoved(selectors: readonly string[], signal: AbortSignal): 
  * Call `fn` on every element matching `selector`, now and as they appear,
  * until `signal` aborts.
  */
-function onEachMatch(selector: string, fn: (el: HTMLElement) => void, signal: AbortSignal) {
+export function onEachMatch(
+  selector: string,
+  fn: (el: HTMLElement) => void,
+  signal: AbortSignal,
+): void {
   const root = document.documentElement;
   if (!root || !selector || signal.aborted) return;
 

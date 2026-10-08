@@ -52,6 +52,18 @@ autoContinue:
   title: '自动继续阅读'
   description: '“点击继续阅读”之类的按钮一出现就自动点击。'
 
+fastLoad:
+  title: '加速加载'
+  description: '让漫画图片更快出现。只有预加载下一话会多用流量；开启省流量模式时不预加载。'
+  connect: '提前连接'
+  connectDescription: '页面一打开就先连上图片服务器。'
+  preloadImages: '预加载本话'
+  preloadImagesDescription: '同时下载多张图片，而不是一张接一张。'
+  parallel: '同时下载数'
+  parallelValue: '$1 张'
+  preloadNext: '预加载下一话'
+  preloadNextDescription: '本话加载完后在后台准备下一话，点下一话就能立刻看。'
+
 pageDistance:
   title: Page Up / Down 滚动距离
   description: '每次滚动屏幕高度的固定比例，保留重叠方便接续阅读。'

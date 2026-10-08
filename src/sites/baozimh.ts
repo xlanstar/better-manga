@@ -7,6 +7,10 @@ import { defineSite } from './types';
  *   `api-get-v3.mgsearcher.com`, images `*.6wm.top`).
  * - Front end: own build, assets under `/_astro/`.
  * - Routes (one host): works `/manga/<slug>`, chapter `/manga/<slug>/<chapter>`.
+ * - Reader: fetches the chapter's image list from the API, then loads the
+ *   images one at a time, each after the last (`#chapcontent img[data-src]`,
+ *   hosts `c-nd2-1` / `c-nd3-1` by the chapter's line). Records the chapter
+ *   in `localStorage.ChapterHistory` as it opens.
  * - Ads: TrafficStars SDK (`cdn.tsyndicate.com`), trackers (`pxltag`,
  *   `uuidksinc`), `18gallery.com` banner.
  * - Not handled: clicking a chapter link (`.chapteritem`, `#nextchaptera`,
@@ -35,6 +39,15 @@ export const site = defineSite({
             'div.py-2:has(+ #nextbutton)',
             '#nextbutton + div.md\\:mx-2',
           ],
+        },
+        fastLoad: {
+          origins: ['https://c-nd2-1.6wm.top', 'https://c-nd3-1.6wm.top'],
+          images: { selector: '#chapcontent img[data-src]', src: 'data-src' },
+          // On the last chapter it points to the chapter list instead.
+          nextChapter: {
+            link: '#nextChapterLink[href*="/manga/"]',
+            keepStorage: ['ChapterHistory'],
+          },
         },
       },
     },

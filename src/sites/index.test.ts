@@ -317,6 +317,22 @@ describe('sectionFor (registered sites)', () => {
   ])('包子漫畫 main site: %s', (url) => {
     expect(sectionFor(baozimh, url)).toBe('main');
   });
+
+  const mh18 = sites.find((s) => s.name === '18mh')!;
+
+  test.each([
+    'https://18mh.org/manga/nizhao/36-14192-25',
+    'https://www.18mh.org/manga/1227-zhenzhengdemaji/5539-30043-9',
+  ])('18漫畫 reader: %s', (url) => {
+    expect(sectionFor(mh18, url)).toBe('reader');
+  });
+
+  test.each(['https://18mh.org/', 'https://18mh.org/manga/nizhao', 'https://18mh.org/hots'])(
+    '18漫畫 main site: %s',
+    (url) => {
+      expect(sectionFor(mh18, url)).toBe('main');
+    },
+  );
 });
 
 describe('sections', () => {

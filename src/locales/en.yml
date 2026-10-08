@@ -53,6 +53,18 @@ autoContinue:
   title: Auto-continue
   description: Clicks buttons like “Click to continue reading” as soon as they appear.
 
+fastLoad:
+  title: Faster loading
+  description: Gets chapter images on screen sooner. Only the next chapter costs extra data, and nothing is preloaded under Data Saver.
+  connect: Connect early
+  connectDescription: Connects to the image servers as the page opens.
+  preloadImages: Preload this chapter
+  preloadImagesDescription: Downloads its images several at a time, not one by one.
+  parallel: Downloads at a time
+  parallelValue: $1 at a time
+  preloadNext: Preload the next chapter
+  preloadNextDescription: Fetches it in the background once this one is in, so it opens at once.
+
 pageDistance:
   title: Page Up / Down distance
   description: Scrolls a fixed share of the screen height, keeping some overlap so you don't lose your place.

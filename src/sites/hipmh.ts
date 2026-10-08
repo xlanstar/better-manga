@@ -25,6 +25,15 @@ export const site = defineSite({
       remove: ['#nav-redirect-config'],
     },
     skipRedirects: { rewriteLink: directChapterUrl },
+    fastLoad: {
+      origins: ['https://hip-tx-1.s3imgs.top'],
+      images: { selector: '#chapcontent img[data-src]', src: 'data-src' },
+      nextChapter: {
+        link: '#nextChapterLink',
+        rewrite: directChapterUrl,
+        keepStorage: ['ReadingHistory'],
+      },
+    },
   },
 });
 

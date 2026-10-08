@@ -5,6 +5,9 @@ import { defineSite } from './types';
  *
  * - Backend: shared with `baozimh`.
  * - Front end: own build, assets under `/_chunks/`.
+ * - Routes: works `/manga/<slug>`, chapter `/manga/<slug>/<chapter>`.
+ * - Reader: same as `baozimh`'s (API, then images one at a time; history in
+ *   `localStorage.ChapterHistory`).
  * - Ads: first-party slots (`.adCode`, `.adshow`, `.banners`), no ad SDK. An
  *   inline script hides `.banners, .adshow` while the `showAds` cookie /
  *   localStorage timestamp is unexpired (「免廣告試驗」).
@@ -22,6 +25,21 @@ export const site = defineSite({
   features: {
     blockAds: {
       hide: ['.adshow'],
+    },
+  },
+  sections: {
+    reader: {
+      matches: ['*://m.g-mh.org/manga/*/*', '*://g-mh.org/manga/*/*', '*://godamh.com/manga/*/*'],
+      features: {
+        fastLoad: {
+          origins: ['https://c-nd2-1.6wm.top', 'https://c-nd3-1.6wm.top'],
+          images: { selector: '#chapcontent img[data-src]', src: 'data-src' },
+          nextChapter: {
+            link: '#nextChapterLink[href*="/manga/"]',
+            keepStorage: ['ChapterHistory'],
+          },
+        },
+      },
     },
   },
 });

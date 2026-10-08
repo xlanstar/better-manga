@@ -1,5 +1,6 @@
 import { autoContinue } from './auto-continue';
 import { blockAds } from './block-ads';
+import { fastLoad } from './fast-load';
 import { pageDistance } from './page-distance';
 import { skipRedirects } from './skip-redirects';
 import { smoothScroll } from './smooth-scroll';
@@ -12,7 +13,14 @@ import { smoothScroll } from './smooth-scroll';
  * `renamedFeatureIds`, or users lose their settings. The order here is the
  * order in the popup / options page.
  */
-export const features = { blockAds, skipRedirects, autoContinue, pageDistance, smoothScroll };
+export const features = {
+  blockAds,
+  skipRedirects,
+  autoContinue,
+  fastLoad,
+  pageDistance,
+  smoothScroll,
+};
 
 export type FeatureId = keyof typeof features;
 
