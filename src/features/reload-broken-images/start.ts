@@ -1,4 +1,5 @@
 import { isRealImage } from '@/utils/chapter-images';
+import { onImageEvent, queryAll } from '@/utils/dom';
 import type { FeatureStart } from '../types';
 import type { ReloadBrokenImagesResolvedConfig } from './index';
 import { addFailure, retryDelay, type Failures } from './retry';
@@ -31,18 +32,15 @@ export const startReloadBrokenImages: FeatureStart<ReloadBrokenImagesResolvedCon
   };
   // What gave up offline gets another round.
   const onOnline = () => {
-    for (const img of document.querySelectorAll(images.selector)) {
+    for (const img of queryAll(images.selector)) {
       if (!isRealImage(img, images) || !isBroken(img)) continue;
       failures.delete(img);
       reload(img);
     }
   };
 
-  // Image events don't bubble, so capture them; on the document, as a
-  // `load` event never reaches the window.
-  const listen = { capture: true, signal };
-  document.addEventListener('error', onError, listen);
-  document.addEventListener('load', onLoad, listen);
+  onImageEvent('error', onError, signal);
+  onImageEvent('load', onLoad, signal);
   window.addEventListener('online', onOnline, { signal });
 };
 

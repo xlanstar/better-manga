@@ -1,3 +1,4 @@
+import { queryOne } from '@/utils/dom';
 import type { NextChapterConfig } from './index';
 import { otherPageUrl } from './urls';
 
@@ -27,7 +28,7 @@ export function prefetchNextChapter(
   { link, rewrite, keepStorage = [] }: NextChapterConfig,
   signal: AbortSignal,
 ): void {
-  const anchor = document.querySelector(link);
+  const anchor = queryOne(link);
   if (!(anchor instanceof HTMLAnchorElement) || !document.body || signal.aborted) return;
   const url = otherPageUrl(rewrite?.(anchor.href, location.origin) ?? anchor.href, location.href);
   if (!url) return;

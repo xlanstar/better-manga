@@ -1,5 +1,5 @@
 import { isRealImage, realImageUrl, type ChapterImages } from '@/utils/chapter-images';
-import { onEachMatch } from '@/utils/dom';
+import { onEachMatch, onImageEvent, queryAll } from '@/utils/dom';
 import { createLoadQueue } from './queue';
 
 /**
@@ -33,22 +33,18 @@ export function preloadImages(
  * from its real URL (see `isRealImage`); right away if it already has.
  */
 function afterFirstImage(images: ChapterImages, signal: AbortSignal, fn: () => void) {
-  const loaded = [...document.querySelectorAll(images.selector)].some(
-    (el) => isRealImage(el, images) && el.complete,
-  );
+  const loaded = queryAll(images.selector).some((el) => isRealImage(el, images) && el.complete);
   if (loaded) return fn();
 
   const done = new AbortController();
-  const listen = { capture: true, signal: AbortSignal.any([signal, done.signal]) };
+  const listening = AbortSignal.any([signal, done.signal]);
   const onSettle = (event: Event) => {
     if (!isRealImage(event.target, images)) return;
     done.abort();
     fn();
   };
-  // Image events don't bubble, so capture them; on the document, as a
-  // `load` event never reaches the window.
-  document.addEventListener('load', onSettle, listen);
-  document.addEventListener('error', onSettle, listen);
+  onImageEvent('load', onSettle, listening);
+  onImageEvent('error', onSettle, listening);
 }
 
 /** Resolves once `url` is in the cache, or failed. */

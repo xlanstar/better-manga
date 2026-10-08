@@ -1,4 +1,5 @@
 import type { ChapterImages } from '@/utils/chapter-images';
+import { onImageEvent, queryAll } from '@/utils/dom';
 import { CHAPTER_START, type ReadingPosition } from './history';
 
 /** How long after the chapter opens restoring keeps following its image. */
@@ -38,7 +39,7 @@ export function isNearStart({ page, offset }: ReadingPosition): boolean {
 
 /** The position on screen now. */
 export function readPosition(images: ChapterImages): ReadingPosition {
-  return positionAt(pageImages(images).map((img) => img.getBoundingClientRect()));
+  return positionAt(queryAll(images.selector).map((img) => img.getBoundingClientRect()));
 }
 
 /**
@@ -64,25 +65,15 @@ export function restorePosition(
   signal: AbortSignal,
 ): void {
   const align = () => {
-    const img = pageImages(images)[position.page];
+    const img = queryAll(images.selector)[position.page];
     if (!img) return;
     const { top, height } = img.getBoundingClientRect();
     const delta = top + position.offset * height;
     if (height > 0 && Math.abs(delta) >= 1) window.scrollBy({ top: delta, behavior: 'instant' });
   };
-  // Image events don't bubble, so capture them; on the document, as a
-  // `load` event never reaches the window.
   const restoring = AbortSignal.any([signal, AbortSignal.timeout(RESTORE_TIMEOUT_MS)]);
-  document.addEventListener('load', align, { capture: true, signal: restoring });
+  onImageEvent('load', align, restoring);
   align();
-}
-
-function pageImages({ selector }: ChapterImages): Element[] {
-  try {
-    return [...document.querySelectorAll(selector)];
-  } catch {
-    return []; // invalid selector
-  }
 }
 
 function roundOffset(offset: number): number {

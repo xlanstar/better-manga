@@ -6,6 +6,7 @@
  * the same key press.
  */
 
+import { queryOne } from './dom';
 import { createSmoothScroller } from './smooth-scroll';
 
 /** Keys aimed at these are left to the browser (typing, not scrolling). */
@@ -161,7 +162,7 @@ function listen(): AbortController {
  */
 function findScrollContainer(el: Element | null, selector?: string): Element | null {
   if (selector) {
-    const forced = querySafely(selector);
+    const forced = queryOne(selector);
     if (forced) return forced;
   }
   for (let node = el; node instanceof HTMLElement; node = node.parentElement) {
@@ -174,12 +175,4 @@ function findScrollContainer(el: Element | null, selector?: string): Element | n
 /** The document scrolls by the viewport; any other box by its own height. */
 function visibleHeight(scroller: Element): number {
   return scroller === document.scrollingElement ? innerHeight : scroller.clientHeight;
-}
-
-function querySafely(selector: string): Element | null {
-  try {
-    return document.querySelector(selector);
-  } catch {
-    return null; // invalid selector — fall back to auto-detection
-  }
 }

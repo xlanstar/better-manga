@@ -1,3 +1,4 @@
+import { matches } from './dom';
 import { httpUrl } from './url';
 
 /** The chapter's page images, as the page lazy-loads them. */
@@ -19,7 +20,7 @@ export function realImageUrl(img: Element, images: ChapterImages): string | null
  * lazy-loaded). Not while it shows a lazy-load placeholder.
  */
 export function isRealImage(el: EventTarget | null, images: ChapterImages): el is HTMLImageElement {
-  if (!(el instanceof HTMLImageElement) || !el.matches(images.selector)) return false;
+  if (!(el instanceof HTMLImageElement) || !matches(el, images.selector)) return false;
   const url = realImageUrl(el, images);
   return url === null || el.src === url;
 }

@@ -42,7 +42,8 @@ Source in `src/` (`@/` alias).
   names and stay in the site file.
 - Pure logic gets a `*.test.ts` next to it; pass browser values (`location`, …)
   in as arguments.
-- Content scripts: guard every DOM query and fail silently.
+- Content scripts: guard every DOM query and fail silently; query with site
+  selectors through `queryAll`/`queryOne`/`matches` (`utils/dom.ts`).
 - Store state with `browser.storage`, not `localStorage`.
 - No new dependency for what a few lines or a browser API can do.
 - Oldest supported browsers: Chrome 119, Firefox 128 (`MIN_*_VERSION` in

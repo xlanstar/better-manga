@@ -1,3 +1,4 @@
+import { queryOne } from '@/utils/dom';
 import { httpUrl } from '@/utils/url';
 import type { ReadingHistorySiteConfig } from './index';
 
@@ -13,15 +14,11 @@ export function readChapter(
   doc: Document,
 ): ChapterInfo | null {
   if (!work || !chapter) return null;
-  try {
-    const link = doc.querySelector(work);
-    const workId = workIdFromHref(link?.getAttribute('href') ?? null, doc.baseURI);
-    const workTitle = text(link);
-    const chapterTitle = text(doc.querySelector(chapter));
-    return workId && workTitle && chapterTitle ? { workId, workTitle, chapterTitle } : null;
-  } catch {
-    return null; // invalid selector
-  }
+  const link = queryOne(work, doc);
+  const workId = workIdFromHref(link?.getAttribute('href') ?? null, doc.baseURI);
+  const workTitle = text(link);
+  const chapterTitle = text(queryOne(chapter, doc));
+  return workId && workTitle && chapterTitle ? { workId, workTitle, chapterTitle } : null;
 }
 
 /**

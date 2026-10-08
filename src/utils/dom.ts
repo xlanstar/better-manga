@@ -64,7 +64,7 @@ export function keepRemoved(selectors: readonly string[], signal: AbortSignal): 
 
 /**
  * Call `fn` on every element matching `selector`, now and as they appear,
- * until `signal` aborts.
+ * until `signal` aborts. Does nothing if `selector` is invalid.
  */
 export function onEachMatch(
   selector: string,
@@ -72,7 +72,7 @@ export function onEachMatch(
   signal: AbortSignal,
 ): void {
   const root = document.documentElement;
-  if (!root || !selector || signal.aborted) return;
+  if (!root || signal.aborted || !isValidSelector(selector)) return;
 
   const sweep = (node: ParentNode) => {
     for (const el of node.querySelectorAll<HTMLElement>(selector)) fn(el);
@@ -110,13 +110,13 @@ export function onEachMatch(
 
 /**
  * Click each element matching `selector` once, including ones the page adds
- * later, until `signal` aborts.
+ * later, until `signal` aborts. Does nothing if `selector` is invalid.
  *
  * Polling, not a MutationObserver — a poll can't miss a node that
  * appears and vanishes between callbacks, and this needs no burst handling.
  */
 export function clickOnAppear(selector: string, signal: AbortSignal, pollMs = 500): void {
-  if (signal.aborted) return;
+  if (signal.aborted || !isValidSelector(selector)) return;
   const clicked = new WeakSet<HTMLElement>();
   const timer = setInterval(() => {
     for (const el of document.querySelectorAll<HTMLElement>(selector)) {
@@ -126,6 +126,59 @@ export function clickOnAppear(selector: string, signal: AbortSignal, pollMs = 50
     }
   }, pollMs);
   signal.addEventListener('abort', () => clearInterval(timer), { once: true });
+}
+
+/**
+ * Call `fn` on every image `load` (or `error`) in the document until `signal`
+ * aborts. Image events don't bubble, so it captures them; on the document, as
+ * a `load` event never reaches the window.
+ */
+export function onImageEvent(
+  type: 'load' | 'error',
+  fn: (event: Event) => void,
+  signal: AbortSignal,
+): void {
+  document.addEventListener(type, fn, { capture: true, signal });
+}
+
+// Site selectors are config, and an invalid one throws wherever it's used:
+// these treat it as matching nothing instead.
+
+/** Every element under `root` matching `selector`. */
+export function queryAll(selector: string, root: ParentNode = document): Element[] {
+  try {
+    return [...root.querySelectorAll(selector)];
+  } catch {
+    return [];
+  }
+}
+
+/** The first element under `root` matching `selector`. */
+export function queryOne(selector: string, root: ParentNode = document): Element | null {
+  try {
+    return root.querySelector(selector);
+  } catch {
+    return null;
+  }
+}
+
+/** Whether `el` matches `selector`. */
+export function matches(el: Element, selector: string): boolean {
+  try {
+    return el.matches(selector);
+  } catch {
+    return false;
+  }
+}
+
+/** Whether `selector` parses, for checking once what's used over and over. */
+function isValidSelector(selector: string): boolean {
+  try {
+    document.createDocumentFragment().querySelector(selector);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function hideElement(el: HTMLElement) {

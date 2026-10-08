@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { hideRules } from './dom';
+import { hideRules, matches, queryAll, queryOne } from './dom';
 
 describe('hideRules', () => {
   test('one selector gives one rule', () => {
@@ -38,5 +38,34 @@ describe('hideRules', () => {
     const selectors = ['.ad', '.ad'];
     expect(hideRules(selectors).split('\n')).toHaveLength(2);
     expect(selectors).toEqual(['.ad', '.ad']);
+  });
+});
+
+/** What the DOM does with an invalid selector. */
+function invalid(): never {
+  throw new SyntaxError('not a valid selector');
+}
+
+describe('guarded queries', () => {
+  // No DOM under `bun test`: stand-ins that answer like one, or throw like
+  // one does on an invalid selector.
+  const el = { matches: () => true } as unknown as Element;
+  const root = {
+    querySelectorAll: () => [el],
+    querySelector: () => el,
+  } as unknown as ParentNode;
+  const badRoot = { querySelectorAll: invalid, querySelector: invalid } as unknown as ParentNode;
+  const badEl = { matches: invalid } as unknown as Element;
+
+  test('pass through what a valid selector finds', () => {
+    expect(queryAll('img', root)).toEqual([el]);
+    expect(queryOne('img', root)).toBe(el);
+    expect(matches(el, 'img')).toBe(true);
+  });
+
+  test('an invalid selector matches nothing', () => {
+    expect(queryAll('img[', badRoot)).toEqual([]);
+    expect(queryOne('img[', badRoot)).toBeNull();
+    expect(matches(badEl, 'img[')).toBe(false);
   });
 });
