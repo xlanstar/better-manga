@@ -9,6 +9,9 @@ Source in `src/` (`@/` alias).
 
 ## Code
 
+- Follow best practices; keep code readable and maintainable. Take the
+  simplest design that works (no speculative options or abstractions, no
+  duplicated logic), then review it once more to simplify and optimize.
 - Never hand-write `manifest.json`; WXT generates it.
 - `src/entrypoints/` holds entry files only; logic goes in `sites/`, `features/`,
   `components/`, `hooks/` or `utils/`.
