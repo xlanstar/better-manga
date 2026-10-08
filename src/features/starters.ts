@@ -9,12 +9,11 @@ import { startAutoContinue } from './auto-continue/start';
 import { startBlockAds } from './block-ads/start';
 import { startFastLoad } from './fast-load/start';
 import { featureIds, type FeatureId, type FeatureResolvedConfig } from './index';
-import { startPageDistance } from './page-distance/start';
+import { startPageKeys } from './page-keys/start';
 import { startReadingHistory } from './reading-history/start';
 import { startReloadBrokenImages } from './reload-broken-images/start';
 import { createFeatureRunner } from './runner';
 import { startSkipRedirects } from './skip-redirects/start';
-import { startSmoothScroll } from './smooth-scroll/start';
 import { resolveFeatures, type ResolvedFeatures } from './settings';
 import { subscribeStoredSettings, type StoredSettings } from './settings-storage';
 import type { FeatureStart } from './types';
@@ -30,8 +29,7 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
   fastLoad: startFastLoad,
   reloadBrokenImages: startReloadBrokenImages,
   readingHistory: startReadingHistory,
-  pageDistance: startPageDistance,
-  smoothScroll: startSmoothScroll,
+  pageKeys: startPageKeys,
 };
 
 /**

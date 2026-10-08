@@ -5,7 +5,7 @@ import { featureStarters } from './starters';
 describe('feature registry', () => {
   test('featureIds lists every feature, in registry order', () => {
     expect(featureIds).toEqual(Object.keys(features) as typeof featureIds);
-    expect(featureIds).toContain('pageDistance');
+    expect(featureIds).toContain('pageKeys');
   });
 
   test('ids are unique', () => {

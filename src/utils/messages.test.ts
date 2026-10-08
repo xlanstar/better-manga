@@ -14,20 +14,20 @@ describe('parseLocalePreference', () => {
 });
 
 describe('lookupMessage', () => {
-  const zh = { pageDistance_default: { message: '預設 $1' }, extName: { message: 'Better Manga' } };
-  const en = { pageDistance_title: { message: 'Page Up / Down scrolling' } };
+  const zh = { pageKeys_default: { message: '預設 $1' }, extName: { message: 'Better Manga' } };
+  const en = { pageKeys_title: { message: 'Page Up / Down scrolling' } };
 
   test('maps dotted keys and substitutes', () => {
-    expect(lookupMessage([zh], 'pageDistance.default', ['70%'])).toBe('預設 70%');
+    expect(lookupMessage([zh], 'pageKeys.default', ['70%'])).toBe('預設 70%');
   });
 
   test('falls through catalogs in order', () => {
-    expect(lookupMessage([zh, en], 'pageDistance.title')).toBe('Page Up / Down scrolling');
+    expect(lookupMessage([zh, en], 'pageKeys.title')).toBe('Page Up / Down scrolling');
   });
 
   test('missing key or substitution', () => {
     expect(lookupMessage([zh, en], 'nope')).toBeUndefined();
-    expect(lookupMessage([zh], 'pageDistance.default')).toBe('預設 ');
+    expect(lookupMessage([zh], 'pageKeys.default')).toBe('預設 ');
   });
 
   test('$$ is a literal dollar', () => {

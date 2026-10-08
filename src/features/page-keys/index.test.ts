@@ -1,46 +1,54 @@
 import { describe, expect, test } from 'bun:test';
-import { PAGE_DISTANCE_RATIO, pageDistance } from './index';
+import { PAGE_KEYS_DURATION, PAGE_KEYS_HOLD_SPEED, PAGE_KEYS_RATIO, pageKeys } from './index';
 
-const { defaults } = pageDistance;
-const sanitizeOptions = pageDistance.sanitizeOptions!;
-const { min, max, step } = PAGE_DISTANCE_RATIO;
+const { defaults } = pageKeys;
+const sanitizeOptions = pageKeys.sanitizeOptions!;
+const { min, max } = PAGE_KEYS_RATIO;
 
-describe('PAGE_DISTANCE_RATIO', () => {
-  test('is a non-empty range inside (0, 1]', () => {
-    expect(min).toBeGreaterThan(0);
-    expect(max).toBeLessThanOrEqual(1);
-    expect(min).toBeLessThan(max);
+describe.each([
+  ['PAGE_KEYS_RATIO', PAGE_KEYS_RATIO, defaults.ratio],
+  ['PAGE_KEYS_DURATION', PAGE_KEYS_DURATION, defaults.duration],
+  ['PAGE_KEYS_HOLD_SPEED', PAGE_KEYS_HOLD_SPEED, defaults.holdSpeed],
+])('%s', (_, range, fallback) => {
+  test('is a non-empty positive range', () => {
+    expect(range.min).toBeGreaterThan(0);
+    expect(range.min).toBeLessThan(range.max);
   });
 
   test('step divides the range evenly (the slider reaches both ends)', () => {
-    const steps = (max - min) / step;
+    const steps = (range.max - range.min) / range.step;
     expect(steps).toBeCloseTo(Math.round(steps), 9);
-    expect(step).toBeGreaterThan(0);
+  });
+
+  test('holds the default, on a slider step', () => {
+    expect(fallback).toBeGreaterThanOrEqual(range.min);
+    expect(fallback).toBeLessThanOrEqual(range.max);
+    const n = (fallback - range.min) / range.step;
+    expect(n).toBeCloseTo(Math.round(n), 9);
   });
 });
 
-describe('pageDistance.defaults', () => {
-  test('is enabled with a ratio that leaves overlap', () => {
-    expect(defaults).toEqual({ enabled: true, ratio: 0.7 });
-  });
+test('PAGE_KEYS_RATIO stays within one screen', () => {
+  expect(max).toBeLessThanOrEqual(1);
+});
 
-  test('ratio lies inside the slider range and on a slider step', () => {
-    expect(defaults.ratio).toBeGreaterThanOrEqual(min);
-    expect(defaults.ratio).toBeLessThanOrEqual(max);
-    const n = (defaults.ratio - min) / step;
-    expect(n).toBeCloseTo(Math.round(n), 9);
+describe('pageKeys.defaults', () => {
+  test('is enabled, 70 % per press, smooth: 150 ms per press, 2 screens/s held', () => {
+    expect(defaults).toEqual({
+      enabled: true,
+      ratio: 0.7,
+      smooth: true,
+      duration: 150,
+      holdSpeed: 2,
+    });
   });
 
   test('has no container (that is a site adapter, not a default)', () => {
     expect('container' in defaults).toBe(false);
   });
-
-  test('ratio survives sanitizeOptions unchanged', () => {
-    expect(sanitizeOptions({ ...defaults })).toEqual({ ratio: 0.7 });
-  });
 });
 
-describe('pageDistance.sanitizeOptions', () => {
+describe('pageKeys.sanitizeOptions', () => {
   test('empty input gives an empty layer', () => {
     expect(sanitizeOptions({})).toEqual({});
   });
@@ -82,6 +90,44 @@ describe('pageDistance.sanitizeOptions', () => {
       ['Number object', new Number(0.5)],
     ])('drops non-number (%s)', (_, ratio) => {
       expect(sanitizeOptions({ ratio })).toEqual({});
+    });
+  });
+
+  describe('smooth', () => {
+    test.each([true, false])('keeps boolean %p', (smooth) => {
+      expect(sanitizeOptions({ smooth })).toEqual({ smooth });
+    });
+
+    test.each([['true'], [1], [null], [new Boolean(true)]])('drops %p', (smooth) => {
+      expect(sanitizeOptions({ smooth })).toEqual({});
+    });
+  });
+
+  describe('duration and holdSpeed', () => {
+    test('snap to the nearest step', () => {
+      expect(sanitizeOptions({ duration: 170, holdSpeed: 1.3 })).toEqual({
+        duration: 150,
+        holdSpeed: 1.5,
+      });
+    });
+
+    test('clamp out-of-range values', () => {
+      expect(sanitizeOptions({ duration: 0, holdSpeed: 99 })).toEqual({
+        duration: PAGE_KEYS_DURATION.min,
+        holdSpeed: PAGE_KEYS_HOLD_SPEED.max,
+      });
+    });
+
+    test.each([[Number.NaN], ['300'], [null], [[300]]])('drop %p', (bad) => {
+      expect(sanitizeOptions({ duration: bad, holdSpeed: bad })).toEqual({});
+    });
+  });
+
+  test('sanitizes each option on its own', () => {
+    expect(sanitizeOptions({ ratio: 'x', smooth: false, duration: 1e9, holdSpeed: 1 })).toEqual({
+      smooth: false,
+      duration: PAGE_KEYS_DURATION.max,
+      holdSpeed: 1,
     });
   });
 

@@ -313,7 +313,7 @@ describe('sections', () => {
   const hide = ['.ad'];
   const site: Site = {
     ...testSite('*://a.test/*', '*://reader.a.test/*'),
-    features: { blockAds: { hide }, pageDistance: { container: '#c' } },
+    features: { blockAds: { hide }, pageKeys: { container: '#c' } },
     sections: {
       main: { features: { autoContinue: { selector: '.go' } } },
       reader: {
@@ -321,7 +321,7 @@ describe('sections', () => {
         features: {
           blockAds: { remove: ['#x'] },
           skipRedirects: { rewriteLink },
-          pageDistance: false,
+          pageKeys: false,
         },
       },
     },

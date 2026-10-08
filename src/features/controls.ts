@@ -6,8 +6,7 @@ import type { ComponentType } from 'react';
 import { i18n } from '@/utils/i18n';
 import { FastLoadOptions } from './fast-load/controls';
 import type { FeatureId, FeatureOptions, FeatureResolvedConfig } from './index';
-import { PageDistanceOptions } from './page-distance/controls';
-import { SmoothScrollOptions } from './smooth-scroll/controls';
+import { PageKeysOptions } from './page-keys/controls';
 import type { FeatureOptionsProps } from './types';
 
 /** Props of feature `K`'s options controls. */
@@ -36,8 +35,7 @@ export const featureControls: {
   fastLoad: { group: 'loading', Options: FastLoadOptions },
   reloadBrokenImages: { group: 'loading' },
   readingHistory: { group: 'reading' },
-  pageDistance: { group: 'reading', Options: PageDistanceOptions },
-  smoothScroll: { group: 'reading', Options: SmoothScrollOptions },
+  pageKeys: { group: 'reading', Options: PageKeysOptions },
 };
 
 /**

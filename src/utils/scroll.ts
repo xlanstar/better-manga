@@ -1,9 +1,6 @@
 /**
- * Page Up/Down handling, shared by the features that change it: one sets the
- * distance (`pageDistance`), another animates it (`smoothScroll`). Each
- * registers its part with `contributePageKeyScroll`; one key listener reads
- * them all, so the features stay independent switches without fighting over
- * the same key press.
+ * Page Up/Down handling: each press scrolls a set share of the box that holds
+ * the content, animated or not.
  */
 
 import { queryOne } from './dom';
@@ -15,83 +12,26 @@ const EDITABLE_SELECTOR = 'input, textarea, select, [contenteditable]';
 const SCROLLABLE_OVERFLOW = /^(auto|scroll|overlay)$/;
 /** Keys that don't scroll on their own, so they don't interrupt a scroll. */
 const MODIFIER_KEYS = new Set(['Shift', 'Control', 'Alt', 'Meta']);
-/**
- * The browser's own page step (Chromium's rule; Firefox's is close): at least
- * 87.5 % of the height, at most 40 px short of it.
- */
-const BROWSER_PAGE_STEP = { minRatio: 0.875, maxOverlap: 40 } as const;
 
-/** How to animate: `duration` in ms (see `SmoothScrollTiming`), `holdSpeed` in screens/s. */
-export type PageKeySmooth = { duration: number; holdSpeed: number };
-
-/** What one feature contributes to Page Up/Down handling. */
-export type PageKeyScrollPart = {
-  /** Fraction of the viewport to scroll per key press. */
-  ratio?: number;
-  /** Animate the scroll (see `smooth-scroll.ts`). */
-  smooth?: PageKeySmooth;
+/** How to handle Page Up/Down. */
+export type PageKeyOptions = {
+  /** Share of the box's height one press scrolls. */
+  ratio: number;
+  /** Animate the scroll (see `smooth-scroll.ts`), timed by the next two. */
+  smooth: boolean;
+  /** ms a typical press animates; see `SmoothScrollTiming`. */
+  duration: number;
+  /** Screens per second while a key is held. */
+  holdSpeed: number;
   /** Selector for the element that scrolls, when auto-detection gets it wrong. */
   container?: string;
 };
-
-/** The parts combined. No `ratio` = the browser's own step; no `smooth` = jump. */
-export type PageKeyScrollOptions = { ratio?: number; smooth?: PageKeySmooth; container?: string };
 
 /** The `KeyboardEvent` fields `pageKeyDirection` reads. */
 export type PageKeyEvent = Pick<
   KeyboardEvent,
   'key' | 'ctrlKey' | 'altKey' | 'metaKey' | 'shiftKey' | 'defaultPrevented'
 >;
-
-/** The features' parts, each until its signal aborts. */
-const parts = new Set<PageKeyScrollPart>();
-/** The key listeners, installed while any part is registered. */
-let listening: AbortController | null = null;
-
-/**
- * Take over Page Up/Down with `part` merged into what other features
- * contribute (see `mergePageKeyParts`), until `signal` aborts.
- *
- * Scrolls whichever container actually holds the content — many readers put it
- * in their own overflow box rather than the document.
- */
-export function contributePageKeyScroll(part: PageKeyScrollPart, signal: AbortSignal): void {
-  if (signal.aborted) return;
-  parts.add(part);
-  listening ??= listen();
-  signal.addEventListener(
-    'abort',
-    () => {
-      parts.delete(part);
-      if (parts.size) return;
-      listening?.abort();
-      listening = null;
-    },
-    { once: true },
-  );
-}
-
-/**
- * Combine the features' parts: the first `ratio`, `smooth` and `container`
- * set. `null` when nothing changes the browser's own behaviour, so the key is
- * left to it.
- */
-export function mergePageKeyParts(all: readonly PageKeyScrollPart[]): PageKeyScrollOptions | null {
-  const options: PageKeyScrollOptions = {};
-  const ratio = all.find((part) => part.ratio !== undefined)?.ratio;
-  const smooth = all.find((part) => part.smooth)?.smooth;
-  const container = all.find((part) => part.container)?.container;
-  if (ratio !== undefined) options.ratio = ratio;
-  if (smooth) options.smooth = smooth;
-  if (container) options.container = container;
-  return ratio === undefined && !smooth ? null : options;
-}
-
-/** How far one press scrolls a box `height` px tall: `ratio` of it, else the browser's step. */
-export function pageStep(height: number, ratio?: number): number {
-  if (ratio !== undefined) return height * ratio;
-  return Math.max(height * BROWSER_PAGE_STEP.minRatio, height - BROWSER_PAGE_STEP.maxOverlap);
-}
 
 /**
  * `1` for a plain Page Down, `-1` for a plain Page Up, `0` for anything else:
@@ -106,22 +46,21 @@ export function pageKeyDirection(event: PageKeyEvent): 1 | -1 | 0 {
   return 0;
 }
 
-/** Install the one set of key listeners; removed when the result aborts. */
-function listen(): AbortController {
-  const controller = new AbortController();
-  const { signal } = controller;
-  const smooth = createSmoothScroller(signal);
+/**
+ * Take over Page Up/Down until `signal` aborts. Scrolls whichever container
+ * actually holds the content — many readers put it in their own overflow box
+ * rather than the document.
+ */
+export function handlePageKeys(options: PageKeyOptions, signal: AbortSignal): void {
+  const smoothScroller = createSmoothScroller(signal);
 
   const onKeyDown = (event: KeyboardEvent) => {
     const direction = pageKeyDirection(event);
     if (!direction) {
       // Arrow keys, Space, Home, … scroll by themselves; don't fight them.
-      if (!MODIFIER_KEYS.has(event.key)) smooth.stop();
+      if (!MODIFIER_KEYS.has(event.key)) smoothScroller.stop();
       return;
     }
-    const options = mergePageKeyParts([...parts]);
-    if (!options) return;
-
     const target = event.target instanceof Element ? event.target : null;
     if (target?.closest(EDITABLE_SELECTOR)) return;
 
@@ -130,23 +69,20 @@ function listen(): AbortController {
 
     event.preventDefault();
     const height = visibleHeight(scroller);
-    const delta = pageStep(height, options.ratio) * direction;
+    const delta = height * options.ratio * direction;
     if (options.smooth) {
-      const { duration, holdSpeed } = options.smooth;
-      const timing = { duration, holdSpeed: (holdSpeed * height) / 1000 };
-      smooth.scrollBy(scroller, delta, timing, event.repeat);
+      const timing = { duration: options.duration, holdSpeed: (options.holdSpeed * height) / 1000 };
+      smoothScroller.scrollBy(scroller, delta, timing, event.repeat);
     } else {
-      smooth.stop();
       scroller.scrollBy({ top: delta, behavior: 'instant' });
     }
   };
   const onKeyUp = (event: KeyboardEvent) => {
-    if (event.key === 'PageDown' || event.key === 'PageUp') smooth.release();
+    if (event.key === 'PageDown' || event.key === 'PageUp') smoothScroller.release();
   };
   // Capture, so we win against the site's own Page Up/Down handler.
   window.addEventListener('keydown', onKeyDown, { capture: true, signal });
   window.addEventListener('keyup', onKeyUp, { capture: true, signal });
-  return controller;
 }
 
 /**

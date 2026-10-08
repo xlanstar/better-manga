@@ -89,14 +89,12 @@ readingHistory:
   clearConfirm: Clear
   cancel: Cancel
 
-pageDistance:
-  title: Page scroll distance
-  description: How far Page Up / Down scrolls. A little overlap keeps your place.
+pageKeys:
+  title: Page Up / Down
+  description: Sets how far Page Up / Down scrolls. A little overlap keeps your place.
   ratio: Scroll by
-
-smoothScroll:
-  title: Smooth page scrolling
-  description: Page Up / Down scrolls smoothly so your eyes can follow. Hold the key to keep scrolling.
+  smooth: Smooth scrolling
+  smoothDescription: Scrolls smoothly so your eyes can follow. Hold the key to keep scrolling.
   duration: Animation length
   durationValue: $1 ms
   holdSpeed: Speed while held

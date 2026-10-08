@@ -6,6 +6,8 @@ them under the new version, and the GitHub release shows that section.
 
 ## Unreleased
 
+- Page Up / Down distance and smooth scrolling are now one setting, "Page
+  Up / Down", with smooth scrolling as an option in it.
 - Settings are grouped into Ads & distractions, Loading and Reading, and
   every feature has a simpler name and description.
 - New feature: reading history. Remembers the chapter you last read of each

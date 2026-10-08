@@ -28,7 +28,7 @@
  *
  * 1. `features/<name>/`: `index.ts` exports a `Feature` definition, `start.ts`
  *    a `FeatureStart`, and `controls.tsx` its options controls if it has user
- *    options besides `enabled` (see `page-distance/`).
+ *    options besides `enabled` (see `page-keys/`).
  * 2. Register them in `features/index.ts`, `starters.ts` and `controls.ts`
  *    (with the popup group).
  * 3. Add `<id>.title` and `<id>.description` (the popup switch) to the

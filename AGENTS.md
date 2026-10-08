@@ -77,9 +77,8 @@ only on sites that configure them; the others run on every site.
   when the chapter is reopened, and lists the history in the popup
   (continue reading) and options page. Local storage only. Site: `work`,
   `chapter`, `images`.
-- `pageDistance`: Page Up/Down scrolls a set share of the screen. Site:
-  `container`; user: `ratio`.
-- `smoothScroll`: animates Page Up/Down. Site: `container`; user: `duration`,
+- `pageKeys`: Page Up/Down scrolls a set share of the screen, animated or
+  not. Site: `container`; user: `ratio`, `smooth` with `duration` and
   `holdSpeed`.
 
 ## Design

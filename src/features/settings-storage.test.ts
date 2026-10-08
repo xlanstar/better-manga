@@ -8,8 +8,8 @@ import {
   type StoredSettingsChange,
 } from './settings-storage';
 
-const A: UserSettings = { pageDistance: { ratio: 0.5 } };
-const B: UserSettings = { pageDistance: { enabled: false } };
+const A: UserSettings = { pageKeys: { ratio: 0.5 } };
+const B: UserSettings = { pageKeys: { enabled: false } };
 
 /** Let pending promise callbacks run. */
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
@@ -70,7 +70,7 @@ describe('parseStorageChanges', () => {
     expect(
       parseStorageChanges(
         {
-          global: { newValue: { pageDistance: { ratio: 7, x: 1 } } },
+          global: { newValue: { pageKeys: { ratio: 7, x: 1 } } },
           disabledSites: { newValue: ['one', 1, '', 'one'] },
           'site:one': {},
         },
@@ -78,7 +78,7 @@ describe('parseStorageChanges', () => {
         watched,
       ),
     ).toEqual({
-      global: { pageDistance: { ratio: 1 } },
+      global: { pageKeys: { ratio: 1 } },
       disabledSites: new Set(['one']),
       bySite: { one: {} },
     });

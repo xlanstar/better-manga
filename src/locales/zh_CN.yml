@@ -88,14 +88,12 @@ readingHistory:
   clearConfirm: '清除'
   cancel: '取消'
 
-pageDistance:
-  title: '翻页距离'
+pageKeys:
+  title: 'Page Up / Down 翻页'
   description: '设置 Page Up / Down 每次滚动多少，留一点重叠才不会看漏。'
   ratio: '每次滚动'
-
-smoothScroll:
-  title: '平滑翻页'
-  description: '让 Page Up / Down 平滑滚动，视线跟得上；按住可连续滚动。'
+  smooth: '平滑滚动'
+  smoothDescription: '滚动时有动画，视线跟得上；按住可连续滚动。'
   duration: '动画时长'
   durationValue: '$1 毫秒'
   holdSpeed: '按住时的速度'

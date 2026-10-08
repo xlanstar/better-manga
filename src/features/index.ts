@@ -1,11 +1,10 @@
 import { autoContinue } from './auto-continue';
 import { blockAds } from './block-ads';
 import { fastLoad } from './fast-load';
-import { pageDistance } from './page-distance';
+import { pageKeys } from './page-keys';
 import { readingHistory } from './reading-history';
 import { reloadBrokenImages } from './reload-broken-images';
 import { skipRedirects } from './skip-redirects';
-import { smoothScroll } from './smooth-scroll';
 
 /**
  * Registry of feature definitions — add a folder next to this one, then one
@@ -23,8 +22,7 @@ export const features = {
   fastLoad,
   reloadBrokenImages,
   readingHistory,
-  pageDistance,
-  smoothScroll,
+  pageKeys,
 };
 
 export type FeatureId = keyof typeof features;
@@ -34,7 +32,8 @@ export type FeatureId = keyof typeof features;
  * `sanitizeUserSettings` reads it as the new one, and the next save drops it.
  */
 export const renamedFeatureIds: Readonly<Record<string, FeatureId>> = {
-  pageScroll: 'pageDistance',
+  pageScroll: 'pageKeys',
+  pageDistance: 'pageKeys',
 };
 export const featureIds = Object.keys(features) as FeatureId[];
 

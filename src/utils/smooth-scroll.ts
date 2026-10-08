@@ -20,7 +20,7 @@
  * Times are in ms, speeds in px/ms.
  */
 
-/** User-tunable timing (the `smoothScroll` feature's options). */
+/** User-tunable timing (the `pageKeys` feature's options). */
 export type SmoothScrollTiming = {
   /**
    * How long a 700 px move (70 % of a 1000 px screen) takes. Shorter moves

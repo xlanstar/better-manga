@@ -11,7 +11,7 @@ describe('sections', () => {
   const hide = ['.ad'];
   const site: Site = {
     ...testSite('*://a.test/*', '*://reader.a.test/*'),
-    features: { blockAds: { hide }, pageDistance: { container: '#c' } },
+    features: { blockAds: { hide }, pageKeys: { container: '#c' } },
     sections: {
       main: { features: { autoContinue: { selector: '.go' } } },
       reader: {
@@ -19,7 +19,7 @@ describe('sections', () => {
         features: {
           blockAds: { remove: ['#x'] },
           skipRedirects: { rewriteLink },
-          pageDistance: false,
+          pageKeys: false,
         },
       },
     },
@@ -30,11 +30,11 @@ describe('sections', () => {
       expect(sectionFeatures(site, 'reader')).toEqual({
         blockAds: { hide, remove: ['#x'] },
         skipRedirects: { rewriteLink },
-        pageDistance: false,
+        pageKeys: false,
       });
       expect(sectionFeatures(site, 'main')).toEqual({
         blockAds: { hide },
-        pageDistance: { container: '#c' },
+        pageKeys: { container: '#c' },
         autoContinue: { selector: '.go' },
       });
     });
@@ -76,7 +76,7 @@ describe('sections', () => {
 
     test('sections set adapters, not user option defaults', () => {
       // @ts-expect-error `ratio` is a user option: its default is per site.
-      const features: SectionFeatures = { pageDistance: { ratio: 0.5 } };
+      const features: SectionFeatures = { pageKeys: { ratio: 0.5 } };
       expect(features).toBeDefined();
     });
   });
@@ -87,17 +87,17 @@ describe('sections', () => {
       expect(layer.autoContinue).toEqual({ selector: '.go' });
       expect(layer.skipRedirects).toEqual({ rewriteLink });
       // On in the main site, off in the reader: still listed.
-      expect(layer.pageDistance).toEqual({ container: '#c' });
+      expect(layer.pageKeys).toEqual({ container: '#c' });
     });
 
     test('is false only where every section turns it off', () => {
       const s: Site = {
         ...site,
-        features: { smoothScroll: false },
-        sections: { reader: { matches: ['*://a.test/r/*'], features: { pageDistance: false } } },
+        features: { blockAds: false },
+        sections: { reader: { matches: ['*://a.test/r/*'], features: { pageKeys: false } } },
       };
-      expect(settingsFeatures(s).smoothScroll).toBe(false);
-      expect(settingsFeatures(s).pageDistance).toBeUndefined();
+      expect(settingsFeatures(s).blockAds).toBe(false);
+      expect(settingsFeatures(s).pageKeys).toBeUndefined();
     });
 
     test('without sections, it is the site layer', () => {

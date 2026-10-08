@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { PAGE_DISTANCE_RATIO } from '@/features/page-distance';
+import { PAGE_KEYS_RATIO } from '@/features/page-keys';
 import { formatTimeAgo, formatPercent } from './format';
 
 describe('formatPercent', () => {
@@ -28,7 +28,7 @@ describe('formatPercent', () => {
   });
 
   test('every slider step shows a distinct multiple of 5%', () => {
-    const { min, max, step } = PAGE_DISTANCE_RATIO;
+    const { min, max, step } = PAGE_KEYS_RATIO;
     const seen = new Set<string>();
     for (let i = 0; min + i * step <= max + 1e-9; i++) {
       const label = formatPercent(min + i * step);

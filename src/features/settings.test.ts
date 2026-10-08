@@ -14,7 +14,7 @@ import {
   type UserSettings,
 } from './settings';
 
-const DEFAULTS = features.pageDistance.defaults;
+const DEFAULTS = features.pageKeys.defaults;
 
 /** Every feature at its defaults: the global settings with nothing stored. */
 const ALL_DEFAULTS = Object.fromEntries(
@@ -34,28 +34,28 @@ const scopeLabel = (s: SiteScope) =>
   s === ALL_SITES ? 'ALL_SITES' : (JSON.stringify(s) ?? 'undefined');
 
 describe('sanitizeUserSettings', () => {
-  describe('a renamed feature (pageScroll → pageDistance)', () => {
-    test('reads settings stored under the old id', () => {
-      expect(sanitizeUserSettings({ pageScroll: { enabled: false, ratio: 0.5 } })).toEqual({
-        pageDistance: { enabled: false, ratio: 0.5 },
+  describe('a renamed feature (pageScroll, pageDistance → pageKeys)', () => {
+    test.each(['pageScroll', 'pageDistance'])('reads settings stored under %s', (oldId) => {
+      expect(sanitizeUserSettings({ [oldId]: { enabled: false, ratio: 0.5 } })).toEqual({
+        pageKeys: { enabled: false, ratio: 0.5 },
       });
     });
 
     test('prefers the new id when both are stored', () => {
       expect(
-        sanitizeUserSettings({ pageScroll: { ratio: 0.5 }, pageDistance: { ratio: 0.8 } }),
-      ).toEqual({ pageDistance: { ratio: 0.8 } });
+        sanitizeUserSettings({ pageScroll: { ratio: 0.5 }, pageKeys: { ratio: 0.8 } }),
+      ).toEqual({ pageKeys: { ratio: 0.8 } });
     });
 
     test('falls back to the old id when the new one is not an object', () => {
-      expect(sanitizeUserSettings({ pageScroll: { ratio: 0.5 }, pageDistance: 1 })).toEqual({
-        pageDistance: { ratio: 0.5 },
+      expect(sanitizeUserSettings({ pageScroll: { ratio: 0.5 }, pageKeys: 1 })).toEqual({
+        pageKeys: { ratio: 0.5 },
       });
     });
 
     test('sanitizes it like any other', () => {
       expect(sanitizeUserSettings({ pageScroll: { ratio: 9, enabled: 'x' } })).toEqual({
-        pageDistance: { ratio: 1 },
+        pageKeys: { ratio: 1 },
       });
     });
 
@@ -74,10 +74,10 @@ describe('sanitizeUserSettings', () => {
     ['undefined', undefined],
     ['null', null],
     ['number', 42],
-    ['string', '{"pageDistance":{"ratio":0.5}}'],
+    ['string', '{"pageKeys":{"ratio":0.5}}'],
     ['boolean', true],
-    ['array', [{ pageDistance: { ratio: 0.5 } }]],
-    ['function', () => ({ pageDistance: { ratio: 0.5 } })],
+    ['array', [{ pageKeys: { ratio: 0.5 } }]],
+    ['function', () => ({ pageKeys: { ratio: 0.5 } })],
   ])('non-object (%s) gives {}', (_, raw) => {
     expect(sanitizeUserSettings(raw)).toEqual({});
   });
@@ -87,14 +87,14 @@ describe('sanitizeUserSettings', () => {
   });
 
   test('keeps valid feature values', () => {
-    expect(sanitizeUserSettings({ pageDistance: { enabled: false, ratio: 0.5 } })).toEqual({
-      pageDistance: { enabled: false, ratio: 0.5 },
+    expect(sanitizeUserSettings({ pageKeys: { enabled: false, ratio: 0.5 } })).toEqual({
+      pageKeys: { enabled: false, ratio: 0.5 },
     });
   });
 
   test('runs each feature sanitizer (clamps, drops bad fields)', () => {
-    expect(sanitizeUserSettings({ pageDistance: { enabled: 'no', ratio: 7, x: 1 } })).toEqual({
-      pageDistance: { ratio: 1 },
+    expect(sanitizeUserSettings({ pageKeys: { enabled: 'no', ratio: 7, x: 1 } })).toEqual({
+      pageKeys: { ratio: 1 },
     });
   });
 
@@ -127,8 +127,8 @@ describe('sanitizeUserSettings', () => {
   });
 
   test('drops unknown feature ids', () => {
-    expect(sanitizeUserSettings({ zoom: { level: 2 }, pageDistance: { ratio: 0.4 } })).toEqual({
-      pageDistance: { ratio: 0.4 },
+    expect(sanitizeUserSettings({ zoom: { level: 2 }, pageKeys: { ratio: 0.4 } })).toEqual({
+      pageKeys: { ratio: 0.4 },
     });
   });
 
@@ -138,35 +138,35 @@ describe('sanitizeUserSettings', () => {
     ['number', 0.5],
     ['boolean', false],
     ['array', [{ ratio: 0.5 }]],
-  ])('drops a feature whose value is not an object (%s)', (_, pageDistance) => {
-    expect(sanitizeUserSettings({ pageDistance })).toEqual({});
+  ])('drops a feature whose value is not an object (%s)', (_, pageKeys) => {
+    expect(sanitizeUserSettings({ pageKeys })).toEqual({});
   });
 
   test('drops a feature left empty after sanitizing', () => {
-    expect(sanitizeUserSettings({ pageDistance: {} })).toEqual({});
-    expect(sanitizeUserSettings({ pageDistance: { ratio: 'x', enabled: 1 } })).toEqual({});
-    expect('pageDistance' in sanitizeUserSettings({ pageDistance: { bogus: 1 } })).toBe(false);
+    expect(sanitizeUserSettings({ pageKeys: {} })).toEqual({});
+    expect(sanitizeUserSettings({ pageKeys: { ratio: 'x', enabled: 1 } })).toEqual({});
+    expect('pageKeys' in sanitizeUserSettings({ pageKeys: { bogus: 1 } })).toBe(false);
   });
 
   test('accepts prototype-less objects', () => {
     const inner = Object.assign(Object.create(null), { ratio: 0.6 });
-    const raw = Object.assign(Object.create(null), { pageDistance: inner });
-    expect(sanitizeUserSettings(raw)).toEqual({ pageDistance: { ratio: 0.6 } });
+    const raw = Object.assign(Object.create(null), { pageKeys: inner });
+    expect(sanitizeUserSettings(raw)).toEqual({ pageKeys: { ratio: 0.6 } });
   });
 
   test('inherited feature values are read, but still sanitized', () => {
-    const raw = Object.create({ pageDistance: { ratio: 0.6, enabled: 'x' } });
-    expect(sanitizeUserSettings(raw)).toEqual({ pageDistance: { ratio: 0.6 } });
+    const raw = Object.create({ pageKeys: { ratio: 0.6, enabled: 'x' } });
+    expect(sanitizeUserSettings(raw)).toEqual({ pageKeys: { ratio: 0.6 } });
   });
 
   test('is safe against a JSON `__proto__` key', () => {
-    const raw = JSON.parse('{"__proto__": {"pageDistance": {"ratio": 0.5}}}');
+    const raw = JSON.parse('{"__proto__": {"pageKeys": {"ratio": 0.5}}}');
     expect(sanitizeUserSettings(raw)).toEqual({});
-    expect(({} as Record<string, unknown>).pageDistance).toBeUndefined();
+    expect(({} as Record<string, unknown>).pageKeys).toBeUndefined();
   });
 
   test('does not mutate its input', () => {
-    const raw = { pageDistance: { ratio: 9, enabled: 'x' }, other: 1 };
+    const raw = { pageKeys: { ratio: 9, enabled: 'x' }, other: 1 };
     const copy = structuredClone(raw);
     sanitizeUserSettings(raw);
     expect(raw).toEqual(copy);
@@ -174,21 +174,21 @@ describe('sanitizeUserSettings', () => {
 
   test('returns fresh objects, not the input', () => {
     const inner = { ratio: 0.5 };
-    const raw = { pageDistance: inner };
+    const raw = { pageKeys: inner };
     const out = sanitizeUserSettings(raw);
     expect(out).not.toBe(raw);
-    expect(out.pageDistance).not.toBe(inner);
+    expect(out.pageKeys).not.toBe(inner);
   });
 
   test('is idempotent', () => {
     const inputs: unknown[] = [
       null,
       {},
-      { pageDistance: { ratio: 0.5 } },
-      { pageDistance: { ratio: -1, enabled: true } },
-      { pageDistance: { ratio: Number.NaN } },
-      { pageDistance: [], other: {} },
-      { pageDistance: { enabled: false, ratio: 2, container: '#x' } },
+      { pageKeys: { ratio: 0.5 } },
+      { pageKeys: { ratio: -1, enabled: true } },
+      { pageKeys: { ratio: Number.NaN } },
+      { pageKeys: [], other: {} },
+      { pageKeys: { enabled: false, ratio: 2, container: '#x' } },
     ];
     for (const raw of inputs) {
       const once = sanitizeUserSettings(raw);
@@ -197,7 +197,7 @@ describe('sanitizeUserSettings', () => {
   });
 
   test('survives a JSON round trip (what storage does)', () => {
-    const value = { pageDistance: { enabled: false, ratio: 0.45 } };
+    const value = { pageKeys: { enabled: false, ratio: 0.45 } };
     expect(sanitizeUserSettings(JSON.parse(JSON.stringify(value)))).toEqual(value);
   });
 });
@@ -215,7 +215,7 @@ describe('resolveFeatures', () => {
     expect(resolveFeatures(undefined)).toEqual(SITE_DEFAULTS);
     expect(resolveFeatures(undefined, {}, null)).toEqual(SITE_DEFAULTS);
     expect(SITE_DEFAULTS.blockAds).toBeNull();
-    expect(SITE_DEFAULTS.pageDistance).toEqual(DEFAULTS);
+    expect(SITE_DEFAULTS.pageKeys).toEqual(DEFAULTS);
   });
 
   describe('site-specific features', () => {
@@ -229,7 +229,7 @@ describe('resolveFeatures', () => {
     });
 
     test('do not apply on a site that leaves them out or sets them to false', () => {
-      expect(resolveFeatures({ pageDistance: { ratio: 0.5 } }, {}).blockAds).toBeNull();
+      expect(resolveFeatures({ pageKeys: { ratio: 0.5 } }, {}).blockAds).toBeNull();
       expect(resolveFeatures({ blockAds: undefined }, {}).blockAds).toBeNull();
       expect(resolveFeatures({ blockAds: false }, {}).blockAds).toBeNull();
     });
@@ -264,49 +264,49 @@ describe('resolveFeatures', () => {
   });
 
   test('site layer overrides the defaults', () => {
-    expect(resolveFeatures({ pageDistance: { ratio: 0.5 } }, {}).pageDistance).toEqual({
-      enabled: true,
+    expect(resolveFeatures({ pageKeys: { ratio: 0.5 } }, {}).pageKeys).toEqual({
+      ...DEFAULTS,
       ratio: 0.5,
     });
   });
 
   test('site layer can add adapters such as a scroll container', () => {
-    expect(resolveFeatures({ pageDistance: { container: '#reader' } }, {}).pageDistance).toEqual({
-      enabled: true,
-      ratio: 0.7,
+    expect(resolveFeatures({ pageKeys: { container: '#reader' } }, {}).pageKeys).toEqual({
+      ...DEFAULTS,
       container: '#reader',
     });
   });
 
   test('undefined site values fall through to the defaults', () => {
     expect(
-      resolveFeatures({ pageDistance: { ratio: undefined, container: undefined } }, {})
-        .pageDistance,
+      resolveFeatures({ pageKeys: { ratio: undefined, container: undefined } }, {}).pageKeys,
     ).toEqual(DEFAULTS);
   });
 
   test('an undefined site feature entry is the same as none', () => {
-    expect(resolveFeatures({ pageDistance: undefined }, {}).pageDistance).toEqual(DEFAULTS);
+    expect(resolveFeatures({ pageKeys: undefined }, {}).pageKeys).toEqual(DEFAULTS);
   });
 
   test('site `false` turns the feature off entirely, whatever the user stored', () => {
-    const site: SiteFeatures = { pageDistance: false };
-    expect(resolveFeatures(site, {}).pageDistance).toBeNull();
-    expect(
-      resolveFeatures(site, { pageDistance: { enabled: true, ratio: 0.4 } }).pageDistance,
-    ).toBe(null);
+    const site: SiteFeatures = { pageKeys: false };
+    expect(resolveFeatures(site, {}).pageKeys).toBeNull();
+    expect(resolveFeatures(site, { pageKeys: { enabled: true, ratio: 0.4 } }).pageKeys).toBe(null);
   });
 
   test('user layer overrides site and defaults', () => {
-    const site: SiteFeatures = { pageDistance: { ratio: 0.5, container: '#c' } };
-    expect(
-      resolveFeatures(site, { pageDistance: { ratio: 0.9, enabled: false } }).pageDistance,
-    ).toEqual({ enabled: false, ratio: 0.9, container: '#c' });
+    const site: SiteFeatures = { pageKeys: { ratio: 0.5, container: '#c' } };
+    expect(resolveFeatures(site, { pageKeys: { ratio: 0.9, enabled: false } }).pageKeys).toEqual({
+      ...DEFAULTS,
+      enabled: false,
+      ratio: 0.9,
+      container: '#c',
+    });
   });
 
   test('partial user layer only overrides what it sets', () => {
-    const site: SiteFeatures = { pageDistance: { ratio: 0.5 } };
-    expect(resolveFeatures(site, { pageDistance: { enabled: false } }).pageDistance).toEqual({
+    const site: SiteFeatures = { pageKeys: { ratio: 0.5 } };
+    expect(resolveFeatures(site, { pageKeys: { enabled: false } }).pageKeys).toEqual({
+      ...DEFAULTS,
       enabled: false,
       ratio: 0.5,
     });
@@ -314,18 +314,17 @@ describe('resolveFeatures', () => {
 
   test('user layer is sanitized first', () => {
     expect(
-      resolveFeatures(ALL_SITES, asUser({ pageDistance: { ratio: 99, enabled: 'off' } }))
-        .pageDistance,
-    ).toEqual({ enabled: true, ratio: 1 });
-    expect(resolveFeatures(ALL_SITES, asUser({ pageDistance: { ratio: Number.NaN } }))).toEqual(
+      resolveFeatures(ALL_SITES, asUser({ pageKeys: { ratio: 99, enabled: 'off' } })).pageKeys,
+    ).toEqual({ ...DEFAULTS, ratio: 1 });
+    expect(resolveFeatures(ALL_SITES, asUser({ pageKeys: { ratio: Number.NaN } }))).toEqual(
       ALL_DEFAULTS,
     );
   });
 
   test('a user cannot set a site adapter', () => {
-    const resolved = resolveFeatures(ALL_SITES, asUser({ pageDistance: { container: 'body' } }));
-    expect(resolved.pageDistance).toEqual(DEFAULTS);
-    expect(resolved.pageDistance && 'container' in resolved.pageDistance).toBe(false);
+    const resolved = resolveFeatures(ALL_SITES, asUser({ pageKeys: { container: 'body' } }));
+    expect(resolved.pageKeys).toEqual(DEFAULTS);
+    expect(resolved.pageKeys && 'container' in resolved.pageKeys).toBe(false);
   });
 
   test.each([
@@ -337,19 +336,20 @@ describe('resolveFeatures', () => {
   });
 
   test('does not mutate the defaults, the site or the user layer', () => {
-    const site: SiteFeatures = { pageDistance: { ratio: 0.5 } };
-    const user: UserSettings = { pageDistance: { enabled: false } };
+    const site: SiteFeatures = { pageKeys: { ratio: 0.5 } };
+    const user: UserSettings = { pageKeys: { enabled: false } };
+    const before = structuredClone(DEFAULTS);
     const resolved = resolveFeatures(site, user);
-    expect(DEFAULTS).toEqual({ enabled: true, ratio: 0.7 });
-    expect(site).toEqual({ pageDistance: { ratio: 0.5 } });
-    expect(user).toEqual({ pageDistance: { enabled: false } });
-    expect(resolved.pageDistance).not.toBe(DEFAULTS);
+    expect(DEFAULTS).toEqual(before);
+    expect(site).toEqual({ pageKeys: { ratio: 0.5 } });
+    expect(user).toEqual({ pageKeys: { enabled: false } });
+    expect(resolved.pageKeys).not.toBe(DEFAULTS);
   });
 
   test('mutating a result does not leak into later results', () => {
     const first = resolveFeatures(ALL_SITES, undefined);
-    first.pageDistance!.ratio = 0.1;
-    first.pageDistance!.enabled = false;
+    first.pageKeys!.ratio = 0.1;
+    first.pageKeys!.enabled = false;
     first.blockAds!.enabled = false;
     expect(resolveFeatures(ALL_SITES, undefined)).toEqual(ALL_DEFAULTS);
   });
@@ -361,69 +361,67 @@ describe('pruneUserSettings', () => {
   });
 
   test('drops values equal to the global defaults', () => {
-    expect(pruneUserSettings(ALL_SITES, { pageDistance: { enabled: true, ratio: 0.7 } })).toEqual(
-      {},
-    );
+    expect(pruneUserSettings(ALL_SITES, { pageKeys: { enabled: true, ratio: 0.7 } })).toEqual({});
   });
 
   test('keeps values that differ from the defaults', () => {
-    expect(pruneUserSettings(ALL_SITES, { pageDistance: { enabled: false, ratio: 0.5 } })).toEqual({
-      pageDistance: { enabled: false, ratio: 0.5 },
+    expect(pruneUserSettings(ALL_SITES, { pageKeys: { enabled: false, ratio: 0.5 } })).toEqual({
+      pageKeys: { enabled: false, ratio: 0.5 },
     });
   });
 
   test('keeps only the differing fields of a feature', () => {
-    expect(pruneUserSettings(ALL_SITES, { pageDistance: { enabled: true, ratio: 0.5 } })).toEqual({
-      pageDistance: { ratio: 0.5 },
+    expect(pruneUserSettings(ALL_SITES, { pageKeys: { enabled: true, ratio: 0.5 } })).toEqual({
+      pageKeys: { ratio: 0.5 },
     });
   });
 
   test('compares against the site default, not the global one', () => {
-    const site: SiteFeatures = { pageDistance: { ratio: 0.5 } };
+    const site: SiteFeatures = { pageKeys: { ratio: 0.5 } };
     // Equal to the site default: pruned.
-    expect(pruneUserSettings(site, { pageDistance: { ratio: 0.5 } })).toEqual({});
+    expect(pruneUserSettings(site, { pageKeys: { ratio: 0.5 } })).toEqual({});
     // Equal to the global default but not the site's: a real customisation.
-    expect(pruneUserSettings(site, { pageDistance: { ratio: 0.7 } })).toEqual({
-      pageDistance: { ratio: 0.7 },
+    expect(pruneUserSettings(site, { pageKeys: { ratio: 0.7 } })).toEqual({
+      pageKeys: { ratio: 0.7 },
     });
   });
 
   test('drops everything for a feature the site turned off', () => {
     expect(
-      pruneUserSettings({ pageDistance: false }, { pageDistance: { enabled: false, ratio: 0.4 } }),
+      pruneUserSettings({ pageKeys: false }, { pageKeys: { enabled: false, ratio: 0.4 } }),
     ).toEqual({});
   });
 
   test('sanitizes first: invalid fields are dropped', () => {
     expect(
-      pruneUserSettings(ALL_SITES, asUser({ pageDistance: { enabled: 'x', ratio: 0.4 } })),
-    ).toEqual({ pageDistance: { ratio: 0.4 } });
+      pruneUserSettings(ALL_SITES, asUser({ pageKeys: { enabled: 'x', ratio: 0.4 } })),
+    ).toEqual({ pageKeys: { ratio: 0.4 } });
     expect(pruneUserSettings(ALL_SITES, asUser({ other: { a: 1 } }))).toEqual({});
     expect(pruneUserSettings(ALL_SITES, asUser(null))).toEqual({});
   });
 
   test('sanitizes first: a value clamped onto the default is pruned', () => {
-    const site: SiteFeatures = { pageDistance: { ratio: 1 } };
-    expect(pruneUserSettings(site, { pageDistance: { ratio: 3 } })).toEqual({});
+    const site: SiteFeatures = { pageKeys: { ratio: 1 } };
+    expect(pruneUserSettings(site, { pageKeys: { ratio: 3 } })).toEqual({});
   });
 
   test('drops undefined fields', () => {
-    expect(pruneUserSettings(ALL_SITES, { pageDistance: { ratio: undefined } })).toEqual({});
+    expect(pruneUserSettings(ALL_SITES, { pageKeys: { ratio: undefined } })).toEqual({});
   });
 
   test('does not mutate its input', () => {
-    const user: UserSettings = { pageDistance: { enabled: true, ratio: 0.5 } };
+    const user: UserSettings = { pageKeys: { enabled: true, ratio: 0.5 } };
     pruneUserSettings(ALL_SITES, user);
-    expect(user).toEqual({ pageDistance: { enabled: true, ratio: 0.5 } });
+    expect(user).toEqual({ pageKeys: { enabled: true, ratio: 0.5 } });
   });
 
   test('is idempotent', () => {
-    const site: SiteFeatures = { pageDistance: { ratio: 0.5 } };
+    const site: SiteFeatures = { pageKeys: { ratio: 0.5 } };
     const users: UserSettings[] = [
       {},
-      { pageDistance: { ratio: 0.5 } },
-      { pageDistance: { ratio: 0.6, enabled: true } },
-      { pageDistance: { enabled: false } },
+      { pageKeys: { ratio: 0.5 } },
+      { pageKeys: { ratio: 0.6, enabled: true } },
+      { pageKeys: { enabled: false } },
     ];
     for (const user of users) {
       const once = pruneUserSettings(site, user);
@@ -438,14 +436,14 @@ describe('pruneUserSettings', () => {
       ALL_SITES,
       undefined,
       {},
-      { pageDistance: { ratio: 0.5 } },
-      { pageDistance: { ratio: 0.3, container: '#c' } },
-      { pageDistance: false },
+      { pageKeys: { ratio: 0.5 } },
+      { pageKeys: { ratio: 0.3, container: '#c' } },
+      { pageKeys: false },
     ];
-    const users: unknown[] = [{}, null, { pageDistance: { bogus: 1 } }];
+    const users: unknown[] = [{}, null, { pageKeys: { bogus: 1 } }];
     for (const enabled of [undefined, true, false, 'x']) {
       for (const ratio of [undefined, 0, 0.3, 0.5, 0.7, 0.75, 1, 2, Number.NaN]) {
-        users.push({ pageDistance: { enabled, ratio } });
+        users.push({ pageKeys: { enabled, ratio } });
       }
     }
 
@@ -469,58 +467,55 @@ describe('isCustomised', () => {
   });
 
   test('any feature entry counts as customised', () => {
-    expect(isCustomised({ pageDistance: { ratio: 0.5 } })).toBe(true);
+    expect(isCustomised({ pageKeys: { ratio: 0.5 } })).toBe(true);
     // Only meaningful after pruning; on its own it just checks for entries.
-    expect(isCustomised({ pageDistance: {} })).toBe(true);
+    expect(isCustomised({ pageKeys: {} })).toBe(true);
   });
 });
 
 describe('global and site user layers', () => {
-  const site: SiteFeatures = { pageDistance: { ratio: 0.5, container: '#c' } };
-  const global: UserSettings = { pageDistance: { ratio: 0.8 } };
+  const site: SiteFeatures = { pageKeys: { ratio: 0.5, container: '#c' } };
+  const global: UserSettings = { pageKeys: { ratio: 0.8 } };
 
   test('global overrides the site default', () => {
-    expect(resolveFeatures(site, global).pageDistance).toEqual({
-      enabled: true,
+    expect(resolveFeatures(site, global).pageKeys).toEqual({
+      ...DEFAULTS,
       ratio: 0.8,
       container: '#c',
     });
   });
 
   test('the site override wins over global, field by field', () => {
-    expect(
-      resolveFeatures(site, global, { pageDistance: { enabled: false } }).pageDistance,
-    ).toEqual({
+    expect(resolveFeatures(site, global, { pageKeys: { enabled: false } }).pageKeys).toEqual({
+      ...DEFAULTS,
       enabled: false,
       ratio: 0.8,
       container: '#c',
     });
-    expect(
-      resolveFeatures(site, global, { pageDistance: { ratio: 0.4 } }).pageDistance?.ratio,
-    ).toBe(0.4);
+    expect(resolveFeatures(site, global, { pageKeys: { ratio: 0.4 } }).pageKeys?.ratio).toBe(0.4);
   });
 
   test('every layer is sanitized', () => {
     expect(
-      resolveFeatures(ALL_SITES, asUser({ pageDistance: { ratio: 9 } }), asUser('x')).pageDistance,
-    ).toEqual({ enabled: true, ratio: 1 });
+      resolveFeatures(ALL_SITES, asUser({ pageKeys: { ratio: 9 } }), asUser('x')).pageKeys,
+    ).toEqual({ ...DEFAULTS, ratio: 1 });
   });
 
   test('site `false` still wins', () => {
-    expect(resolveFeatures({ pageDistance: false }, global, global).pageDistance).toBeNull();
+    expect(resolveFeatures({ pageKeys: false }, global, global).pageKeys).toBeNull();
   });
 
   test('an override equal to the global value is pruned', () => {
-    expect(pruneUserSettings(site, { pageDistance: { ratio: 0.8 } }, global)).toEqual({});
-    expect(pruneUserSettings(site, { pageDistance: { ratio: 0.5 } }, global)).toEqual({
-      pageDistance: { ratio: 0.5 },
+    expect(pruneUserSettings(site, { pageKeys: { ratio: 0.8 } }, global)).toEqual({});
+    expect(pruneUserSettings(site, { pageKeys: { ratio: 0.5 } }, global)).toEqual({
+      pageKeys: { ratio: 0.5 },
     });
   });
 
   test('pruning an override keeps the effective settings', () => {
     for (const ratio of [0.3, 0.5, 0.8, 1]) {
       for (const enabled of [true, false]) {
-        const user: UserSettings = { pageDistance: { ratio, enabled } };
+        const user: UserSettings = { pageKeys: { ratio, enabled } };
         const pruned = pruneUserSettings(site, user, global);
         expect(resolveFeatures(site, global, pruned)).toEqual(resolveFeatures(site, global, user));
       }
