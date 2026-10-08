@@ -1,13 +1,16 @@
 import { describe, expect, mock, test } from 'bun:test';
 import { createFeatureRunner } from './runner';
+import type { FeatureContext } from './types';
 
 type Config = { enabled: boolean; ratio?: number; hide?: string[] };
+
+const context: FeatureContext = { siteName: 'example' };
 
 /** A `start` that records each run's config and signal and counts aborts. */
 function recorder() {
   const signals: AbortSignal[] = [];
   const onAbort = mock(() => {});
-  const start = mock((_config: Config, signal: AbortSignal) => {
+  const start = mock((_config: Config, signal: AbortSignal, _context: FeatureContext) => {
     signals.push(signal);
     signal.addEventListener('abort', onAbort, { once: true });
   });
@@ -18,16 +21,17 @@ function recorder() {
 function setup() {
   const r = recorder();
   const lifetime = new AbortController();
-  const update = createFeatureRunner(r.start, lifetime.signal);
+  const update = createFeatureRunner(r.start, lifetime.signal, context);
   return { ...r, lifetime, update };
 }
 
 describe('createFeatureRunner', () => {
-  test('starts when enabled, with the config', () => {
+  test('starts when enabled, with the config and context', () => {
     const { start, signals, update } = setup();
     update({ enabled: true, ratio: 0.5 });
     expect(start).toHaveBeenCalledTimes(1);
     expect(start.mock.calls[0]?.[0]).toEqual({ enabled: true, ratio: 0.5 });
+    expect(start.mock.calls[0]?.[2]).toBe(context);
     expect(signals[0]?.aborted).toBe(false);
   });
 
@@ -112,7 +116,7 @@ describe('createFeatureRunner', () => {
 
   test('does nothing once the lifetime has aborted', () => {
     const r = recorder();
-    const update = createFeatureRunner(r.start, AbortSignal.abort());
+    const update = createFeatureRunner(r.start, AbortSignal.abort(), context);
     update({ enabled: true });
     expect(r.start).not.toHaveBeenCalled();
   });

@@ -40,17 +40,28 @@ export type Feature<
   types?: { site: SiteConfig; options: Options; resolved: ResolvedConfig };
 };
 
+/** What a feature knows about the page besides its config. */
+export type FeatureContext = {
+  /** The page's site (`Site.name`), as the content script resolved it. */
+  siteName: string;
+};
+
 /**
  * Content-script side of a feature: install it on the page with `config`,
  * synchronously at document_start (wrap DOM work in `onDomReady()` from
- * `utils/dom` if needed), and undo it when `signal` aborts.
+ * `utils/dom` if needed), and undo it when `signal` aborts. `context` stays
+ * the same across restarts; a feature that doesn't need it may leave it out.
  *
  * Called when the feature turns on, and again whenever its effective config
  * changes (the site's defaults until the user settings load). `signal` aborts
  * when it turns off, before such a restart, or when this content-script
  * instance retires.
  */
-export type FeatureStart<ResolvedConfig> = (config: ResolvedConfig, signal: AbortSignal) => void;
+export type FeatureStart<ResolvedConfig> = (
+  config: ResolvedConfig,
+  signal: AbortSignal,
+  context: FeatureContext,
+) => void;
 
 /**
  * Props of a feature's options controls, shown below its on/off switch (see

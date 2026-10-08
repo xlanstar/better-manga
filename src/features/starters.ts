@@ -55,11 +55,12 @@ export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedCo
  */
 export function startFeatures(site: Site, section: SiteSection): (section: SiteSection) => void {
   const lifetime = lifetimeSignal();
+  const context = { siteName: site.name };
   let stored: StoredSettings | null = null;
 
   // Generic so TS ties each starter to its own feature's config type.
   const createRunner = <K extends FeatureId>(id: K) => {
-    const update = createFeatureRunner(featureStarters[id], lifetime);
+    const update = createFeatureRunner(featureStarters[id], lifetime, context);
     return (resolved: ResolvedFeatures) => {
       try {
         update(resolved[id]);

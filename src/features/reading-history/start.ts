@@ -1,4 +1,3 @@
-import { siteFor } from '@/sites';
 import { onDomReady } from '@/utils/dom';
 import type { FeatureStart } from '../types';
 import { isSameChapter, readChapter } from './chapter';
@@ -19,16 +18,18 @@ const SAVE_INTERVAL_MS = 2000;
  * Top frame only, which also leaves out fast-load's hidden prefetch frame:
  * a preloaded chapter doesn't count as read.
  */
-export const startReadingHistory: FeatureStart<ReadingHistoryResolvedConfig> = (config, signal) => {
+export const startReadingHistory: FeatureStart<ReadingHistoryResolvedConfig> = (
+  config,
+  signal,
+  { siteName },
+) => {
   if (window !== window.top) return;
-  const site = siteFor(location.href)?.name;
-  if (!site) return;
   const userInput = userInputSignal(signal);
   onDomReady(() => {
     void loadHistory()
       .catch(() => [])
       .then((history) => {
-        if (!signal.aborted) trackChapter(site, config, history, userInput, signal);
+        if (!signal.aborted) trackChapter(siteName, config, history, userInput, signal);
       });
   });
 };

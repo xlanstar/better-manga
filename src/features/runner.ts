@@ -1,4 +1,4 @@
-import type { FeatureStart } from './types';
+import type { FeatureContext, FeatureStart } from './types';
 
 /**
  * Run a feature from snapshots of its effective config. Returns `update`, to
@@ -12,6 +12,7 @@ import type { FeatureStart } from './types';
 export function createFeatureRunner<Config extends { enabled: boolean }>(
   start: FeatureStart<Config>,
   lifetime: AbortSignal,
+  context: FeatureContext,
 ): (config: Config | null) => void {
   let current: Config | null = null;
   let run: AbortController | null = null;
@@ -22,7 +23,7 @@ export function createFeatureRunner<Config extends { enabled: boolean }>(
     run = null;
     if (!config?.enabled) return;
     run = new AbortController();
-    start(config, AbortSignal.any([lifetime, run.signal]));
+    start(config, AbortSignal.any([lifetime, run.signal]), context);
   };
 }
 
