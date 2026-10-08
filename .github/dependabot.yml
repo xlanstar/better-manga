@@ -1,10 +1,25 @@
-# Keeps the SHA-pinned GitHub Actions up to date.
+# Keeps the SHA-pinned GitHub Actions and the bun dependencies up to date.
+# Each waits a few days after a release before proposing it (supply-chain
+# cooldown); minor and patch updates come as one PR, majors one by one.
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns: ['*']
+
+  - package-ecosystem: bun
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    versioning-strategy: increase
+    groups:
+      dependencies:
+        update-types: [minor, patch]
