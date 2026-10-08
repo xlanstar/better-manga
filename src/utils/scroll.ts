@@ -43,30 +43,26 @@ export type PageKeyEvent = Pick<
   'key' | 'ctrlKey' | 'altKey' | 'metaKey' | 'shiftKey' | 'defaultPrevented'
 >;
 
-/** Each registered part, read on every key press (`null` = sits it out). */
-const parts = new Set<() => PageKeyScrollPart | null>();
+/** The features' parts, each until its signal aborts. */
+const parts = new Set<PageKeyScrollPart>();
 /** The key listeners, installed while any part is registered. */
 let listening: AbortController | null = null;
 
 /**
- * Take over Page Up/Down with `getPart` merged into what other features
- * contribute (see `mergePageKeyParts`), until `signal` aborts. `getPart` is
- * read on every key press; return `null` to sit out.
+ * Take over Page Up/Down with `part` merged into what other features
+ * contribute (see `mergePageKeyParts`), until `signal` aborts.
  *
  * Scrolls whichever container actually holds the content — many readers put it
  * in their own overflow box rather than the document.
  */
-export function contributePageKeyScroll(
-  getPart: () => PageKeyScrollPart | null,
-  signal: AbortSignal,
-): void {
+export function contributePageKeyScroll(part: PageKeyScrollPart, signal: AbortSignal): void {
   if (signal.aborted) return;
-  parts.add(getPart);
+  parts.add(part);
   listening ??= listen();
   signal.addEventListener(
     'abort',
     () => {
-      parts.delete(getPart);
+      parts.delete(part);
       if (parts.size) return;
       listening?.abort();
       listening = null;
@@ -80,14 +76,11 @@ export function contributePageKeyScroll(
  * set. `null` when nothing changes the browser's own behaviour, so the key is
  * left to it.
  */
-export function mergePageKeyParts(
-  all: readonly (PageKeyScrollPart | null)[],
-): PageKeyScrollOptions | null {
-  const active = all.filter((part) => part !== null);
+export function mergePageKeyParts(all: readonly PageKeyScrollPart[]): PageKeyScrollOptions | null {
   const options: PageKeyScrollOptions = {};
-  const ratio = active.find((part) => part.ratio !== undefined)?.ratio;
-  const smooth = active.find((part) => part.smooth)?.smooth;
-  const container = active.find((part) => part.container)?.container;
+  const ratio = all.find((part) => part.ratio !== undefined)?.ratio;
+  const smooth = all.find((part) => part.smooth)?.smooth;
+  const container = all.find((part) => part.container)?.container;
   if (ratio !== undefined) options.ratio = ratio;
   if (smooth) options.smooth = smooth;
   if (container) options.container = container;
@@ -126,7 +119,7 @@ function listen(): AbortController {
       if (!MODIFIER_KEYS.has(event.key)) smooth.stop();
       return;
     }
-    const options = mergePageKeyParts([...parts].map((getPart) => getPart()));
+    const options = mergePageKeyParts([...parts]);
     if (!options) return;
 
     const target = event.target instanceof Element ? event.target : null;

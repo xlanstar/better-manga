@@ -9,17 +9,31 @@ import type { ContentScriptContext } from 'wxt/utils/content-script-context';
  * a fresh instance (see `entrypoints/background.ts`); the old one must stand
  * down so the two don't both act on the page.
  *
- * Long-lived work ties its cleanup to `lifetimeSignal()`, which aborts when a
- * newer instance announces itself; `isAlive()` is a lazy check that also
- * notices the extension being gone.
+ * Long-lived work ties its cleanup to `lifetimeSignal()`. It aborts when a
+ * newer instance announces itself; nothing tells an orphan that the extension
+ * is gone (removed, disabled), so that's checked lazily, by `isAlive()` and on
+ * the user input the features act on (`CHECK_EVENTS`), and aborts it too.
  */
 let ctx: ContentScriptContext | undefined;
+
+/**
+ * Where the features act on user input: Page Up/Down, following a link,
+ * coming back to the tab.
+ */
+const CHECK_EVENTS = ['keydown', 'click', 'auxclick', 'contextmenu', 'visibilitychange'] as const;
 
 /** Stands in for the instance's signal when unbound (tests): never aborts. */
 const unboundSignal = new AbortController().signal;
 
 export function bindLifecycle(context: ContentScriptContext) {
   ctx = context;
+  // Bound before any feature's window capture listener, so these run first;
+  // if the extension is gone, the abort removes the feature's listener for
+  // the same event before it's reached.
+  const check = () => context.isValid;
+  for (const type of CHECK_EVENTS) {
+    context.addEventListener(window, type, check, { capture: true, passive: true });
+  }
 }
 
 /** False once the extension was reloaded or a newer instance took over. */

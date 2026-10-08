@@ -1,4 +1,3 @@
-import { isAlive } from '@/utils/lifecycle';
 import type { FeatureStart } from '../types';
 import type { SkipRedirectsResolvedConfig } from './index';
 
@@ -13,8 +12,6 @@ export const startSkipRedirects: FeatureStart<SkipRedirectsResolvedConfig> = (
 ) => {
   if (!rewriteLink) return;
   const rewrite = (event: Event) => {
-    // An orphaned instance (extension removed) gets no abort; stand down.
-    if (!isAlive()) return;
     const target = event.target;
     if (!(target instanceof Element)) return;
     const link = target.closest('a[href]');

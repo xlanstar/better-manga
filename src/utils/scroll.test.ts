@@ -16,7 +16,6 @@ const SMOOTH = { duration: 300, holdSpeed: 2 };
 describe('mergePageKeyParts', () => {
   test('nothing registered leaves the key to the browser', () => {
     expect(mergePageKeyParts([])).toBeNull();
-    expect(mergePageKeyParts([null, null])).toBeNull();
   });
 
   test('a ratio alone jumps', () => {
@@ -31,10 +30,6 @@ describe('mergePageKeyParts', () => {
     const both = { ratio: 0.7, smooth: SMOOTH };
     expect(mergePageKeyParts([{ ratio: 0.7 }, { smooth: SMOOTH }])).toEqual(both);
     expect(mergePageKeyParts([{ smooth: SMOOTH }, { ratio: 0.7 }])).toEqual(both);
-  });
-
-  test('a part that sits out is ignored', () => {
-    expect(mergePageKeyParts([null, { smooth: SMOOTH }])).toEqual({ smooth: SMOOTH });
   });
 
   test('takes the container from whichever part has it', () => {
