@@ -43,41 +43,42 @@ export function FeatureList({
   // `null` = the feature doesn't apply to this site; it gets no controls.
   const available = featureIds.filter((id) => resolved[id] && defaults[id]);
 
-  if (!available.length) {
+  const groups = featureGroups
+    .map((group) => ({ group, ids: available.filter((id) => featureControls[id].group === group) }))
+    .filter(({ ids }) => ids.length);
+
+  if (!groups.length) {
     return <p className="text-xs text-muted-foreground">{i18n.t('siteSettings.noSettings')}</p>;
   }
+  // Groups split by rules; in each, its heading over its features.
   return (
-    <div className="flex flex-col gap-6">
-      {featureGroups.map((group) => {
-        const ids = available.filter((id) => featureControls[id].group === group);
-        if (!ids.length) return null;
-        return (
-          <section className="flex flex-col gap-2" key={group}>
-            <h3 className="text-xs font-medium text-muted-foreground">
-              {i18n.t(`featureGroups.${group}`)}
-            </h3>
-            <div className="flex flex-col gap-4 divide-y *:not-last:pb-4">
-              {ids.map((id) => (
-                <FeatureSettings
-                  defaults={defaults}
-                  id={id}
-                  key={id}
-                  layer={layer}
-                  onChange={onChange}
-                  resolved={resolved}
-                />
-              ))}
-            </div>
-          </section>
-        );
-      })}
+    <div className="flex flex-col gap-4 divide-y *:not-last:pb-4">
+      {groups.map(({ group, ids }) => (
+        <section className="flex flex-col gap-2" key={group}>
+          <h3 className="text-xs font-medium text-muted-foreground">
+            {i18n.t(`featureGroups.${group}`)}
+          </h3>
+          <div className="flex flex-col gap-4">
+            {ids.map((id) => (
+              <FeatureSettings
+                defaults={defaults}
+                id={id}
+                key={id}
+                layer={layer}
+                onChange={onChange}
+                resolved={resolved}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }
 
 /**
- * One feature's switch and options (shown only while it's on), wired to its
- * slice of the layer.
+ * One feature's switch and options (shown only while it's on, in an inset
+ * panel under it), wired to its slice of the layer.
  */
 function FeatureSettings<K extends FeatureId>({
   id,
@@ -107,7 +108,9 @@ function FeatureSettings<K extends FeatureId>({
         title={featureTitle(id)}
       />
       {value.enabled && Options && (
-        <Options defaults={defaultValue} onChange={change} value={value} />
+        <div className="rounded-lg bg-muted/64 p-3">
+          <Options defaults={defaultValue} onChange={change} value={value} />
+        </div>
       )}
     </div>
   );

@@ -15,7 +15,8 @@ export function FeatureToggle({
   onCheckedChange: (checked: boolean) => void;
 }) {
   return (
-    <Label className="justify-between gap-4">
+    // Same size in the narrow popup as on the options page (Label grows below `sm`).
+    <Label className="justify-between gap-4 text-sm sm:text-sm">
       <span className="flex items-center gap-2">
         {title}
         <InfoTooltip description={description} />

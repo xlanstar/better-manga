@@ -10,6 +10,8 @@ them under the new version, and the GitHub release shows that section.
   Up / Down", with smooth scrolling as an option in it.
 - Settings are grouped into Ads & distractions, Loading and Reading, and
   every feature has a simpler name and description.
+- Clearer settings layout: groups are separated by dividers, and a
+  feature's options sit in a panel under its switch.
 - New feature: reading history. Remembers the chapter you last read of each
   work and where you were in it; reopening the chapter takes you back there,
   and the popup lists your latest works to continue reading. The settings

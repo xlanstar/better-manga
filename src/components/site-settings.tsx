@@ -128,7 +128,7 @@ function SiteBody({
         scope={settingsFeatures(site)}
       />
       {customised && (
-        <div className="flex items-center justify-between gap-2 border-t pt-3">
+        <div className="flex items-center justify-between gap-2 border-t pt-4">
           <span className="text-xs text-muted-foreground">
             {i18n.t('siteSettings.customisedHint')}
           </span>
