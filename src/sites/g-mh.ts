@@ -11,7 +11,7 @@ const images: ChapterImages = { selector: '#chapcontent img[data-src]', src: 'da
  * - Front end: own build, assets under `/_chunks/`.
  * - Routes: works `/manga/<slug>`, chapter `/manga/<slug>/<chapter>`.
  * - Reader: same as `baozimh`'s (API, then images one at a time; history in
- *   `localStorage.ChapterHistory`).
+ *   `localStorage.ChapterHistory`; breadcrumb with the work and chapter).
  * - Ads: first-party slots (`.adCode`, `.adshow`, `.banners`), no ad SDK. An
  *   inline script hides `.banners, .adshow` while the `showAds` cookie /
  *   localStorage timestamp is unexpired (「免廣告試驗」).
@@ -44,6 +44,11 @@ export const site = defineSite({
           },
         },
         reloadBrokenImages: { images },
+        readingHistory: {
+          work: 'nav[aria-label="Breadcrumb"] li:nth-child(2) a',
+          chapter: 'nav[aria-label="Breadcrumb"] li:nth-child(3) a',
+          images,
+        },
       },
     },
   },

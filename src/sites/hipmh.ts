@@ -10,6 +10,10 @@ const images: ChapterImages = { selector: '#chapcontent img[data-src]', src: 'da
  * - Main site: `m.hipmh.com`, not matched.
  * - Reader: `reader.hipmh.top`, chapter `/chapter/<hid>`; `/` redirects to
  *   the main site. Rendered client-side; link hrefs are set after data loads.
+ *   The breadcrumb (首頁 / work / chapter) is server-rendered; its work link
+ *   is on the main site, `m.hipmh.com/works/<id>-<slug>`. A page mode
+ *   (`chapterReadMode`) shows one image at a time; the reading position is
+ *   only meaningful in the default scroll mode.
  * - Backend: API `hipapi1.s3file.top`, images `cover.s3imgs.top`.
  * - Chapter links: go via `m.hipmh.com/chapter/go?hid=…` →
  *   `reader.hipmh.top/chapter/go?hid=…` → `/chapter/<hid>`. The cross-site
@@ -39,6 +43,11 @@ export const site = defineSite({
       },
     },
     reloadBrokenImages: { images },
+    readingHistory: {
+      work: 'nav[aria-label="Breadcrumb"] li:nth-child(2) a',
+      chapter: 'nav[aria-label="Breadcrumb"] li:nth-child(3) a',
+      images,
+    },
   },
 });
 

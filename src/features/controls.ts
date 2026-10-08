@@ -50,6 +50,10 @@ export const featureControls: {
     title: () => i18n.t('reloadBrokenImages.title'),
     description: () => i18n.t('reloadBrokenImages.description'),
   },
+  readingHistory: {
+    title: () => i18n.t('readingHistory.title'),
+    description: () => i18n.t('readingHistory.description'),
+  },
   pageDistance: {
     title: () => i18n.t('pageDistance.title'),
     description: () => i18n.t('pageDistance.description'),

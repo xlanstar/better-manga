@@ -14,7 +14,9 @@ const images: ChapterImages = { selector: '#chapcontent img[data-src]', src: 'da
  * - Reader: fetches the chapter's image list from the API, then loads the
  *   images one at a time, each after the last (`#chapcontent img[data-src]`,
  *   hosts `c-nd2-1` / `c-nd3-1` by the chapter's line). Records the chapter
- *   in `localStorage.ChapterHistory` as it opens. A failed image turns into
+ *   in `localStorage.ChapterHistory` as it opens. The work and chapter
+ *   titles are in the server-rendered breadcrumb (首頁 / work / chapter),
+ *   the work's link `/manga/<slug>`. A failed image turns into
  *   a 「加载失败，点击重试」 (click to retry) placeholder, and stops the chain
  *   until it loads.
  * - Ads: TrafficStars SDK (`cdn.tsyndicate.com`), trackers (`pxltag`,
@@ -56,6 +58,11 @@ export const site = defineSite({
           },
         },
         reloadBrokenImages: { images },
+        readingHistory: {
+          work: 'nav[aria-label="Breadcrumb"] li:nth-child(2) a',
+          chapter: 'nav[aria-label="Breadcrumb"] li:nth-child(3) a',
+          images,
+        },
       },
     },
   },

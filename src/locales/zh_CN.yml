@@ -68,6 +68,21 @@ reloadBrokenImages:
   title: '重试加载失败的图片'
   description: '漫画图片加载失败时自动重试几次；网络恢复连接后会再试一次。'
 
+readingHistory:
+  title: '阅读记录'
+  description: '记住每部作品最后读到的章节和位置，再次打开时带你回到那里。只保存在这个浏览器里。'
+  continue: '继续阅读'
+  entryDetail: '$1 · $2 · $3'
+  listDescription: '读过的作品，最近读的在前。只保存在这个浏览器里。'
+  empty: '还没有阅读记录'
+  emptyHint: '在支持的网站上读过的章节会显示在这里。'
+  remove: '从记录中移除'
+  clear: '清除记录'
+  clearTitle: '清除阅读记录？'
+  clearDescription: '所有作品都会从阅读记录中移除，无法恢复。'
+  clearConfirm: '清除'
+  cancel: '取消'
+
 pageDistance:
   title: Page Up / Down 滚动距离
   description: '每次滚动屏幕高度的固定比例，保留重叠方便接续阅读。'

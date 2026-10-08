@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { PAGE_DISTANCE_RATIO } from '@/features/page-distance';
-import { formatPercent, sliderValue } from './format';
+import { formatTimeAgo, formatPercent, sliderValue } from './format';
 
 describe('formatPercent', () => {
   test.each([
@@ -93,5 +93,36 @@ describe('sliderValue', () => {
       const once = sliderValue(r, 0);
       expect(sliderValue(once, 0)).toBe(once);
     }
+  });
+});
+
+describe('formatTimeAgo', () => {
+  const NOW = Date.UTC(2026, 9, 8, 12);
+  const ago = (ms: number) => formatTimeAgo(NOW - ms, NOW, 'en');
+  const MINUTE = 60_000;
+  const HOUR = 60 * MINUTE;
+  const DAY = 24 * HOUR;
+
+  test.each([
+    [0, 'now'],
+    [59_000, 'now'],
+    [MINUTE, '1 minute ago'],
+    [5 * MINUTE + 59_000, '5 minutes ago'],
+    [3 * HOUR, '3 hours ago'],
+    [DAY, 'yesterday'],
+    [6 * DAY, '6 days ago'],
+    [7 * DAY, 'last week'],
+    [45 * DAY, 'last month'],
+    [400 * DAY, 'last year'],
+  ])('%p ms ago → %p', (ms, text) => {
+    expect(ago(ms)).toBe(text);
+  });
+
+  test('a time in the future (clock change) is now', () => {
+    expect(ago(-HOUR)).toBe('now');
+  });
+
+  test('follows the language', () => {
+    expect(formatTimeAgo(NOW - DAY, NOW, 'zh-Hant')).toBe('昨天');
   });
 });

@@ -69,6 +69,21 @@ reloadBrokenImages:
   title: Retry broken images
   description: Retries chapter images that fail to load a few times, and again once you're back online.
 
+readingHistory:
+  title: Reading history
+  description: Remembers the chapter you last read of each work and where you were in it, and takes you back there when you reopen it. Kept only in this browser.
+  continue: Continue reading
+  entryDetail: $1 · $2 · $3
+  listDescription: The works you've read, latest first. Kept only in this browser.
+  empty: No reading history yet
+  emptyHint: Chapters you read on supported sites show up here.
+  remove: Remove from history
+  clear: Clear history
+  clearTitle: Clear reading history?
+  clearDescription: Every work is removed from your reading history. This can't be undone.
+  clearConfirm: Clear
+  cancel: Cancel
+
 pageDistance:
   title: Page Up / Down distance
   description: Scrolls a fixed share of the screen height, keeping some overlap so you don't lose your place.

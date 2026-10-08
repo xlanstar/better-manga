@@ -70,6 +70,11 @@ only on sites that configure them; the others run on every site.
 - `reloadBrokenImages` (site-specific): retries chapter images that fail to
   load, a few times with a growing wait, and again when the browser comes
   back online. Site: `images`.
+- `readingHistory` (site-specific): remembers each work's latest chapter
+  read and the position in it (page image + fraction), scrolls back there
+  when the chapter is reopened, and lists the history in the popup
+  (continue reading) and options page. Local storage only. Site: `work`,
+  `chapter`, `images`.
 - `pageDistance`: Page Up/Down scrolls a set share of the screen. Site:
   `container`; user: `ratio`.
 - `smoothScroll`: animates Page Up/Down. Site: `container`; user: `duration`,

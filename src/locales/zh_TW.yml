@@ -69,6 +69,21 @@ reloadBrokenImages:
   title: '重試載入失敗的圖片'
   description: '漫畫圖片載入失敗時自動重試幾次；網路恢復連線後會再試一次。'
 
+readingHistory:
+  title: '閱讀紀錄'
+  description: '記住每部作品最後讀到的章節和位置，再次開啟時帶你回到那裡。只存在這個瀏覽器裡。'
+  continue: '繼續閱讀'
+  entryDetail: '$1 · $2 · $3'
+  listDescription: '讀過的作品，最近讀的在前。只存在這個瀏覽器裡。'
+  empty: '還沒有閱讀紀錄'
+  emptyHint: '在支援的網站上讀過的章節會出現在這裡。'
+  remove: '從紀錄中移除'
+  clear: '清除紀錄'
+  clearTitle: '清除閱讀紀錄？'
+  clearDescription: '所有作品都會從閱讀紀錄中移除，無法復原。'
+  clearConfirm: '清除'
+  cancel: '取消'
+
 pageDistance:
   title: Page Up / Down 捲動距離
   description: '每次捲動畫面高度的固定比例，保留重疊方便接續閱讀。'

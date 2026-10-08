@@ -2,19 +2,23 @@ import { GlobeIcon, RotateCwIcon, SettingsIcon } from 'lucide-react';
 import { useState } from 'react';
 import { browser } from 'wxt/browser';
 import { AppHeader, Section } from '@/components/page-layout';
+import { ContinueReading } from '@/components/reading-history';
 import { CurrentSiteSettings } from '@/components/site-settings';
 import { Button } from '@/components/ui/button';
 import { Frame, FramePanel } from '@/components/ui/frame';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { ALL_SITES, resolveFeatures } from '@/features/settings';
 import { useCurrentTab } from '@/hooks/use-current-tab';
 import { useLocalePreference } from '@/hooks/use-locale';
+import { useReadingHistory } from '@/hooks/use-reading-history';
 import { useSettings } from '@/hooks/use-settings';
 import { i18n } from '@/utils/i18n';
 
 /**
- * Quick settings for the site in the current tab only. The global layer and
- * every other site live on the options page (the header's settings button), so
- * this stays short however many sites there are.
+ * The latest works read, then quick settings for the site in the current tab
+ * only. The global layer, every other site and the full reading history live
+ * on the options page (the header's settings button), so this stays short
+ * however many sites there are.
  */
 export default function App() {
   const tab = useCurrentTab();
@@ -24,7 +28,8 @@ export default function App() {
   useLocalePreference();
   // Turning a site on (or off) only fully applies after a reload.
   const [needsReload, setNeedsReload] = useState(false);
-  if (!settings || !tab) return <div className="w-85" />;
+  const history = useReadingHistory();
+  if (!settings || !tab || !history) return <div className="w-85" />;
 
   const { site } = tab;
   const reloadTab = () => {
@@ -56,6 +61,10 @@ export default function App() {
       />
 
       <main className="flex flex-col gap-4 px-3 pb-3">
+        {/* Off for all sites: the user doesn't want it, even if a history is left. */}
+        {resolveFeatures(ALL_SITES, settings.global).readingHistory?.enabled && (
+          <ContinueReading history={history} />
+        )}
         <Section title={i18n.t('popup.currentSite')}>
           {site ? (
             <CurrentSiteSettings

@@ -17,7 +17,9 @@ const images: ChapterImages = { selector: '#chapcontent > div > img', src: 'data
  *   straight away, the rest are lazysizes `img[data-src]` that trickle in a
  *   few at a time. Images on `s3-nl-01.mangabuddy.in`. Records the chapter in
  *   `localStorage.ChapterHistory` as it opens. The next-chapter link points
- *   to the chapter list on the last chapter.
+ *   to the chapter list on the last chapter. Breadcrumb as on `g-mh` (work,
+ *   chapter); seen only in a 2024 archive.org copy, as the live site is
+ *   behind the Cloudflare challenge.
  * - Ads: first-party `.adshow` slots, as on `g-mh`.
  * - Not handled: other ad scripts (TrafficStars, Propeller and others) send
  *   the tab to ad pages.
@@ -46,6 +48,11 @@ export const site = defineSite({
           },
         },
         reloadBrokenImages: { images },
+        readingHistory: {
+          work: 'nav[aria-label="Breadcrumb"] li:nth-child(2) a',
+          chapter: 'nav[aria-label="Breadcrumb"] li:nth-child(3) a',
+          images,
+        },
       },
     },
   },

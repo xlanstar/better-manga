@@ -2,6 +2,7 @@ import { SearchIcon, SearchXIcon } from 'lucide-react';
 import { useDeferredValue, useState } from 'react';
 import { GlobalSettings } from '@/components/global-settings';
 import { AppHeader, Section } from '@/components/page-layout';
+import { ReadingHistory } from '@/components/reading-history';
 import {
   isSiteCustomised,
   SiteSettingsItem,
@@ -14,6 +15,7 @@ import { Frame, FramePanel } from '@/components/ui/frame';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useLocalePreference } from '@/hooks/use-locale';
+import { useReadingHistory } from '@/hooks/use-reading-history';
 import { useSettings } from '@/hooks/use-settings';
 import { siteSearch, sites } from '@/sites';
 import { i18n } from '@/utils/i18n';
@@ -24,7 +26,10 @@ type Filter = (typeof FILTERS)[number];
 /** Sites rendered at first, and added per "show more". */
 const PAGE_SIZE = 50;
 
-/** Every site's settings: the global layer, then a searchable site list. */
+/**
+ * Every site's settings (the global layer, then a searchable site list), and
+ * the reading history.
+ */
 export default function App() {
   const { settings, updateGlobal, updateSite, setDisabled } = useSettings(sites);
   useLocalePreference();
@@ -33,7 +38,8 @@ export default function App() {
   const [limit, setLimit] = useState(PAGE_SIZE);
   // Keep typing responsive with many sites.
   const deferredQuery = useDeferredValue(query);
-  if (!settings) return null;
+  const history = useReadingHistory();
+  if (!settings || !history) return null;
 
   const propsFor = (site: (typeof sites)[number]): SiteSettingsProps => ({
     site,
@@ -136,6 +142,8 @@ export default function App() {
           </Button>
         )}
       </Section>
+
+      <ReadingHistory history={history} />
     </div>
   );
 }
