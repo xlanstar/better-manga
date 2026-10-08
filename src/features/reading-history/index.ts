@@ -13,7 +13,8 @@ import type { Feature } from '../types';
  * - `history.ts`, `storage.ts`: the stored history, shared with the popup
  *   and options page (`components/reading-history.tsx`) and written by the
  *   background (`entrypoints/background.ts`).
- * - Popup title and description: in `features/controls.ts`.
+ * - Popup group: in `features/controls.ts`; title and description: in the
+ *   locales (`<id>.title`, `<id>.description`).
  */
 
 export type ReadingHistorySiteConfig = {

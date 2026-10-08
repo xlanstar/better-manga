@@ -1,5 +1,10 @@
 import { featureIds, type FeatureId, type FeatureUserConfig } from '@/features';
-import { featureControls, featureGroups } from '@/features/controls';
+import {
+  featureControls,
+  featureDescription,
+  featureGroups,
+  featureTitle,
+} from '@/features/controls';
 import {
   resolveFeatures,
   type ResolvedFeatures,
@@ -87,7 +92,7 @@ function FeatureSettings<K extends FeatureId>({
   layer: UserSettings;
   onChange: OnLayerChange;
 }) {
-  const { title, description, Options } = featureControls[id];
+  const { Options } = featureControls[id];
   const value = resolved[id];
   const defaultValue = defaults[id];
   if (!value || !defaultValue) return null;
@@ -97,9 +102,9 @@ function FeatureSettings<K extends FeatureId>({
     <div className="flex flex-col gap-2">
       <FeatureToggle
         checked={value.enabled}
-        description={description()}
+        description={featureDescription(id)}
         onCheckedChange={(enabled) => change({ enabled }, true)}
-        title={title()}
+        title={featureTitle(id)}
       />
       {value.enabled && Options && (
         <Options defaults={defaultValue} onChange={change} value={value} />

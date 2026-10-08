@@ -10,7 +10,8 @@ import { smoothScroll } from './smooth-scroll';
 /**
  * Registry of feature definitions — add a folder next to this one, then one
  * line here, one in `starters.ts` (content script) and one in `controls.ts`
- * (popup text and options). The key is the feature id, also its key in `Site.features` and in
+ * (popup group and options), plus `<id>.title` and `<id>.description` in the
+ * locales. The key is the feature id, also its key in `Site.features` and in
  * stored user settings: renaming one means listing the old id in
  * `renamedFeatureIds`, or users lose their settings. The order here is the
  * order in the popup / options page.

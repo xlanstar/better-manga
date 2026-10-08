@@ -6,7 +6,8 @@ import type { Feature } from '../types';
  *
  * - `index.ts` (this file): definition, registered in `features/index.ts`.
  * - `start.ts`: content-script side, registered in `features/starters.ts`.
- * - Popup title and description: in `features/controls.ts`.
+ * - Popup group: in `features/controls.ts`; title and description: in the
+ *   locales (`<id>.title`, `<id>.description`).
  */
 
 export type AutoContinueSiteConfig = {

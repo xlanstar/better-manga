@@ -20,60 +20,29 @@ type OptionsPropsOf<K extends FeatureId> = FeatureOptionsProps<
 export const featureGroups = ['distractions', 'loading', 'reading'] as const;
 
 /**
- * What the popup shows for each feature: its on/off switch with `title` and
- * `description` (functions, so the text follows the language picker), then
- * its `Options` controls if it has any, under its `group`'s heading. Typed
- * over every `FeatureId`, so a new feature can't be forgotten here.
+ * What the popup shows for each feature besides its on/off switch: its
+ * `Options` controls if it has any, under its `group`'s heading. Typed over
+ * every `FeatureId`, so a new feature can't be forgotten here.
  */
 export const featureControls: {
   [K in FeatureId]: {
     group: (typeof featureGroups)[number];
-    title: () => string;
-    description: () => string;
     Options?: ComponentType<OptionsPropsOf<K>>;
   };
 } = {
-  blockAds: {
-    group: 'distractions',
-    title: () => i18n.t('blockAds.title'),
-    description: () => i18n.t('blockAds.description'),
-  },
-  skipRedirects: {
-    group: 'distractions',
-    title: () => i18n.t('skipRedirects.title'),
-    description: () => i18n.t('skipRedirects.description'),
-  },
-  autoContinue: {
-    group: 'distractions',
-    title: () => i18n.t('autoContinue.title'),
-    description: () => i18n.t('autoContinue.description'),
-  },
-  fastLoad: {
-    group: 'loading',
-    title: () => i18n.t('fastLoad.title'),
-    description: () => i18n.t('fastLoad.description'),
-    Options: FastLoadOptions,
-  },
-  reloadBrokenImages: {
-    group: 'loading',
-    title: () => i18n.t('reloadBrokenImages.title'),
-    description: () => i18n.t('reloadBrokenImages.description'),
-  },
-  readingHistory: {
-    group: 'reading',
-    title: () => i18n.t('readingHistory.title'),
-    description: () => i18n.t('readingHistory.description'),
-  },
-  pageDistance: {
-    group: 'reading',
-    title: () => i18n.t('pageDistance.title'),
-    description: () => i18n.t('pageDistance.description'),
-    Options: PageDistanceOptions,
-  },
-  smoothScroll: {
-    group: 'reading',
-    title: () => i18n.t('smoothScroll.title'),
-    description: () => i18n.t('smoothScroll.description'),
-    Options: SmoothScrollOptions,
-  },
+  blockAds: { group: 'distractions' },
+  skipRedirects: { group: 'distractions' },
+  autoContinue: { group: 'distractions' },
+  fastLoad: { group: 'loading', Options: FastLoadOptions },
+  reloadBrokenImages: { group: 'loading' },
+  readingHistory: { group: 'reading' },
+  pageDistance: { group: 'reading', Options: PageDistanceOptions },
+  smoothScroll: { group: 'reading', Options: SmoothScrollOptions },
 };
+
+/**
+ * A feature's switch label and description, from the locales' `<id>.title` and
+ * `<id>.description`. Functions, so the text follows the language picker.
+ */
+export const featureTitle = (id: FeatureId) => i18n.t(`${id}.title`);
+export const featureDescription = (id: FeatureId) => i18n.t(`${id}.description`);

@@ -30,9 +30,12 @@
  *    a `FeatureStart`, and `controls.tsx` its options controls if it has user
  *    options besides `enabled` (see `page-distance/`).
  * 2. Register them in `features/index.ts`, `starters.ts` and `controls.ts`
- *    (with the popup title and description).
+ *    (with the popup group).
+ * 3. Add `<id>.title` and `<id>.description` (the popup switch) to the
+ *    locales.
  *
- * Step 2 is typed over `FeatureId`, so a missing entry is a compile error.
+ * Steps 2 and 3 are typed over `FeatureId`, so a missing entry is a compile
+ * error (for locales, in `en`, the fallback).
  *
  * Everything here is pure; reading and writing the user layer lives in
  * `settings-storage.ts`.

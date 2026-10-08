@@ -22,7 +22,8 @@ Source in `src/` (`@/` alias).
 - Where a site's main site and reader need different config (selectors, URL
   rules), put it in `Site.sections`, not a second site or a feature branch.
 - A feature is `features/<name>/`, registered in `features/index.ts`,
-  `starters.ts` and `controls.ts`.
+  `starters.ts` and `controls.ts`, with `<id>.title` and `<id>.description`
+  in the locales.
 - `utils/` imports nothing from `sites/` or `features/`. The popup and options
   page must not import `features/starters.ts`; the content script must not
   import `features/controls.ts`.

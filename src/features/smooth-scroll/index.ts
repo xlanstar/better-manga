@@ -9,7 +9,8 @@ import type { Feature } from '../types';
  * - `index.ts` (this file): definition, registered in `features/index.ts`.
  * - `start.ts`: content-script side, registered in `features/starters.ts`.
  * - `controls.tsx`: the duration and hold-speed sliders, registered in
- *   `features/controls.ts` with the popup title and description.
+ *   `features/controls.ts` with the popup group; title and description: in
+ *   the locales.
  */
 
 /**
