@@ -6,6 +6,8 @@ them under the new version, and the GitHub release shows that section.
 
 ## Unreleased
 
+## 0.13.1 - 2026-10-09
+
 - 36 new sites: 包子漫畫 (baozimh.com and its mirrors), 拷貝漫畫, 熱辣漫畫,
   漫畫櫃, 再漫畫, 動漫屋, 極速漫畫, 漫畫人, 漫本, Mangabz, XManhua, YYManhua,
   Komiic, 無限動漫, COLAMANGA, 漫蛙, 喜漫漫畫, 漫畫狗, 瓜子漫畫, 六漫畫,
