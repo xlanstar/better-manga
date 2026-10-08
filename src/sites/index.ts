@@ -1,6 +1,4 @@
 import { MatchPattern } from 'wxt/utils/match-patterns';
-import type { FeatureId } from '@/features';
-import type { SiteFeatures } from '@/features/settings';
 import type { Site, SiteSection } from './types';
 import { site as mh18 } from './18mh';
 import { site as baozimh } from './baozimh';
@@ -89,49 +87,6 @@ export function followsSections(site: Site, protocol: string, isTopFrame: boolea
   return isTopFrame && /^https?:$/.test(protocol) && Boolean(site.sections?.reader);
 }
 
-const SECTIONS: readonly SiteSection[] = ['main', 'reader'];
-
-/**
- * The site layer on pages of `section`: `Site.features`, the section's on top.
- * Field by field, the section's wins, except lists (selectors, …): those add
- * to the site's.
- */
-export function sectionFeatures(site: Site, section: SiteSection): SiteFeatures {
-  const merged: Record<string, unknown> = { ...site.features };
-  for (const [id, config] of Object.entries(site.sections?.[section]?.features ?? {})) {
-    const base = merged[id];
-    merged[id] = config && base ? mergeConfig(base, config) : (config ?? base);
-  }
-  return merged as SiteFeatures;
-}
-
-function mergeConfig(base: object, config: object): object {
-  const merged: Record<string, unknown> = { ...base };
-  for (const [key, value] of Object.entries(config)) {
-    const below = merged[key];
-    merged[key] = Array.isArray(below) && Array.isArray(value) ? [...below, ...value] : value;
-  }
-  return merged;
-}
-
-/**
- * The site layer the user settings are shown and pruned against, as they
- * cover every section: each feature as the first section that configures it,
- * so it is listed if it applies anywhere. Sections set no user options, so
- * the defaults agree whichever section it comes from.
- */
-export function settingsFeatures(site: Site): SiteFeatures {
-  if (!site.sections) return site.features ?? {};
-  const layers = SECTIONS.map((section) => sectionFeatures(site, section));
-  const merged: Record<string, unknown> = {};
-  for (const id of new Set(layers.flatMap(Object.keys)) as Set<FeatureId>) {
-    const values = layers.map((layer) => layer[id]);
-    // `undefined` (shared features apply) beats `false` (off) when none is configured.
-    merged[id] = values.find(Boolean) ?? (values.includes(undefined) ? undefined : false);
-  }
-  return merged as SiteFeatures;
-}
-
 /**
  * `url` as match patterns should see it, `null` if unparsable (the popup
  * passes any tab URL). Chrome matches `example.com.` (fully-qualified,
@@ -159,20 +114,4 @@ function patternHost(pattern: string): string {
     .replace(/^[^:]+:\/\//, '') // scheme
     .replace(/^\*\./, '') // subdomain wildcard
     .replace(/\/.*$/, ''); // path
-}
-
-/**
- * A site search: matches a site whose label, name or one of its hosts
- * contains `query` (case-insensitive), or that covers `query` as a URL / host
- * (`https://m.bzmh.org/manga/x`, `m.bzmh.org`). A blank query matches all.
- * The URL is looked up here, once per query, not once per site filtered.
- */
-export function siteSearch(query: string): (site: Site) => boolean {
-  const q = query.trim().toLowerCase();
-  if (!q) return () => true;
-  const url = /^[a-z][a-z\d+.-]*:\/\//.test(q) ? q : `https://${q}`;
-  const covering = q.includes('.') ? siteFor(url)?.name : undefined;
-  return (site) =>
-    site.name === covering ||
-    [site.label, site.name, ...siteHosts(site)].some((s) => s.toLowerCase().includes(q));
 }

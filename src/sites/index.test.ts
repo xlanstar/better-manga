@@ -2,20 +2,17 @@ import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { MatchPattern } from 'wxt/utils/match-patterns';
 import { featureIds, features as featureDefs, type FeatureId } from '@/features';
-import type { SectionFeatures } from '@/features/settings';
 import {
   allMatches,
   followsSections,
-  sectionFeatures,
   sectionFor,
-  settingsFeatures,
   siteHosts,
   siteFor,
-  siteSearch,
   sites,
   type Site,
   type SiteName,
 } from './index';
+import { sectionFeatures } from './layers';
 import { defineSite } from './types';
 
 const name = (url: string) => siteFor(url)?.name;
@@ -274,29 +271,6 @@ describe('siteHosts', () => {
   });
 });
 
-describe('siteSearch', () => {
-  const site = {
-    name: 'baozimh',
-    label: '包子漫畫',
-    matches: ['*://*.bzmh.org/*'],
-  } satisfies Site;
-  const [baozimh] = sites;
-
-  test.each(['', '  ', '包子', 'BAOZI', 'bzmh', 'zmh.o', ' bzmh.org '])('matches %p', (q) => {
-    expect(siteSearch(q)(site)).toBe(true);
-  });
-
-  test.each(['g站', 'hipmh', 'bzmh.com', 'evil.test'])('does not match %p', (q) => {
-    expect(siteSearch(q)(site)).toBe(false);
-  });
-
-  test('a URL or subdomain the site covers matches', () => {
-    expect(siteSearch('https://m.bzmh.org/manga/abc')(baozimh!)).toBe(true);
-    expect(siteSearch('www.bzmh.org/x')(baozimh!)).toBe(true);
-    expect(siteSearch('https://evil.test/?u=bzmh')(baozimh!)).toBe(false);
-  });
-});
-
 const rewriteLink = () => null;
 
 describe('sectionFor (registered sites)', () => {
@@ -385,87 +359,6 @@ describe('sections', () => {
 
     test('not a site without a reader', () => {
       expect(followsSections(testSite('*://a.test/*'), 'https:', true)).toBe(false);
-    });
-  });
-
-  describe('sectionFeatures', () => {
-    test("merges the section's configs over the site's, feature by feature", () => {
-      expect(sectionFeatures(site, 'reader')).toEqual({
-        blockAds: { hide, remove: ['#x'] },
-        skipRedirects: { rewriteLink },
-        pageDistance: false,
-      });
-      expect(sectionFeatures(site, 'main')).toEqual({
-        blockAds: { hide },
-        pageDistance: { container: '#c' },
-        autoContinue: { selector: '.go' },
-      });
-    });
-
-    test("a section's lists add to the site's; other fields replace them", () => {
-      const s: Site = {
-        ...site,
-        features: { autoContinue: { selector: '.a' }, blockAds: { hide } },
-        sections: {
-          main: {
-            features: { autoContinue: { selector: '.b' }, blockAds: { hide: ['.more'] } },
-          },
-        },
-      };
-      expect(sectionFeatures(s, 'main')).toMatchObject({
-        autoContinue: { selector: '.b' },
-        blockAds: { hide: ['.ad', '.more'] },
-      });
-      expect(sectionFeatures(s, 'reader').blockAds).toEqual({ hide });
-    });
-
-    test('a section can configure a feature the site turned off', () => {
-      const s: Site = {
-        ...site,
-        features: { blockAds: false },
-        sections: { main: { features: { blockAds: { hide } } } },
-      };
-      expect(sectionFeatures(s, 'main').blockAds).toEqual({ hide });
-    });
-
-    test('undefined section values keep the site config', () => {
-      const s: Site = { ...site, sections: { main: { features: { blockAds: undefined } } } };
-      expect(sectionFeatures(s, 'main').blockAds).toEqual({ hide });
-    });
-
-    test('without sections, it is the site layer', () => {
-      expect(sectionFeatures(testSite(), 'reader')).toEqual({});
-    });
-
-    test('sections set adapters, not user option defaults', () => {
-      // @ts-expect-error `ratio` is a user option: its default is per site.
-      const features: SectionFeatures = { pageDistance: { ratio: 0.5 } };
-      expect(features).toBeDefined();
-    });
-  });
-
-  describe('settingsFeatures', () => {
-    test('lists a feature any section configures', () => {
-      const layer = settingsFeatures(site);
-      expect(layer.autoContinue).toEqual({ selector: '.go' });
-      expect(layer.skipRedirects).toEqual({ rewriteLink });
-      // On in the main site, off in the reader: still listed.
-      expect(layer.pageDistance).toEqual({ container: '#c' });
-    });
-
-    test('is false only where every section turns it off', () => {
-      const s: Site = {
-        ...site,
-        features: { smoothScroll: false },
-        sections: { reader: { matches: ['*://a.test/r/*'], features: { pageDistance: false } } },
-      };
-      expect(settingsFeatures(s).smoothScroll).toBe(false);
-      expect(settingsFeatures(s).pageDistance).toBeUndefined();
-    });
-
-    test('without sections, it is the site layer', () => {
-      const features = { blockAds: { hide } };
-      expect(settingsFeatures({ ...testSite(), features })).toBe(features);
     });
   });
 });

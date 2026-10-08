@@ -6,7 +6,8 @@ import { Frame, FrameHeader, FramePanel } from '@/components/ui/frame';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { isCustomised, pruneUserSettings, type UserSettings } from '@/features/settings';
-import { settingsFeatures, siteHosts, type Site } from '@/sites';
+import { siteHosts, type Site } from '@/sites';
+import { settingsFeatures } from '@/sites/layers';
 import { i18n } from '@/utils/i18n';
 import { FeatureList, type OnLayerChange } from './feature-list';
 

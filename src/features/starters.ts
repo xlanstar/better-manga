@@ -2,7 +2,8 @@
  * Content-script side of the features, kept out of `index.ts` so the popup
  * doesn't bundle it.
  */
-import { sectionFeatures, settingsFeatures, type Site, type SiteSection } from '@/sites';
+import type { Site, SiteSection } from '@/sites';
+import { sectionFeatures, settingsFeatures } from '@/sites/layers';
 import { isAlive, lifetimeSignal, retire } from '@/utils/lifecycle';
 import { startAutoContinue } from './auto-continue/start';
 import { startBlockAds } from './block-ads/start';

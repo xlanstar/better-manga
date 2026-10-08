@@ -9,7 +9,8 @@ import {
   subscribeStoredSettings,
   type StoredSettings,
 } from '@/features/settings-storage';
-import { settingsFeatures, type Site } from '@/sites';
+import type { Site } from '@/sites';
+import { settingsFeatures } from '@/sites/layers';
 
 /**
  * The global layer, the disabled sites and the overrides of `sites`, kept in

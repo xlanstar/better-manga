@@ -17,7 +17,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useLocalePreference } from '@/hooks/use-locale';
 import { useReadingHistory } from '@/hooks/use-reading-history';
 import { useSettings } from '@/hooks/use-settings';
-import { siteSearch, sites } from '@/sites';
+import { sites } from '@/sites';
+import { siteSearch } from '@/sites/search';
 import { i18n } from '@/utils/i18n';
 
 const FILTERS = ['all', 'customised', 'disabled'] as const;
