@@ -48,5 +48,6 @@ jobs:
         with:
           name: extension
           path: .output/*.zip
+          include-hidden-files: true # .output is a dot directory
           if-no-files-found: error
           retention-days: 14
