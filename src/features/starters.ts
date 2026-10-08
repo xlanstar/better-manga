@@ -18,10 +18,6 @@ import { resolveFeatures, type ResolvedFeatures } from './settings';
 import { subscribeStoredSettings, type StoredSettings } from './settings-storage';
 import type { FeatureStart } from './types';
 
-/**
- * How to start each feature. Typed over every `FeatureId`, so a new feature
- * can't be forgotten here.
- */
 export const featureStarters: { [K in FeatureId]: FeatureStart<FeatureResolvedConfig<K>> } = {
   blockAds: startBlockAds,
   skipRedirects: startSkipRedirects,

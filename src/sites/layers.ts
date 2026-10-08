@@ -5,9 +5,8 @@ import type { Site, SiteSection } from './types';
 const SECTIONS: readonly SiteSection[] = ['main', 'reader'];
 
 /**
- * The site layer on pages of `section`: `Site.features`, the section's on top.
- * Field by field, the section's wins, except lists (selectors, …): those add
- * to the site's.
+ * The site layer on pages of `section`: `Site.features`, the section's on top
+ * (merged as `SiteSections` describes).
  */
 export function sectionFeatures(site: Site, section: SiteSection): SiteFeatures {
   const merged: Record<string, unknown> = { ...site.features };

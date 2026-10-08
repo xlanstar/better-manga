@@ -14,8 +14,7 @@ export const featureGroups = ['distractions', 'loading', 'reading'] as const;
 
 /**
  * What the popup shows for each feature besides its on/off switch: its
- * `Options` controls if it has any, under its `group`'s heading. Typed over
- * every `FeatureId`, so a new feature can't be forgotten here.
+ * `Options` controls if it has any, under its `group`'s heading.
  */
 export const featureControls: {
   [K in FeatureId]: {

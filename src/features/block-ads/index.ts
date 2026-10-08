@@ -3,11 +3,6 @@ import type { Feature } from '../types';
 /**
  * Hide ad slots and remove the nodes ad scripts hook into, on sites that list
  * them. Site-specific: each site names its own selectors.
- *
- * - `index.ts` (this file): definition, registered in `features/index.ts`.
- * - `start.ts`: content-script side, registered in `features/starters.ts`.
- * - Popup group: in `features/controls.ts`; title and description: in the
- *   locales (`<id>.title`, `<id>.description`).
  */
 
 export type BlockAdsSiteConfig = {

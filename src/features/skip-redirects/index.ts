@@ -5,11 +5,6 @@ import type { Feature } from '../types';
  * before the browser follows them. A chain of cross-site redirects reveals
  * the browser toolbar in fullscreen (and gives ad scripts a hook).
  * Site-specific: each site supplies its own URL rule.
- *
- * - `index.ts` (this file): definition, registered in `features/index.ts`.
- * - `start.ts`: content-script side, registered in `features/starters.ts`.
- * - Popup group: in `features/controls.ts`; title and description: in the
- *   locales (`<id>.title`, `<id>.description`).
  */
 
 export type SkipRedirectsSiteConfig = {

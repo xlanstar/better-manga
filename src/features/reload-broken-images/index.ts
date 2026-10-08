@@ -7,11 +7,6 @@ import type { Feature } from '../types';
  * is requested again a few times, waiting longer each time (see `retry.ts`),
  * and once more when the browser comes back online. Site-specific: each site
  * names its chapter images.
- *
- * - `index.ts` (this file): definition, registered in `features/index.ts`.
- * - `start.ts`: content-script side, registered in `features/starters.ts`.
- * - Popup group: in `features/controls.ts`; title and description: in the
- *   locales (`<id>.title`, `<id>.description`).
  */
 
 export type ReloadBrokenImagesSiteConfig = {

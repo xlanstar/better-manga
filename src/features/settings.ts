@@ -15,30 +15,10 @@
  *
  * A feature applies to every site unless the site sets it to `false`; a
  * `siteSpecific` one (ad blocking, …) only to sites that configure it.
- * Anything a site needs beyond the shared reading features (ad selectors,
- * anti-hijack rules, …) is a site-specific feature too, so the user can turn
- * it off.
  *
- * Every feature has an `enabled` user setting, which the framework sanitizes
- * here, applies (`runner.ts` starts and stops the feature) and shows as a
- * switch. Each feature is one folder in `features/` (site config and option
- * types, defaults, sanitizing of its other user options, content-script
- * start, options controls). This file only loops over the registry, so
- * adding a feature means:
- *
- * 1. `features/<name>/`: `index.ts` exports a `Feature` definition, `start.ts`
- *    a `FeatureStart`, and `controls.tsx` its options controls if it has user
- *    options besides `enabled` (see `page-keys/`).
- * 2. Register them in `features/index.ts`, `starters.ts` and `controls.ts`
- *    (with the popup group).
- * 3. Add `<id>.title` and `<id>.description` (the popup switch) to the
- *    locales.
- *
- * Steps 2 and 3 are typed over `FeatureId`, so a missing entry is a compile
- * error (for locales, in `en`, the fallback).
- *
- * Everything here is pure; reading and writing the user layer lives in
- * `settings-storage.ts`.
+ * This file only loops over the registry (`features/index.ts`); adding a
+ * feature: see AGENTS.md. Everything here is pure; reading and writing the
+ * user layer lives in `settings-storage.ts`.
  */
 import {
   featureIds,
@@ -53,10 +33,7 @@ import {
 
 // ── Shapes per layer, keyed by feature id ────────────────────────────────────
 
-/**
- * Site layer (`Site.features`). `false` = the feature does not apply to this
- * site; a `siteSpecific` feature applies only when it has an entry here.
- */
+/** Site layer (`Site.features`); `false` and `siteSpecific` as above. */
 export type SiteFeatures = { [K in FeatureId]?: false | FeatureSiteConfig<K> };
 
 /**

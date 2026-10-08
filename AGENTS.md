@@ -15,15 +15,21 @@ Source in `src/` (`@/` alias).
 - Never hand-write `manifest.json`; WXT generates it.
 - `src/entrypoints/` holds entry files only; logic goes in `sites/`, `features/`,
   `components/`, `hooks/` or `utils/`.
-- A site is `sites/<name>.ts`, registered in `sites/index.ts`. Its selectors,
+- A site is `sites/<name>.ts` exporting `site = defineSite({ … })` (shape in
+  `sites/types.ts`), registered in `sites/index.ts`. Its selectors,
   quirks and notes stay in that file, as config for features (`Site.features`).
 - Site behaviour (ad blocking, auto-clicks, link rewrites, …) is a feature,
   so users can toggle it; one only some sites need is `siteSpecific`.
 - Where a site's main site and reader need different config (selectors, URL
   rules), put it in `Site.sections`, not a second site or a feature branch.
-- A feature is `features/<name>/`, registered in `features/index.ts`,
-  `starters.ts` and `controls.ts`, with `<id>.title` and `<id>.description`
-  in the locales.
+- A feature is `features/<name>/`: `index.ts` exports its `Feature`,
+  `start.ts` its `FeatureStart` (contracts in `features/types.ts`), and
+  `controls.tsx` its options controls if it has user options besides
+  `enabled`. Register it in `features/index.ts`, `starters.ts` and
+  `controls.ts` (with its popup group), and add `<id>.title` and
+  `<id>.description` to the locales; all are typed over `FeatureId`, so a
+  missing entry fails to compile (locales: in `en`). Layering of site and
+  user settings: `features/settings.ts`.
 - `utils/` imports nothing from `sites/` or `features/`. The popup and options
   page must not import `features/starters.ts`; the content script must not
   import `features/controls.ts`.

@@ -17,14 +17,15 @@ import { FeatureToggle } from './feature-toggle';
 /** No layers beneath: a stable default. */
 const NONE: readonly UserSettings[] = [];
 
+/** `persist: false` updates the UI only (e.g. while dragging a slider). */
 export type OnLayerChange = (next: UserSettings, persist: boolean) => void;
 
 /**
  * The switch and options of every feature that applies in `scope` (a site's
  * layer from `settingsFeatures`, or `ALL_SITES`), grouped under headings,
- * editing one user layer (`layer`) on
- * top of the layers `beneath` it (bottom first). Controls show the effective
- * value, and as their default what the layers beneath give.
+ * editing one user layer (`layer`) on top of the layers `beneath` it (bottom
+ * first). Controls show the effective value, and as their default what the
+ * layers beneath give.
  */
 export function FeatureList({
   scope,
@@ -35,7 +36,6 @@ export function FeatureList({
   scope: SiteScope;
   beneath?: readonly UserSettings[];
   layer: UserSettings;
-  /** `persist: false` updates the UI only (e.g. while dragging a slider). */
   onChange: OnLayerChange;
 }) {
   const resolved = resolveFeatures(scope, ...beneath, layer);

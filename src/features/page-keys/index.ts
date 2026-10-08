@@ -5,14 +5,7 @@ import type { Feature } from '../types';
  * Page Up/Down: each press scrolls a fixed ratio of the screen, leaving
  * overlap, and by default animates there: presses add up, a held key glides,
  * letting go eases to a stop (see `utils/smooth-scroll.ts`). Off, the keys
- * are the browser's. Formerly `pageScroll`, then `pageDistance` beside a
- * separate `smoothScroll` (see `renamedFeatureIds`).
- *
- * - `index.ts` (this file): definition, registered in `features/index.ts`.
- * - `start.ts`: content-script side, registered in `features/starters.ts`.
- * - `controls.tsx`: the ratio slider and the smooth switch with its sliders,
- *   registered in `features/controls.ts` with the popup group; title and
- *   description: in the locales.
+ * are the browser's.
  */
 
 /** What a site may declare. `container` is an adapter, not a user setting. */

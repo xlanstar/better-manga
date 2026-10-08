@@ -8,13 +8,11 @@ import { skipRedirects } from './skip-redirects';
 import type { Feature, ResolvedConfig } from './types';
 
 /**
- * Registry of feature definitions — add a folder next to this one, then one
- * line here, one in `starters.ts` (content script) and one in `controls.ts`
- * (popup group and options), plus `<id>.title` and `<id>.description` in the
- * locales. The key is the feature id, also its key in `Site.features` and in
- * stored user settings: renaming one means listing the old id in
- * `renamedFeatureIds`, or users lose their settings. The order here is the
- * order in the popup / options page.
+ * Registry of feature definitions (adding one: see AGENTS.md). The key is the
+ * feature id, also its key in `Site.features` and in stored user settings:
+ * renaming one means listing the old id in `renamedFeatureIds`, or users
+ * lose their settings. The order here is the order in the popup / options
+ * page.
  */
 export const features = {
   blockAds,

@@ -33,7 +33,6 @@ export const i18n: typeof browserI18n = {
   }) as typeof browserI18n.t,
 };
 
-/** The current language preference. */
 export const getLocalePreference = () => preference;
 
 /** Call `listener` after the language changes. Returns unsubscribe. */

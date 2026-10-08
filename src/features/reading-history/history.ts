@@ -35,7 +35,6 @@ export function workKey({ site, workId }: Work): string {
   return JSON.stringify([site, workId]);
 }
 
-/** Whether `a` and `b` are the same work. */
 export function isSameWork(a: Work, b: Work): boolean {
   return a.site === b.site && a.workId === b.workId;
 }

@@ -17,7 +17,6 @@ export type SiteSettingsProps = {
   /** This site's override layer. */
   override: UserSettings;
   disabled: boolean;
-  /** `persist: false` updates the UI only (e.g. while dragging a slider). */
   onChange: OnLayerChange;
   onDisabledChange: (disabled: boolean) => void;
 };

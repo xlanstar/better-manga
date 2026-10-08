@@ -7,14 +7,10 @@ import type { Feature } from '../types';
  * there. Kept only in this browser (see `storage.ts`). Site-specific: each
  * site says where the page names its work and chapter.
  *
- * - `index.ts` (this file): definition, registered in `features/index.ts`.
- * - `start.ts`: content-script side (records and restores), registered in
- *   `features/starters.ts`.
- * - `history.ts`, `storage.ts`: the stored history, shared with the popup
- *   and options page (`components/reading-history.tsx`) and written by the
- *   background (`entrypoints/background.ts`).
- * - Popup group: in `features/controls.ts`; title and description: in the
- *   locales (`<id>.title`, `<id>.description`).
+ * `start.ts` records and restores; `history.ts` and `storage.ts` hold the
+ * stored history, shared with the popup and options page
+ * (`components/reading-history.tsx`) and written by the background
+ * (`entrypoints/background.ts`).
  */
 
 export type ReadingHistorySiteConfig = {
