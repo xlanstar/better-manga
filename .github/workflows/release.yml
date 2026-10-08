@@ -1,0 +1,80 @@
+# A vX.Y.Z tag (pushed by `bun run release`) runs CI, then, once approved in
+# the `chrome-web-store` environment, submits the Chrome zip for review and
+# publishes a GitHub release with it. Run by hand, it's a dry run that only
+# checks the store credentials. A failed release: "Re-run failed jobs".
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+
+  submit:
+    name: Submit to Chrome Web Store
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: chrome-web-store # needs approval; holds the store secrets
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: extension
+          path: dist
+
+      - name: Submit
+        run: |
+          args=(--chrome-zip dist/*-chrome.zip)
+          if [ "$DRY_RUN" = true ]; then args+=(--dry-run); fi
+          bunx wxt submit "${args[@]}"
+        env:
+          DRY_RUN: ${{ github.event_name != 'push' }}
+          CHROME_API_VERSION: v2
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_PUBLISHER_ID: ${{ secrets.CHROME_PUBLISHER_ID }}
+          CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL: ${{ secrets.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL }}
+          CHROME_SERVICE_ACCOUNT_PRIVATE_KEY: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY }}
+
+  github-release:
+    name: GitHub release
+    needs: submit
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: extension
+          path: dist
+
+      # Notes: the annotated tag's message, i.e. the version's CHANGELOG.md
+      # entries (read via the API; gh's --notes-from-tag needs a local tag).
+      - run: |
+          tag_sha=$(gh api "repos/$GH_REPO/git/ref/tags/$GITHUB_REF_NAME" --jq .object.sha)
+          gh api "repos/$GH_REPO/git/tags/$tag_sha" --jq .message > notes.md
+          gh release create "$GITHUB_REF_NAME" dist/*-chrome.zip --verify-tag --notes-file notes.md
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}

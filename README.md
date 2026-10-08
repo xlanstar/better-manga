@@ -31,7 +31,30 @@ bun run build:firefox  # Firefox
 
 ## Release
 
-Package a zip for store upload:
+Published to the Chrome Web Store only.
+
+1. As changes land, list the user-visible ones under `## Unreleased` in
+   `CHANGELOG.md`.
+2. On a clean, up-to-date `main`, run `bun run release <patch|minor|major>`
+   (patch for fixes, minor for new sites or features, major for breaking
+   changes). It raises the version, moves the `Unreleased` entries under it,
+   commits, tags `vX.Y.Z` and pushes.
+3. The tag starts `.github/workflows/release.yml`: CI, then, after you approve
+   the `chrome-web-store` deployment in GitHub Actions, the store submission
+   and a GitHub release with the zip and the changelog entries.
+
+A version can't be uploaded twice: if the store rejects one, release a new
+patch. If the workflow fails, use "Re-run failed jobs".
+
+To check the store credentials, run the Release workflow by hand (a dry run),
+or locally, where `wxt submit` reads `.env.submit` (git-ignored; create it
+with `bunx wxt submit init`):
+
+```sh
+bun run zip && bunx wxt submit --dry-run --chrome-zip .output/*-chrome.zip
+```
+
+Package a zip by hand:
 
 ```sh
 bun run zip          # Chrome
@@ -57,3 +80,7 @@ Run all Git hook checks on every file:
 ```sh
 prek run --all-files
 ```
+
+CI (`.github/workflows/ci.yml`) runs the same checks on every pull request
+and push to `main`, then builds both zips and keeps them as workflow
+artifacts for 14 days.

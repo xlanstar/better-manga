@@ -80,7 +80,10 @@ only on sites that configure them; the others run on every site.
 
 ## Keep in sync
 
-- `package.json` version (semver): patch for fixes, minor for new sites or
+- `CHANGELOG.md`: add each user-visible change (site, feature, fix) under
+  `## Unreleased`, in the user's terms; skip refactors and internal changes.
+- `package.json` version (semver): don't edit it by hand. `bun run release
+  <patch|minor|major>` raises it: patch for fixes, minor for new sites or
   features, major for breaking changes.
 - `docs/manga-sites.md`: sites and domains only; update when `matches` change.
 - `PRIVACY.md`: stored data and permissions (sites: it links
