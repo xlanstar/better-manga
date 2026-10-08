@@ -1,3 +1,4 @@
+import { snapToRange } from '@/utils/range';
 import type { Feature } from '../types';
 
 /**
@@ -36,18 +37,12 @@ export const smoothScroll: Feature<
   SmoothScrollUserOptions
 > = {
   defaults: { enabled: true, duration: 150, holdSpeed: 2 },
-  sanitizeOptions({ duration, holdSpeed }) {
+  sanitizeOptions(raw) {
     const options: SmoothScrollUserOptions = {};
-    if (isFiniteNumber(duration)) options.duration = clamp(duration, SMOOTH_SCROLL_DURATION);
-    if (isFiniteNumber(holdSpeed)) options.holdSpeed = clamp(holdSpeed, SMOOTH_SCROLL_HOLD_SPEED);
+    const duration = snapToRange(raw.duration, SMOOTH_SCROLL_DURATION);
+    const holdSpeed = snapToRange(raw.holdSpeed, SMOOTH_SCROLL_HOLD_SPEED);
+    if (duration !== undefined) options.duration = duration;
+    if (holdSpeed !== undefined) options.holdSpeed = holdSpeed;
     return options;
   },
 };
-
-function isFiniteNumber(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value);
-}
-
-function clamp(value: number, { min, max }: { min: number; max: number }): number {
-  return Math.min(max, Math.max(min, value));
-}

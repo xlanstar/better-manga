@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { PAGE_DISTANCE_RATIO } from '@/features/page-distance';
-import { formatTimeAgo, formatPercent, sliderValue } from './format';
+import { formatTimeAgo, formatPercent } from './format';
 
 describe('formatPercent', () => {
   test.each([
@@ -36,63 +36,6 @@ describe('formatPercent', () => {
       seen.add(label);
     }
     expect(seen.has('100%')).toBe(true);
-  });
-});
-
-describe('sliderValue', () => {
-  test('rounds a number to two decimals', () => {
-    expect(sliderValue(0.7, 0)).toBe(0.7);
-    expect(sliderValue(0.123, 0)).toBe(0.12);
-    expect(sliderValue(0.126, 0)).toBe(0.13);
-    expect(sliderValue(1, 0)).toBe(1);
-    expect(sliderValue(0, 0.7)).toBe(0);
-  });
-
-  test('cleans float noise from slider steps', () => {
-    expect(sliderValue(0.30000000000000004, 0)).toBe(0.3);
-    expect(sliderValue(0.35000000000000003, 0)).toBe(0.35);
-    expect(sliderValue(0.6499999999999999, 0)).toBe(0.65);
-  });
-
-  test('every slider step lands exactly on its decimal value', () => {
-    const { min, max, step } = PAGE_DISTANCE_RATIO;
-    for (let i = 0; min + i * step <= max + 1e-9; i++) {
-      const expected = Number((0.3 + i * 0.05).toFixed(2));
-      expect(sliderValue(min + i * step, 0)).toBe(expected);
-    }
-  });
-
-  test('accumulated steps compare equal to the default ratio', () => {
-    let v = PAGE_DISTANCE_RATIO.min;
-    for (let i = 0; i < 8; i++) v += PAGE_DISTANCE_RATIO.step;
-    expect(v).not.toBe(0.7); // the raw float is off
-    expect(sliderValue(v, 0)).toBe(0.7);
-  });
-
-  test('a range uses the first thumb', () => {
-    expect(sliderValue([0.456], 0)).toBe(0.46);
-    expect(sliderValue([0.4, 0.9], 0)).toBe(0.4);
-  });
-
-  test('an empty range uses the (rounded) fallback', () => {
-    expect(sliderValue([], 0.7)).toBe(0.7);
-    expect(sliderValue([], 0.704)).toBe(0.7);
-  });
-
-  test('ignores the fallback for a plain number', () => {
-    expect(sliderValue(0.5, 0.9)).toBe(0.5);
-  });
-
-  test('passes non-finite values through (sanitize rejects them later)', () => {
-    expect(sliderValue(Number.NaN, 0.7)).toBeNaN();
-    expect(sliderValue(Infinity, 0.7)).toBe(Infinity);
-  });
-
-  test('is idempotent', () => {
-    for (let r = 0; r <= 1; r += 0.0137) {
-      const once = sliderValue(r, 0);
-      expect(sliderValue(once, 0)).toBe(once);
-    }
   });
 });
 

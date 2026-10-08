@@ -44,6 +44,13 @@ describe('smoothScroll.sanitizeOptions', () => {
     });
   });
 
+  test('snaps values to the nearest step', () => {
+    expect(sanitizeOptions({ duration: 170, holdSpeed: 1.3 })).toEqual({
+      duration: 150,
+      holdSpeed: 1.5,
+    });
+  });
+
   test('clamps out-of-range values', () => {
     expect(sanitizeOptions({ duration: 0, holdSpeed: 99 })).toEqual({
       duration: SMOOTH_SCROLL_DURATION.min,

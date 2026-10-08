@@ -1,4 +1,5 @@
 import type { ChapterImages } from '@/utils/chapter-images';
+import { snapToRange } from '@/utils/range';
 import type { Feature } from '../types';
 
 /**
@@ -70,16 +71,8 @@ export const fastLoad: Feature<FastLoadSiteConfig, FastLoadResolvedConfig, FastL
       const value = raw[key];
       if (typeof value === 'boolean') options[key] = value;
     }
-    const { parallel } = raw;
-    if (typeof parallel === 'number' && Number.isFinite(parallel)) {
-      options.parallel = clampParallel(parallel);
-    }
+    const parallel = snapToRange(raw.parallel, FAST_LOAD_PARALLEL);
+    if (parallel !== undefined) options.parallel = parallel;
     return options;
   },
 };
-
-/** A whole number inside `FAST_LOAD_PARALLEL`. */
-function clampParallel(value: number): number {
-  const { min, max } = FAST_LOAD_PARALLEL;
-  return Math.min(max, Math.max(min, Math.round(value)));
-}

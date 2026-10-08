@@ -1,3 +1,4 @@
+import { snapToRange } from '@/utils/range';
 import type { Feature } from '../types';
 
 /**
@@ -28,11 +29,8 @@ export const pageDistance: Feature<
   PageDistanceUserOptions
 > = {
   defaults: { enabled: true, ratio: 0.7 },
-  sanitizeOptions({ ratio }) {
-    return typeof ratio === 'number' && Number.isFinite(ratio) ? { ratio: clampRatio(ratio) } : {};
+  sanitizeOptions(raw) {
+    const ratio = snapToRange(raw.ratio, PAGE_DISTANCE_RATIO);
+    return ratio === undefined ? {} : { ratio };
   },
 };
-
-function clampRatio(ratio: number): number {
-  return Math.min(PAGE_DISTANCE_RATIO.max, Math.max(PAGE_DISTANCE_RATIO.min, ratio));
-}

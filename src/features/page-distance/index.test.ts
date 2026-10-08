@@ -50,9 +50,9 @@ describe('pageDistance.sanitizeOptions', () => {
       expect(sanitizeOptions({ ratio })).toEqual({ ratio });
     });
 
-    test('keeps in-range values that are not on a step (no rounding)', () => {
-      expect(sanitizeOptions({ ratio: 0.333 })).toEqual({ ratio: 0.333 });
-      expect(sanitizeOptions({ ratio: 0.1 + 0.2 + 0.3 })).toEqual({ ratio: 0.1 + 0.2 + 0.3 });
+    test('snaps in-range values to the nearest step, free of float noise', () => {
+      expect(sanitizeOptions({ ratio: 0.333 })).toEqual({ ratio: 0.35 });
+      expect(sanitizeOptions({ ratio: 0.1 + 0.2 + 0.3 })).toEqual({ ratio: 0.6 });
     });
 
     test.each([0.29, 0.1, 0, -0, -0.5, -1e9, Number.MIN_VALUE, -Number.MAX_VALUE])(
