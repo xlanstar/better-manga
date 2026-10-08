@@ -1,12 +1,12 @@
+import type { FeatureResolvedConfig } from '../index';
 import type { FeatureStart } from '../types';
-import type { SkipRedirectsResolvedConfig } from './index';
 
 /** Every way a link gets followed or opened (incl. "open in new tab"). */
 const EVENTS = ['click', 'auxclick', 'contextmenu'] as const;
 
 // The page may set hrefs late (after its data loads), so rewrite on use
 // rather than up front.
-export const startSkipRedirects: FeatureStart<SkipRedirectsResolvedConfig> = (
+export const startSkipRedirects: FeatureStart<FeatureResolvedConfig<'skipRedirects'>> = (
   { rewriteLink },
   signal,
 ) => {

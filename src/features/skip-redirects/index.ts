@@ -19,9 +19,8 @@ export type SkipRedirectsSiteConfig = {
    */
   rewriteLink?: (href: string, origin: string) => string | null;
 };
-export type SkipRedirectsResolvedConfig = SkipRedirectsSiteConfig & { enabled: boolean };
 
-export const skipRedirects: Feature<SkipRedirectsSiteConfig, SkipRedirectsResolvedConfig> = {
+export const skipRedirects: Feature<SkipRedirectsSiteConfig> = {
   defaults: { enabled: true },
   siteSpecific: true,
   isUsable: ({ rewriteLink }) => typeof rewriteLink === 'function',

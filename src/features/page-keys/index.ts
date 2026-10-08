@@ -26,15 +26,13 @@ export type PageKeysUserOptions = {
   /** Screens per second while Page Up/Down is held. */
   holdSpeed?: number;
 };
-export type PageKeysResolvedConfig = PageKeysSiteConfig &
-  Required<PageKeysUserOptions> & { enabled: boolean };
 
 /** Allowed values, also the popup sliders' ranges. */
 export const PAGE_KEYS_RATIO = { min: 0.3, max: 1, step: 0.05 } as const;
 export const PAGE_KEYS_DURATION = { min: 100, max: 600, step: 50 } as const;
 export const PAGE_KEYS_HOLD_SPEED = { min: 0.5, max: 5, step: 0.5 } as const;
 
-export const pageKeys: Feature<PageKeysSiteConfig, PageKeysResolvedConfig, PageKeysUserOptions> = {
+export const pageKeys: Feature<PageKeysSiteConfig, PageKeysUserOptions> = {
   defaults: { enabled: true, ratio: 0.7, smooth: true, duration: 150, holdSpeed: 2 },
   sanitizeOptions(raw) {
     const options: PageKeysUserOptions = {};

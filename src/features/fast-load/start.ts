@@ -1,9 +1,9 @@
+import type { FeatureResolvedConfig } from '../index';
 import type { FeatureStart } from '../types';
 import { preloadImages } from './images';
-import type { FastLoadResolvedConfig } from './index';
 import { isPrefetchFrame, leavePrefetchFrame, prefetchNextChapter } from './next-chapter';
 
-export const startFastLoad: FeatureStart<FastLoadResolvedConfig> = (config, signal) => {
+export const startFastLoad: FeatureStart<FeatureResolvedConfig<'fastLoad'>> = (config, signal) => {
   const { origins, images, nextChapter, parallel } = config;
 
   if (isPrefetchFrame()) {

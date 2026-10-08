@@ -28,9 +28,8 @@ export type ReadingHistorySiteConfig = {
   /** The chapter's page images, for the reading position. */
   images?: ChapterImages;
 };
-export type ReadingHistoryResolvedConfig = ReadingHistorySiteConfig & { enabled: boolean };
 
-export const readingHistory: Feature<ReadingHistorySiteConfig, ReadingHistoryResolvedConfig> = {
+export const readingHistory: Feature<ReadingHistorySiteConfig> = {
   defaults: { enabled: true },
   siteSpecific: true,
   isUsable: ({ work, chapter }) => !!work?.trim() && !!chapter?.trim(),

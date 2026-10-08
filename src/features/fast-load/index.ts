@@ -52,15 +52,13 @@ export type FastLoadUserOptions = {
   parallel?: number;
   preloadNext?: boolean;
 };
-export type FastLoadResolvedConfig = FastLoadSiteConfig &
-  Required<FastLoadUserOptions> & { enabled: boolean };
 
 /** Allowed `parallel` values, also the popup slider's range. */
 export const FAST_LOAD_PARALLEL = { min: 2, max: 8, step: 1 } as const;
 
 const SWITCHES = ['connect', 'preloadImages', 'preloadNext'] as const;
 
-export const fastLoad: Feature<FastLoadSiteConfig, FastLoadResolvedConfig, FastLoadUserOptions> = {
+export const fastLoad: Feature<FastLoadSiteConfig, FastLoadUserOptions> = {
   defaults: { enabled: true, connect: true, preloadImages: true, parallel: 6, preloadNext: true },
   siteSpecific: true,
   isUsable: ({ origins = [], images, nextChapter }) =>

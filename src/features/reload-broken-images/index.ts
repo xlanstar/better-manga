@@ -17,14 +17,8 @@ import type { Feature } from '../types';
 export type ReloadBrokenImagesSiteConfig = {
   images?: ChapterImages;
 };
-export type ReloadBrokenImagesResolvedConfig = ReloadBrokenImagesSiteConfig & {
-  enabled: boolean;
-};
 
-export const reloadBrokenImages: Feature<
-  ReloadBrokenImagesSiteConfig,
-  ReloadBrokenImagesResolvedConfig
-> = {
+export const reloadBrokenImages: Feature<ReloadBrokenImagesSiteConfig> = {
   defaults: { enabled: true },
   siteSpecific: true,
   isUsable: ({ images }) => !!images?.selector.trim(),

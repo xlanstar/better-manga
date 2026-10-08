@@ -1,8 +1,8 @@
 import { onDomReady } from '@/utils/dom';
+import type { FeatureResolvedConfig } from '../index';
 import type { FeatureStart } from '../types';
 import { isSameChapter, readChapter } from './chapter';
 import { CHAPTER_START, isSameWork, type HistoryEntry, type ReadingPosition } from './history';
-import type { ReadingHistoryResolvedConfig } from './index';
 import { isNearStart, readPosition, restorePosition, userInputSignal } from './position';
 import { loadHistory, saveEntry } from './storage';
 
@@ -18,7 +18,7 @@ const SAVE_INTERVAL_MS = 2000;
  * Top frame only, which also leaves out fast-load's hidden prefetch frame:
  * a preloaded chapter doesn't count as read.
  */
-export const startReadingHistory: FeatureStart<ReadingHistoryResolvedConfig> = (
+export const startReadingHistory: FeatureStart<FeatureResolvedConfig<'readingHistory'>> = (
   config,
   signal,
   { siteName },
@@ -41,7 +41,7 @@ function pageUrl(): string {
 
 function trackChapter(
   site: string,
-  config: ReadingHistoryResolvedConfig,
+  config: FeatureResolvedConfig<'readingHistory'>,
   history: readonly HistoryEntry[],
   userInput: AbortSignal,
   signal: AbortSignal,

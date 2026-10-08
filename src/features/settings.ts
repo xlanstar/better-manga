@@ -21,10 +21,10 @@
  *
  * Every feature has an `enabled` user setting, which the framework sanitizes
  * here, applies (`runner.ts` starts and stops the feature) and shows as a
- * switch. Each feature is one folder in `features/` (defaults, per-layer
- * types, sanitizing of its other user options, content-script start, options
- * controls). This file only loops over the registry, so adding a feature
- * means:
+ * switch. Each feature is one folder in `features/` (site config and option
+ * types, defaults, sanitizing of its other user options, content-script
+ * start, options controls). This file only loops over the registry, so
+ * adding a feature means:
  *
  * 1. `features/<name>/`: `index.ts` exports a `Feature` definition, `start.ts`
  *    a `FeatureStart`, and `controls.tsx` its options controls if it has user

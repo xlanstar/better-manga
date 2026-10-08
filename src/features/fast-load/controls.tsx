@@ -2,16 +2,12 @@ import { OptionSlider } from '@/components/option-slider';
 import { OptionSwitch } from '@/components/option-switch';
 import { i18n } from '@/utils/i18n';
 import type { FeatureOptionsProps } from '../types';
-import { FAST_LOAD_PARALLEL, type FastLoadResolvedConfig, type FastLoadUserOptions } from './index';
+import { FAST_LOAD_PARALLEL } from './index';
 
 const formatParallel = (n: number) => i18n.t('fastLoad.parallelValue', [String(n)]);
 
 /** One switch per way of speeding up; the parallel downloads under theirs. */
-export function FastLoadOptions({
-  value,
-  defaults,
-  onChange,
-}: FeatureOptionsProps<FastLoadUserOptions, FastLoadResolvedConfig>) {
+export function FastLoadOptions({ value, defaults, onChange }: FeatureOptionsProps<'fastLoad'>) {
   const disabled = !value.enabled;
   return (
     <div className="flex flex-col gap-4">

@@ -3,23 +3,13 @@ import { OptionSwitch } from '@/components/option-switch';
 import { formatPercent } from '@/utils/format';
 import { i18n } from '@/utils/i18n';
 import type { FeatureOptionsProps } from '../types';
-import {
-  PAGE_KEYS_DURATION,
-  PAGE_KEYS_HOLD_SPEED,
-  PAGE_KEYS_RATIO,
-  type PageKeysResolvedConfig,
-  type PageKeysUserOptions,
-} from './index';
+import { PAGE_KEYS_DURATION, PAGE_KEYS_HOLD_SPEED, PAGE_KEYS_RATIO } from './index';
 
 const formatDuration = (ms: number) => i18n.t('pageKeys.durationValue', [String(ms)]);
 const formatHoldSpeed = (screens: number) => i18n.t('pageKeys.holdSpeedValue', [String(screens)]);
 
 /** The distance, then the smooth switch with its timing under it. */
-export function PageKeysOptions({
-  value,
-  defaults,
-  onChange,
-}: FeatureOptionsProps<PageKeysUserOptions, PageKeysResolvedConfig>) {
+export function PageKeysOptions({ value, defaults, onChange }: FeatureOptionsProps<'pageKeys'>) {
   const disabled = !value.enabled;
   return (
     <div className="flex flex-col gap-4">

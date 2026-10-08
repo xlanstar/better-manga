@@ -1,3 +1,5 @@
+import type { FeatureId, FeatureOptions, FeatureResolvedConfig } from './index';
+
 /**
  * A feature, configured in layers (see `settings.ts`). Every feature has an
  * `enabled` user setting, handled by the framework: sanitized in
@@ -5,18 +7,14 @@
  *
  * - `SiteConfig`: what a site may declare in `Site.features` (defaults and
  *   adapters such as a scroll container or ad selectors).
- * - `ResolvedConfig`: the effective settings, `{ ...defaults, ...site, ...user }`,
- *   so every site / option field must exist there too.
  * - `Options`: the user settings besides `enabled`, if any (e.g. a ratio).
  *   The user may store them and `enabled`, globally or per site.
+ *
+ * The registry (`features/index.ts`) infers both from the definition.
  */
-export type Feature<
-  SiteConfig extends object,
-  ResolvedConfig extends SiteConfig & Options & { enabled: boolean },
-  Options extends object = Record<never, never>,
-> = {
+export type Feature<SiteConfig extends object, Options extends object = Record<never, never>> = {
   /** Global defaults, the bottom layer. */
-  defaults: ResolvedConfig;
+  defaults: ResolvedConfig<SiteConfig, Options>;
   /**
    * Keep only the options of an untrusted stored object that have the right
    * type and range; the rest falls through to the defaults. Leaves `enabled`
@@ -36,9 +34,14 @@ export type Feature<
    * act on, e.g. a selector. Tests check it against every registered site.
    */
   isUsable?: (config: SiteConfig) => boolean;
-  /** Type carrier only, never set: lets the registry derive per-layer shapes. */
-  types?: { site: SiteConfig; options: Options; resolved: ResolvedConfig };
 };
+
+/**
+ * A feature's effective settings, `{ ...defaults, ...site, ...user }`: the
+ * site fields, and every option and `enabled`, which the defaults provide.
+ */
+export type ResolvedConfig<SiteConfig, Options> = SiteConfig &
+  Required<Options> & { enabled: boolean };
 
 /** What a feature knows about the page besides its config. */
 export type FeatureContext = {
@@ -57,24 +60,24 @@ export type FeatureContext = {
  * when it turns off, before such a restart, or when this content-script
  * instance retires.
  */
-export type FeatureStart<ResolvedConfig> = (
-  config: ResolvedConfig,
+export type FeatureStart<Config> = (
+  config: Config,
   signal: AbortSignal,
   context: FeatureContext,
 ) => void;
 
 /**
- * Props of a feature's options controls, shown below its on/off switch (see
+ * Props of feature `K`'s options controls, shown below its on/off switch (see
  * `features/controls.ts`).
  */
-export type FeatureOptionsProps<Options, ResolvedConfig> = {
+export type FeatureOptionsProps<K extends FeatureId> = {
   /** Effective settings. */
-  value: ResolvedConfig;
+  value: FeatureResolvedConfig<K>;
   /** What `value` would be without the layer being edited. */
-  defaults: ResolvedConfig;
+  defaults: FeatureResolvedConfig<K>;
   /**
    * Merged into the user layer. `persist: false` updates the UI only (e.g.
    * while dragging a slider).
    */
-  onChange: (patch: Options, persist: boolean) => void;
+  onChange: (patch: FeatureOptions<K>, persist: boolean) => void;
 };

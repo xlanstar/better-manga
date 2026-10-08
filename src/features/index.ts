@@ -5,6 +5,7 @@ import { pageKeys } from './page-keys';
 import { readingHistory } from './reading-history';
 import { reloadBrokenImages } from './reload-broken-images';
 import { skipRedirects } from './skip-redirects';
+import type { Feature, ResolvedConfig } from './types';
 
 /**
  * Registry of feature definitions — add a folder next to this one, then one
@@ -37,9 +38,16 @@ export const renamedFeatureIds: Readonly<Record<string, FeatureId>> = {
 };
 export const featureIds = Object.keys(features) as FeatureId[];
 
-type ConfigTypes<K extends FeatureId> = NonNullable<(typeof features)[K]['types']>;
+/** Feature `K`'s per-layer types, inferred from its `Feature` definition. */
+type ConfigTypes<K extends FeatureId> =
+  (typeof features)[K] extends Feature<infer SiteConfig, infer Options>
+    ? { site: SiteConfig; options: Options }
+    : never;
 export type FeatureSiteConfig<K extends FeatureId> = ConfigTypes<K>['site'];
 /** The user settings besides `enabled`. */
 export type FeatureOptions<K extends FeatureId> = ConfigTypes<K>['options'];
 export type FeatureUserConfig<K extends FeatureId> = FeatureOptions<K> & { enabled?: boolean };
-export type FeatureResolvedConfig<K extends FeatureId> = ConfigTypes<K>['resolved'];
+export type FeatureResolvedConfig<K extends FeatureId> = ResolvedConfig<
+  FeatureSiteConfig<K>,
+  FeatureOptions<K>
+>;

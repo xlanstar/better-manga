@@ -1,8 +1,8 @@
 import { clickOnAppear } from '@/utils/dom';
+import type { FeatureResolvedConfig } from '../index';
 import type { FeatureStart } from '../types';
-import type { AutoContinueResolvedConfig } from './index';
 
-export const startAutoContinue: FeatureStart<AutoContinueResolvedConfig> = (
+export const startAutoContinue: FeatureStart<FeatureResolvedConfig<'autoContinue'>> = (
   { selector },
   signal,
 ) => {

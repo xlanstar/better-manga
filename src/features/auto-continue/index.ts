@@ -14,9 +14,8 @@ export type AutoContinueSiteConfig = {
   /** The button(s) to click. */
   selector?: string;
 };
-export type AutoContinueResolvedConfig = AutoContinueSiteConfig & { enabled: boolean };
 
-export const autoContinue: Feature<AutoContinueSiteConfig, AutoContinueResolvedConfig> = {
+export const autoContinue: Feature<AutoContinueSiteConfig> = {
   defaults: { enabled: true },
   siteSpecific: true,
   isUsable: ({ selector }) => !!selector?.trim(),

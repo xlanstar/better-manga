@@ -1,10 +1,10 @@
 import { isRealImage } from '@/utils/chapter-images';
 import { onImageEvent, queryAll } from '@/utils/dom';
+import type { FeatureResolvedConfig } from '../index';
 import type { FeatureStart } from '../types';
-import type { ReloadBrokenImagesResolvedConfig } from './index';
 import { addFailure, retryDelay, type Failures } from './retry';
 
-export const startReloadBrokenImages: FeatureStart<ReloadBrokenImagesResolvedConfig> = (
+export const startReloadBrokenImages: FeatureStart<FeatureResolvedConfig<'reloadBrokenImages'>> = (
   { images },
   signal,
 ) => {
