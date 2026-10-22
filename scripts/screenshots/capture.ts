@@ -1,7 +1,8 @@
 /**
  * Chrome Web Store screenshot (1280×800) → store/screenshots/1-popup.png
  *
- *   bun run screenshots          (first time: bunx playwright install chromium)
+ *   bun run screenshots   (first time and after a Playwright update:
+ *                          bunx playwright install chromium)
  *
  * 1. Builds the extension and loads a copy of .output/chrome-mv3 into
  *    Playwright's Chromium (branded Chrome no longer honours --load-extension).
@@ -91,13 +92,11 @@ async function capturePopup() {
         info?.active ? [{ id: 1, url }] : query(info);
     }, CURRENT_URL);
     await page.goto(`chrome-extension://${id}/popup.html`);
-    await page.waitForSelector('h1');
-    await page.waitForTimeout(500); // let accordion / fonts settle
-    const box = await page.locator('body > * > *').first().boundingBox();
-    if (!box) throw new Error('popup did not render');
-    return await page.screenshot({
-      clip: { x: 0, y: 0, width: Math.ceil(box.width), height: Math.ceil(box.height) },
-    });
+    // The header renders once settings, tab and history have loaded.
+    await page.locator('h1').waitFor();
+    // Screenshots wait for fonts; `animations: 'disabled'` finishes the
+    // accordion's transitions.
+    return await page.locator('body > * > *').first().screenshot({ animations: 'disabled' });
   } finally {
     await ctx.close();
   }
