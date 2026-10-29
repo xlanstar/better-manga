@@ -37,7 +37,7 @@ jobs:
       - run: bun install --frozen-lockfile
 
       # The "done" checks from AGENTS.md: format, lint, types, tests.
-      - uses: j178/prek-action@1382ad72dea72f9d53832f2bcb65b3e87a947204 # v3.0.1
+      - uses: j178/prek-action@44924fe9ef4a6f88253c4b6b1bf11c689d3ce53d # v3.1.0
         with:
           prek-version: 0.5.5
 
